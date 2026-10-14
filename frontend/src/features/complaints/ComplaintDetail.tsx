@@ -127,11 +127,11 @@ export function ComplaintDetail({
         )}
       </dl>
       {analysis && (
-        <div className="border-t border-stone-100 pt-5">
-          <h3 className="flex items-center gap-2 font-semibold">
+        <details className="border-t border-stone-100 pt-5">
+          <summary className="flex cursor-pointer items-center gap-2 font-semibold">
             <ShieldCheck size={17} className="text-emerald-700" />
-            Why this recommendation?
-          </h3>
+            Why this department?
+          </summary>
           <div className="mt-3 flex flex-wrap gap-2">
             {analysis.keywords.map((word, i) => (
               <span className="keyword" key={`${word}-${i}`}>
@@ -151,7 +151,7 @@ export function ComplaintDetail({
               {analysis.secondary_departments.join(", ")}
             </p>
           )}
-        </div>
+        </details>
       )}
       {showOriginal && (
         <div className="border-t border-stone-100 pt-5">

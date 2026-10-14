@@ -56,13 +56,16 @@ export function useRecorder(onAudio: (file: File) => void) {
       );
       recorder.current = instance;
       const chunks: Blob[] = [];
+      let failed = false;
       instance.ondataavailable = (e) => {
         if (e.data.size) chunks.push(e.data);
       };
       instance.onstop = () => {
+        if (!mounted.current || generation.current !== token) return;
         cleanup();
         if (!mounted.current) return;
         setRecording(false);
+        if (failed) return;
         const type = instance.mimeType || mime || "audio/webm";
         const blob = new Blob(chunks, { type });
         if (blob.size)
@@ -75,6 +78,9 @@ export function useRecorder(onAudio: (file: File) => void) {
           );
       };
       instance.onerror = () => {
+        if (!mounted.current || generation.current !== token) return;
+        failed = true;
+        if (instance.state === "recording") instance.stop();
         cleanup();
         if (mounted.current) {
           setRecording(false);
@@ -116,5 +122,13 @@ export function useRecorder(onAudio: (file: File) => void) {
     }
     if (recorder.current?.state === "recording") recorder.current.stop();
   }
-  return { recording, pending, seconds, error, start, stop };
+  return {
+    recording,
+    pending,
+    seconds,
+    error,
+    start,
+    stop,
+    stream: recording ? stream.current : null,
+  };
 }

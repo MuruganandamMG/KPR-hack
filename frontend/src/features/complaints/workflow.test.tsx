@@ -256,6 +256,63 @@ it("an old microphone rejection cannot stop a newer recording", async () => {
   }
 });
 
+it("a failed recorder's late stop event cannot shut down its replacement", async () => {
+  const previous = Object.getOwnPropertyDescriptor(navigator, "mediaDevices");
+  const firstStop = vi.fn(),
+    replacementStop = vi.fn();
+  Object.defineProperty(navigator, "mediaDevices", {
+    configurable: true,
+    value: {
+      getUserMedia: vi
+        .fn()
+        .mockResolvedValueOnce({ getTracks: () => [{ stop: firstStop }] })
+        .mockResolvedValueOnce({
+          getTracks: () => [{ stop: replacementStop }],
+        }),
+    },
+  });
+  class Recorder {
+    static instances: Recorder[] = [];
+    static isTypeSupported() {
+      return true;
+    }
+    state = "inactive";
+    mimeType = "audio/webm";
+    onstop = () => {};
+    onerror = () => {};
+    constructor() {
+      Recorder.instances.push(this);
+    }
+    start() {
+      this.state = "recording";
+    }
+    stop() {
+      this.state = "inactive";
+    }
+  }
+  vi.stubGlobal("MediaRecorder", Recorder);
+  try {
+    const { result, unmount } = renderHook(() => useRecorder(vi.fn()));
+    await act(async () => {
+      await result.current.start();
+    });
+    act(() => Recorder.instances[0].onerror());
+    await act(async () => {
+      await result.current.start();
+    });
+    expect(Recorder.instances).toHaveLength(2);
+    expect(result.current.recording).toBe(true);
+    act(() => Recorder.instances[0].onstop());
+    expect(replacementStop).not.toHaveBeenCalled();
+    expect(result.current.recording).toBe(true);
+    unmount();
+    expect(replacementStop).toHaveBeenCalledOnce();
+  } finally {
+    if (previous) Object.defineProperty(navigator, "mediaDevices", previous);
+    else Reflect.deleteProperty(navigator, "mediaDevices");
+  }
+});
+
 it("submits unchanged text and displays tracking and understanding", async () => {
   vi.mocked(fetch).mockResolvedValue(
     new Response(JSON.stringify(complaint), { status: 201 }),
@@ -270,6 +327,10 @@ it("submits unchanged text and displays tracking and understanding", async () =>
   );
   expect(await screen.findByText("GRV-2026-example")).toBeInTheDocument();
   expect(screen.getByText("The road is severely damaged.")).toBeInTheDocument();
+  expect(screen.getByLabelText("Your complaint")).toHaveValue(
+    "Road romba mosama.",
+  );
+  expect(screen.getByLabelText("Your complaint")).toBeDisabled();
   const init = vi.mocked(fetch).mock.calls[0][1]!;
   expect(JSON.parse(init.body as string)).toEqual({
     text: "Road romba mosama.",
@@ -277,6 +338,74 @@ it("submits unchanged text and displays tracking and understanding", async () =>
   expect(
     (init.headers as Record<string, string>)["Idempotency-Key"],
   ).toBeTruthy();
+});
+
+it("sample chips fill the editor without submitting or inventing a result", async () => {
+  render(<SubmitComplaint />);
+  await userEvent.click(screen.getByRole("button", { name: "Road damage" }));
+  expect(screen.getByLabelText("Your complaint")).toHaveValue(
+    "Road romba mosama. Enga theru la periya potholes irukku.",
+  );
+  expect(fetch).not.toHaveBeenCalled();
+  expect(
+    screen.queryByText("Public Works", { exact: true }),
+  ).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Water supply" }));
+  expect(screen.getByLabelText("Your complaint")).toHaveValue(
+    "Enga area la moonu naala thanni varala. Please restore the water supply.",
+  );
+});
+
+it("tracking opened from a receipt fetches the supplied ID automatically", async () => {
+  vi.mocked(fetch).mockResolvedValue(
+    new Response(JSON.stringify(complaint), { status: 200 }),
+  );
+  render(<TrackComplaint initialId="GRV-2026-example" />);
+  expect(
+    await screen.findByText("The road is severely damaged."),
+  ).toBeInTheDocument();
+  expect(screen.getByLabelText("Tracking ID")).toHaveValue("GRV-2026-example");
+});
+
+it("the same audio file can be selected for a new complaint after a receipt", async () => {
+  const NativeURL = URL;
+  vi.stubGlobal(
+    "URL",
+    class extends NativeURL {
+      static createObjectURL() {
+        return "blob:audio-test";
+      }
+      static revokeObjectURL() {}
+    },
+  );
+  vi.mocked(fetch).mockImplementation(
+    async () =>
+      new Response(
+        JSON.stringify({
+          ...complaint,
+          input_type: "voice",
+          original_text: null,
+        }),
+        { status: 201 },
+      ),
+  );
+  render(<SubmitComplaint />);
+  await userEvent.click(screen.getByRole("button", { name: "Use your voice" }));
+  const file = new File(["test audio"], "recording.wav", { type: "audio/wav" });
+  await userEvent.upload(screen.getByLabelText("Upload audio"), file);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Submit complaint" }),
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "New complaint" }),
+  );
+  expect(
+    screen.getByRole("button", { name: "Submit complaint" }),
+  ).toBeDisabled();
+  await userEvent.upload(screen.getByLabelText("Upload audio"), file);
+  expect(
+    screen.getByRole("button", { name: "Submit complaint" }),
+  ).toBeEnabled();
 });
 
 it("shows tracking errors without a stale result", async () => {

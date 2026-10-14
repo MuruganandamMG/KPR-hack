@@ -5,15 +5,25 @@ import { trackComplaint } from "./api";
 import { ComplaintDetail } from "./ComplaintDetail";
 import type { Complaint } from "./types";
 
-export function TrackComplaint() {
-  const [id, setId] = useState("");
+export function TrackComplaint({ initialId = "" }: { initialId?: string }) {
+  const [id, setId] = useState(initialId);
   const [record, setRecord] = useState<Complaint | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const active = useRef<AbortController | null>(null);
   useEffect(() => () => active.current?.abort(), []);
+  useEffect(() => {
+    if (initialId) {
+      setId(initialId);
+      void loadComplaint(initialId);
+    }
+    return () => active.current?.abort();
+  }, [initialId]);
   async function track(event: React.FormEvent) {
     event.preventDefault();
+    await loadComplaint(id);
+  }
+  async function loadComplaint(trackingId: string) {
     active.current?.abort();
     const controller = new AbortController();
     active.current = controller;
@@ -21,7 +31,7 @@ export function TrackComplaint() {
     setError("");
     setRecord(null);
     try {
-      const result = await trackComplaint(id, controller.signal);
+      const result = await trackComplaint(trackingId, controller.signal);
       if (!controller.signal.aborted) setRecord(result);
     } catch (e) {
       if (!controller.signal.aborted)
@@ -31,15 +41,9 @@ export function TrackComplaint() {
     }
   }
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="w-full">
       <div className="panel">
-        <h2 className="text-xl font-semibold">
-          A little clarity, every step of the way.
-        </h2>
-        <p className="mt-2 text-sm text-stone-500">
-          Enter the tracking ID you received when you submitted your complaint.
-        </p>
-        <form onSubmit={track} className="mt-6">
+        <form onSubmit={track}>
           <label htmlFor="tracking-id" className="field-label">
             Tracking ID
           </label>
@@ -80,7 +84,7 @@ export function TrackComplaint() {
             <div className="py-14 text-center text-stone-400">
               <Search className="mx-auto mb-3" size={32} strokeWidth={1.5} />
               <p className="text-sm">
-                Your complaint’s journey will appear here.
+                Enter a tracking ID to view its progress.
               </p>
             </div>
           )

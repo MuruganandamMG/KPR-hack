@@ -65,10 +65,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
   function select(record: Complaint) {
     setSelected(record);
     setDepartment(
-      record.assigned_department ||
-        record.analysis?.primary_department ||
-        departments[0] ||
-        "",
+      record.assigned_department || record.analysis?.primary_department || "",
     );
     setNote("");
     setDecisionError("");
@@ -129,15 +126,10 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
     );
   return (
     <div>
-      <div className="notice mb-6">
-        Prototype officer workspace · Authentication is outside this demo’s
-        scope. Use synthetic complaints only.
-      </div>
       <div className="grid items-start gap-6 xl:grid-cols-[0.85fr_1.15fr]">
         <section className="panel">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <p className="eyebrow">Officer workspace</p>
               <h2 className="mt-2 text-xl font-semibold">
                 Complaint queue{" "}
                 <span className="ml-1 text-sm font-normal text-stone-400">
@@ -372,12 +364,8 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                 strokeWidth={1.4}
                 className="mb-4 text-emerald-700"
               />
-              <h2 className="text-lg font-semibold">
-                Every complaint deserves a closer look.
-              </h2>
               <p className="mt-2 max-w-xs text-sm leading-relaxed text-stone-500">
-                Select a complaint to review its original wording, AI
-                recommendation, and routing explanation.
+                Select a complaint to review.
               </p>
             </div>
           )}

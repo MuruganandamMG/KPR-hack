@@ -1,12 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowRight,
-  FileText,
-  LoaderCircle,
-  Mic,
-  Square,
-  Upload,
-} from "lucide-react";
+import { ArrowRight, FileText, Mic, Square, Upload } from "lucide-react";
 import { Button } from "../../shared/ui/button";
 import { submitText, submitVoice } from "./api";
 import { AnalysisPanel } from "./AnalysisPanel";
@@ -94,8 +87,26 @@ export function SubmitComplaint({
     setError("");
     attempt.current = null;
   }
+  if (busy || record) {
+    return (
+      <div>
+        {record && (
+          <Button
+            type="button"
+            variant="outline"
+            className="mb-5"
+            onClick={reset}
+            autoFocus
+          >
+            New complaint
+          </Button>
+        )}
+        <AnalysisPanel complaint={record} pending={busy} onTrack={onTrack} />
+      </div>
+    );
+  }
   return (
-    <div className="workspace-grid">
+    <div>
       <form onSubmit={submit} className="panel editor-panel">
         <div className="workspace-panel-heading">
           <div>
@@ -254,37 +265,21 @@ export function SubmitComplaint({
         )}
         <div className="editor-actions">
           <span className="text-xs text-stone-500">
-            {record
-              ? "Original input saved"
-              : "Routing requires officer approval"}
+            Routing requires officer approval
           </span>
-          {record ? (
-            <Button type="button" variant="outline" onClick={reset}>
-              New complaint
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              disabled={
-                locked || (mode === "text" ? text.trim().length < 3 : !file)
-              }
-            >
-              {busy ? (
-                <>
-                  <LoaderCircle size={17} className="animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  Submit complaint
-                  <ArrowRight size={17} />
-                </>
-              )}
-            </Button>
-          )}
+          <Button
+            type="submit"
+            disabled={
+              locked || (mode === "text" ? text.trim().length < 3 : !file)
+            }
+          >
+            <>
+              Submit complaint
+              <ArrowRight size={17} />
+            </>
+          </Button>
         </div>
       </form>
-      <AnalysisPanel complaint={record} pending={busy} onTrack={onTrack} />
     </div>
   );
 }

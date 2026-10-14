@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
   Inbox,
   LoaderCircle,
@@ -166,7 +167,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
     );
   return (
     <div>
-      <div className="grid items-start gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+      {!selected ? (
         <section className="panel">
           <div className="mb-5 flex items-center justify-between">
             <div>
@@ -322,7 +323,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                   key={item.tracking_id}
                   disabled={saving}
                   onClick={() => select(item)}
-                  className={`queue-item ${selected?.tracking_id === item.tracking_id ? "selected" : ""}`}
+                  className="queue-item"
                 >
                   <span className="tracking-id block font-mono text-xs text-stone-500">
                     {item.tracking_id}
@@ -388,138 +389,128 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
             </div>
           )}
         </section>
+      ) : (
         <section className="panel">
-          {selected ? (
-            <>
-              <ComplaintDetail
-                key={selected.tracking_id}
-                complaint={selected}
-                showOriginal
-              />
-              {canUpdate && (
-                <form
-                  onSubmit={decide}
-                  className="mt-7 border-t border-stone-100 pt-6"
-                >
-                  <h3 className="mb-4 font-semibold">Officer decision</h3>
-                  {canRoute && (
-                    <>
-                      <label
-                        htmlFor="assigned-department"
-                        className="field-label"
-                      >
-                        Assigned department
-                      </label>
-                      <select
-                        id="assigned-department"
-                        className="field mb-4"
-                        disabled={saving}
-                        value={department}
-                        onChange={(e) => {
-                          setDepartment(e.target.value);
-                          setSecondaryDepartments((values) =>
-                            values.filter((name) => name !== e.target.value),
-                          );
-                        }}
-                        required
-                      >
-                        <option value="" disabled>
-                          Select department
-                        </option>
-                        {departments.map((value) => (
-                          <option key={value}>{value}</option>
-                        ))}
-                      </select>
-                      <fieldset className="mb-4" disabled={saving}>
-                        <legend className="field-label">
-                          Secondary departments
-                        </legend>
-                        <p className="mb-3 text-xs text-stone-500">
-                          Select every supporting department needed to resolve
-                          this complaint.
-                        </p>
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          {departments.map((value) => (
-                            <label
-                              key={value}
-                              className="flex items-center gap-2 text-sm"
-                            >
-                              <input
-                                type="checkbox"
-                                className="accent-emerald-700"
-                                disabled={value === department}
-                                checked={secondaryDepartments.includes(value)}
-                                onChange={(e) =>
-                                  setSecondaryDepartments((values) =>
-                                    e.target.checked
-                                      ? [...values, value]
-                                      : values.filter((name) => name !== value),
-                                  )
-                                }
-                              />
-                              {value}
-                            </label>
-                          ))}
-                        </div>
-                      </fieldset>
-                    </>
-                  )}
-                  <label htmlFor="decision-note" className="field-label">
-                    Decision note
+          <Button
+            variant="outline"
+            className="mb-6"
+            disabled={saving}
+            onClick={() => setSelected(null)}
+            autoFocus
+          >
+            <ArrowLeft size={16} /> Back to queue
+          </Button>
+          <ComplaintDetail
+            key={selected.tracking_id}
+            complaint={selected}
+            showOriginal
+          />
+          {canUpdate && (
+            <form
+              onSubmit={decide}
+              className="mt-7 border-t border-stone-100 pt-6"
+            >
+              <h3 className="mb-4 font-semibold">Officer decision</h3>
+              {canRoute && (
+                <>
+                  <label htmlFor="assigned-department" className="field-label">
+                    Assigned department
                   </label>
-                  <textarea
-                    id="decision-note"
-                    className="field min-h-24"
+                  <select
+                    id="assigned-department"
+                    className="field mb-4"
                     disabled={saving}
+                    value={department}
+                    onChange={(e) => {
+                      setDepartment(e.target.value);
+                      setSecondaryDepartments((values) =>
+                        values.filter((name) => name !== e.target.value),
+                      );
+                    }}
                     required
-                    minLength={3}
-                    maxLength={2000}
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="Explain your review, any department override, or the progress update."
-                  />
-                  {decisionError && (
-                    <p role="alert" className="mt-3 text-sm text-red-700">
-                      {decisionError}
-                    </p>
-                  )}
-                  <Button
-                    className="mt-4 w-full"
-                    type="submit"
-                    disabled={
-                      saving ||
-                      note.trim().length < 3 ||
-                      (canRoute && !department)
-                    }
                   >
-                    {saving ? (
-                      <LoaderCircle size={16} className="animate-spin" />
-                    ) : (
-                      <ArrowRight size={16} />
-                    )}{" "}
-                    {canRoute
-                      ? "Approve routing"
-                      : selected.status === "routed"
-                        ? "Start work"
-                        : "Mark resolved"}
-                  </Button>
-                </form>
+                    <option value="" disabled>
+                      Select department
+                    </option>
+                    {departments.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
+                  </select>
+                  <fieldset className="mb-4" disabled={saving}>
+                    <legend className="field-label">
+                      Secondary departments
+                    </legend>
+                    <p className="mb-3 text-xs text-stone-500">
+                      Select every supporting department needed to resolve this
+                      complaint.
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {departments.map((value) => (
+                        <label
+                          key={value}
+                          className="flex items-center gap-2 text-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            className="accent-emerald-700"
+                            disabled={value === department}
+                            checked={secondaryDepartments.includes(value)}
+                            onChange={(e) =>
+                              setSecondaryDepartments((values) =>
+                                e.target.checked
+                                  ? [...values, value]
+                                  : values.filter((name) => name !== value),
+                              )
+                            }
+                          />
+                          {value}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                </>
               )}
-            </>
-          ) : (
-            <div className="flex min-h-96 flex-col items-center justify-center text-center">
-              <Inbox
-                size={36}
-                strokeWidth={1.4}
-                className="mb-4 text-emerald-700"
+              <label htmlFor="decision-note" className="field-label">
+                Decision note
+              </label>
+              <textarea
+                id="decision-note"
+                className="field min-h-24"
+                disabled={saving}
+                required
+                minLength={3}
+                maxLength={2000}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Explain your review, any department override, or the progress update."
               />
-              <p className="mt-2 max-w-xs text-sm leading-relaxed text-stone-500">
-                Select a complaint to review.
-              </p>
-            </div>
+              {decisionError && (
+                <p role="alert" className="mt-3 text-sm text-red-700">
+                  {decisionError}
+                </p>
+              )}
+              <Button
+                className="mt-4 w-full"
+                type="submit"
+                disabled={
+                  saving || note.trim().length < 3 || (canRoute && !department)
+                }
+              >
+                {saving ? (
+                  <LoaderCircle size={16} className="animate-spin" />
+                ) : (
+                  <ArrowRight size={16} />
+                )}{" "}
+                {canRoute
+                  ? "Approve routing"
+                  : selected.status === "routed"
+                    ? "Start work"
+                    : "Mark resolved"}
+              </Button>
+            </form>
           )}
         </section>
-      </div>
+      )}
     </div>
   );
 }

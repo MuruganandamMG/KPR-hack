@@ -23,6 +23,51 @@ const receipt = {
 };
 afterEach(() => vi.unstubAllGlobals());
 
+it("opens complaint details alone and returns to the filtered queue", async () => {
+  const user = userEvent.setup();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            items: [receipt],
+            total: 1,
+            limit: 25,
+            offset: 0,
+          }),
+          { status: 200 },
+        ),
+    ),
+  );
+  render(<OfficerDashboard departments={["Water Supply", "Public Works"]} />);
+  expect(
+    screen.getByRole("heading", { name: /Complaint queue/ }),
+  ).toBeVisible();
+  expect(
+    screen.queryByText("Select a complaint to review."),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Back to queue" }),
+  ).not.toBeInTheDocument();
+  await user.type(screen.getByLabelText("Search complaints"), "road");
+  await user.selectOptions(screen.getByLabelText("Status"), "analysis_failed");
+  await user.click(
+    await screen.findByRole("button", { name: /GRV-2026-test-flow/ }),
+  );
+  expect(
+    screen.queryByRole("heading", { name: /Complaint queue/ }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Search complaints")).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Assigned department")).toBeVisible();
+  await user.click(screen.getByRole("button", { name: "Back to queue" }));
+  expect(screen.getByLabelText("Search complaints")).toHaveValue("road");
+  expect(screen.getByLabelText("Status")).toHaveValue("analysis_failed");
+  expect(
+    screen.queryByLabelText("Assigned department"),
+  ).not.toBeInTheDocument();
+});
+
 it("receipt tracking opens the real tracking view with the saved ID", async () => {
   vi.stubGlobal(
     "fetch",

@@ -331,10 +331,7 @@ it("submits unchanged text and displays tracking and understanding", async () =>
   );
   expect(await screen.findByText("GRV-2026-example")).toBeInTheDocument();
   expect(screen.getByText("The road is severely damaged.")).toBeInTheDocument();
-  expect(screen.getByLabelText("Your complaint")).toHaveValue(
-    "Road romba mosama.",
-  );
-  expect(screen.getByLabelText("Your complaint")).toBeDisabled();
+  expect(screen.queryByLabelText("Your complaint")).not.toBeInTheDocument();
   const init = vi.mocked(fetch).mock.calls[0][1]!;
   expect(JSON.parse(init.body as string)).toEqual({
     text: "Road romba mosama.",
@@ -342,10 +339,18 @@ it("submits unchanged text and displays tracking and understanding", async () =>
   expect(
     (init.headers as Record<string, string>)["Idempotency-Key"],
   ).toBeTruthy();
+  await userEvent.click(screen.getByRole("button", { name: "New complaint" }));
+  expect(screen.getByLabelText("Your complaint")).toHaveValue("");
+  expect(
+    screen.queryByRole("region", { name: "Analysis" }),
+  ).not.toBeInTheDocument();
 });
 
 it("sample chips fill the editor without submitting or inventing a result", async () => {
   render(<SubmitComplaint />);
+  expect(
+    screen.queryByRole("region", { name: "Analysis" }),
+  ).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Road damage" }));
   expect(screen.getByLabelText("Your complaint")).toHaveValue(
     "Road romba mosama. Enga theru la periya potholes irukku.",

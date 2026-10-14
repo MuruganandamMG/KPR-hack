@@ -1,8 +1,10 @@
 # Complaint workflows
 
+The officer workspace shows the full-width queue first. Selecting a complaint replaces the queue with its detail and decision screen. Back to queue preserves search, filters and pagination; navigation is disabled while a decision is saving. `interactive.test.tsx` covers this sequential flow.
+
 Public UI: `SubmitComplaint`, `TrackComplaint`, `OfficerDashboard({departments})`. `ComplaintDetail` shows understanding, `EvidenceHighlight` phrase-level translation and reasoning bridge, `DecisionTree` explainable 6-step AI reasoning visualization, original evidence for officers, confidence, review status and timeline. `useRecorder` manages microphone permission, recording duration, timers and stream cleanup.
 
-Submission uses a responsive editor/analysis workspace. `samples.ts` contains synthetic input examples only; sample chips never submit or invent inference. `AnalysisPanel` presents real empty/loading/result states. Submitted originals remain locked until New complaint. Optional `SubmitComplaint.onTrack(id)` opens `TrackComplaint({initialId})`, which fetches that receipt automatically. Routing explanations expand with native disclosure controls.
+Submission shows a full-width input form first. Submitting replaces it with the analysis loading screen and saved result. New complaint returns to a cleared form; network errors return to the form with the input and retry key preserved. `samples.ts` contains synthetic input examples only; sample chips never submit or invent inference. `AnalysisPanel` presents real loading/result states. Optional `SubmitComplaint.onTrack(id)` opens `TrackComplaint({initialId})`, which fetches that receipt automatically. Routing explanations expand with native disclosure controls.
 
 `AudioActivity` optionally meters the recorder's actual MediaStream through Web Audio. It owns sampling/context cleanup, while `useRecorder` retains stream ownership. Recording still works if metering is unavailable. Manual classification requires explicit department selection.
 

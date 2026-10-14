@@ -283,6 +283,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                 key={selected.tracking_id}
                 complaint={selected}
                 showOriginal
+                onSelectAction={(action) => setNote(action)}
               />
               {canUpdate && (
                 <form

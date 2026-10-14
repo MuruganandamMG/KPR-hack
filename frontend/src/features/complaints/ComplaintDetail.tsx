@@ -2,16 +2,20 @@ import { CheckCircle2, Clock3, Copy, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../shared/ui/button";
 import { audioUrl } from "./api";
+import { ConfidenceMeter } from "./ConfidenceMeter";
 import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
+import { OfficerSummaryCard } from "./OfficerSummaryCard";
 import { statusLabels, type Complaint } from "./types";
 
 export function ComplaintDetail({
   complaint,
   showOriginal = false,
+  onSelectAction,
 }: {
   complaint: Complaint;
   showOriginal?: boolean;
+  onSelectAction?: (actionText: string) => void;
 }) {
   const { analysis } = complaint;
   const awaitingOfficer = [
@@ -77,6 +81,12 @@ export function ComplaintDetail({
       {complaint.review_reason && complaint.requires_review && (
         <div className="notice">{complaint.review_reason}</div>
       )}
+      {analysis && (
+        <OfficerSummaryCard
+          complaint={complaint}
+          onSelectAction={onSelectAction}
+        />
+      )}
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
         <p className="eyebrow text-emerald-800">What we understood</p>
         <p className="mt-3 text-lg leading-relaxed text-stone-800">
@@ -131,6 +141,11 @@ export function ComplaintDetail({
       {analysis && (
         <div className="border-t border-stone-100 pt-5">
           <EvidenceHighlight complaint={complaint} />
+        </div>
+      )}
+      {analysis && (
+        <div className="border-t border-stone-100 pt-5">
+          <ConfidenceMeter complaint={complaint} />
         </div>
       )}
       {analysis && (

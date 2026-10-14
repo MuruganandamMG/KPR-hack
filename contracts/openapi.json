@@ -557,6 +557,26 @@
             "type": "array",
             "maxItems": 10,
             "title": "Evidence Highlights"
+          },
+          "confidence_breakdown": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConfidenceBreakdown"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "officer_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OfficerSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -821,6 +841,43 @@
         ],
         "title": "ComplaintPage"
       },
+      "ConfidenceBreakdown": {
+        "properties": {
+          "understanding": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Understanding"
+          },
+          "routing": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Routing"
+          },
+          "urgency": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Urgency"
+          },
+          "overall": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Overall"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "understanding",
+          "routing",
+          "urgency",
+          "overall"
+        ],
+        "title": "ConfidenceBreakdown"
+      },
       "EvidenceItem": {
         "properties": {
           "phrase": {
@@ -914,6 +971,67 @@
           "note"
         ],
         "title": "OfficerDecision"
+      },
+      "OfficerSummary": {
+        "properties": {
+          "problem": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Problem"
+          },
+          "area": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Area"
+          },
+          "duration": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Duration"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Priority"
+          },
+          "department": {
+            "type": "string",
+            "enum": [
+              "Water Supply",
+              "Public Works",
+              "Sanitation",
+              "Electricity",
+              "Drainage",
+              "General Administration"
+            ],
+            "title": "Department"
+          },
+          "suggested_action": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Suggested Action"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "problem",
+          "area",
+          "duration",
+          "priority",
+          "department",
+          "suggested_action"
+        ],
+        "title": "OfficerSummary"
       },
       "TextSubmission": {
         "properties": {

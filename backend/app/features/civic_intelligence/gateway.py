@@ -28,8 +28,11 @@ Confidence must reflect uncertainty, not assumed accuracy. Non-civic or unintell
 Other, General Administration, Low confidence. Explain recommendations with brief observable
 evidence, keywords and detected meaning, without private chain-of-thought. Extract evidence_highlights
 mapping key regional dialect phrases to English translation and civic significance (e.g. why urgency
-or department was chosen). Critical urgency means an immediate threat to life or safety; do not
-infer one without evidence."""
+or department was chosen). Provide confidence_breakdown with calibrated float scores between 0 and 1
+for understanding, routing, urgency, and overall. Synthesize an officer_summary with problem,
+area (ward, street or locality, or 'Ward / Locality Unspecified'), duration, priority, department,
+and a concise 1-sentence suggested_action for municipal triage. Critical urgency means an immediate
+threat to life or safety; do not infer one without evidence."""
 
 
 class GeminiGateway:

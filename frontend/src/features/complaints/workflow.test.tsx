@@ -12,8 +12,10 @@ import { TrackComplaint } from "./TrackComplaint";
 import { OfficerDashboard } from "./OfficerDashboard";
 import { useRecorder } from "./useRecorder";
 import { ComplaintDetail } from "./ComplaintDetail";
+import { ConfidenceMeter } from "./ConfidenceMeter";
 import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
+import { OfficerSummaryCard } from "./OfficerSummaryCard";
 import type { Complaint } from "./types";
 
 const complaint = {
@@ -575,4 +577,110 @@ it("renders evidence highlighting with phrase glossing and reasoning bridge", ()
   expect(
     screen.getByText(/Reasoning Bridge · Why Urgency is High/i),
   ).toBeInTheDocument();
+});
+
+it("renders multi-dimensional confidence meter with high-confidence auto-route status", () => {
+  const highComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      confidence: 0.97,
+      confidence_breakdown: {
+        understanding: 0.98,
+        routing: 0.97,
+        urgency: 0.95,
+        overall: 0.97,
+      },
+    },
+  };
+
+  render(<ConfidenceMeter complaint={highComplaint as unknown as Complaint} />);
+  expect(
+    screen.getByRole("region", { name: "AI Confidence Meter" }),
+  ).toBeInTheDocument();
+  expect(screen.getByText("AI Confidence Meter")).toBeInTheDocument();
+  expect(screen.getByText("Understanding")).toBeInTheDocument();
+  expect(screen.getByText("98%")).toBeInTheDocument();
+  expect(screen.getByText("Routing")).toBeInTheDocument();
+  expect(screen.getAllByText("97%").length).toBeGreaterThanOrEqual(1);
+  expect(screen.getByText("Urgency")).toBeInTheDocument();
+  expect(screen.getByText("95%")).toBeInTheDocument();
+  expect(screen.getByText(/Auto-Route \/ Ready/i)).toBeInTheDocument();
+  expect(screen.getByText(/High Confidence \(97%\)/i)).toBeInTheDocument();
+});
+
+it("renders review required when overall confidence is below threshold", () => {
+  const lowComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      confidence: 0.45,
+      confidence_breakdown: {
+        understanding: 0.55,
+        routing: 0.45,
+        urgency: 0.4,
+        overall: 0.45,
+      },
+    },
+  };
+
+  render(
+    <ConfidenceMeter
+      complaint={lowComplaint as unknown as Complaint}
+      threshold={0.75}
+    />,
+  );
+  expect(screen.getByText(/Review Required/i)).toBeInTheDocument();
+  expect(
+    screen.getByText(/Needs Officer Verification \(45%\)/i),
+  ).toBeInTheDocument();
+  expect(screen.getAllByText("45%").length).toBeGreaterThanOrEqual(1);
+});
+
+it("renders the 6-point officer executive summary card and supports 1-click decision note pre-fill", async () => {
+  const onSelectAction = vi.fn();
+  const summaryComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      officer_summary: {
+        problem: "Water Supply Outage",
+        area: "Ward 18",
+        duration: "3 Days",
+        priority: "High" as const,
+        department: "Water Supply",
+        suggested_action: "Inspect pipeline and restore feeder valves.",
+      },
+    },
+  };
+
+  render(
+    <OfficerSummaryCard
+      complaint={summaryComplaint as unknown as Complaint}
+      onSelectAction={onSelectAction}
+    />,
+  );
+
+  expect(
+    screen.getByRole("region", { name: "Officer Executive Summary" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Officer 10-Second Executive Summary"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Water Supply Outage")).toBeInTheDocument();
+  expect(screen.getByText("Ward 18")).toBeInTheDocument();
+  expect(screen.getByText("3 Days")).toBeInTheDocument();
+  expect(screen.getByText("High Priority")).toBeInTheDocument();
+  expect(screen.getByText("Water Supply")).toBeInTheDocument();
+  expect(
+    screen.getByText(/Inspect pipeline and restore feeder valves/i),
+  ).toBeInTheDocument();
+
+  const useButton = screen.getByRole("button", {
+    name: /use as decision note/i,
+  });
+  await userEvent.click(useButton);
+  expect(onSelectAction).toHaveBeenCalledWith(
+    "Inspect pipeline and restore feeder valves.",
+  );
 });

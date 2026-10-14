@@ -10,6 +10,20 @@ export interface EvidenceItem {
   translation: string;
   significance: string;
 }
+export interface ConfidenceBreakdown {
+  understanding: number;
+  routing: number;
+  urgency: number;
+  overall: number;
+}
+export interface OfficerSummary {
+  problem: string;
+  area: string;
+  duration: string;
+  priority: "Low" | "Medium" | "High" | "Critical";
+  department: string;
+  suggested_action: string;
+}
 export interface Analysis {
   transcript: string;
   normalized_complaint: string;
@@ -25,6 +39,8 @@ export interface Analysis {
   detected_meaning: string;
   explanation: string;
   evidence_highlights?: EvidenceItem[];
+  confidence_breakdown?: ConfidenceBreakdown;
+  officer_summary?: OfficerSummary;
 }
 export interface Complaint {
   tracking_id: string;

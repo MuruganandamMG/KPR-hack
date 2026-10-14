@@ -1,6 +1,6 @@
 # Complaint workflows
 
-Public UI: `SubmitComplaint`, `TrackComplaint`, `OfficerDashboard({departments})`. `ComplaintDetail` shows understanding, `EvidenceHighlight` phrase-level translation and reasoning bridge, `DecisionTree` explainable 6-step AI reasoning visualization, original evidence for officers, confidence, review status and timeline. `useRecorder` manages microphone permission, recording duration, timers and stream cleanup.
+Public UI: `SubmitComplaint`, `TrackComplaint`, `OfficerDashboard({departments})`. `ComplaintDetail` shows understanding, `EvidenceHighlight` phrase-level translation and reasoning bridge, `ConfidenceMeter` multi-bar certainty metrics with threshold auto-routing guidance, `DecisionTree` explainable 6-step AI reasoning visualization, original evidence for officers, confidence, review status and timeline. `useRecorder` manages microphone permission, recording duration, timers and stream cleanup.
 
 Submission uses a responsive editor/analysis workspace. `samples.ts` contains synthetic input examples only; sample chips never submit or invent inference. `AnalysisPanel` presents real empty/loading/result states. Submitted originals remain locked until New complaint. Optional `SubmitComplaint.onTrack(id)` opens `TrackComplaint({initialId})`, which fetches that receipt automatically. Routing explanations expand with native disclosure controls.
 

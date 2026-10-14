@@ -310,3 +310,137 @@ def get_audio(engine, tracking_id):
         if row is None or row[0] is None:
             raise HTTPException(404, "Original audio not found.")
         return row[0], row[1]
+
+
+def validate_complaint(engine, tracking_id: str, is_confirmed: bool):
+    with engine.begin() as db:
+        record = read_complaint(db, tracking_id)
+        if not record.analysis:
+            raise HTTPException(422, "Complaint has no active analysis to validate.")
+
+        updated_analysis = record.analysis.model_copy(deep=True)
+        if updated_analysis.citizen_validation:
+            updated_analysis.citizen_validation.is_confirmed = is_confirmed
+            updated_analysis.citizen_validation.confirmed_at = now()
+
+        note = (
+            "Citizen Validation Confirmed: Citizen officially verified AI grievance summary and recommended department."
+            if is_confirmed
+            else "Citizen Validation Flagged: Citizen indicated need for clarification or correction."
+        )
+
+        db.execute(
+            text("""UPDATE complaints SET analysis_json=:analysis,
+            updated_at=:at,version=version+1 WHERE tracking_id=:id"""),
+            {
+                "id": tracking_id,
+                "analysis": updated_analysis.model_dump_json(),
+                "at": now(),
+            },
+        )
+        add_event(
+            db,
+            tracking_id,
+            record.status,
+            note,
+            record.assigned_department,
+            record.assigned_secondary_departments,
+        )
+        return read_complaint(db, tracking_id)
+
+
+def complete_complaint_details(engine, tracking_id: str, field_name: str, value: str):
+    with engine.begin() as db:
+        record = read_complaint(db, tracking_id)
+        if not record.analysis or not record.analysis.completeness:
+            raise HTTPException(422, "Complaint has no active completeness analysis.")
+
+        updated_analysis = record.analysis.model_copy(deep=True)
+        found = False
+        if updated_analysis.completeness:
+            for item in updated_analysis.completeness.missing_fields:
+                if item.field_name.lower() == field_name.lower():
+                    item.is_missing = False
+                    found = True
+            present = sum(
+                1 for item in updated_analysis.completeness.missing_fields if not item.is_missing
+            )
+            total = max(1, len(updated_analysis.completeness.missing_fields))
+            updated_analysis.completeness.score = min(100, 20 + int((present / total) * 80))
+
+        if not found:
+            raise HTTPException(422, f"Unknown missing field '{field_name}'.")
+
+        note = f"Citizen Added Missing Detail: '{field_name}' specified as '{value}'. Completeness raised to {updated_analysis.completeness.score}%."
+
+        db.execute(
+            text("""UPDATE complaints SET analysis_json=:analysis,
+            updated_at=:at,version=version+1 WHERE tracking_id=:id"""),
+            {
+                "id": tracking_id,
+                "analysis": updated_analysis.model_dump_json(),
+                "at": now(),
+            },
+        )
+        add_event(
+            db,
+            tracking_id,
+            record.status,
+            note,
+            record.assigned_department,
+            record.assigned_secondary_departments,
+        )
+        return read_complaint(db, tracking_id)
+
+
+def ensure_dialect_table(db):
+    db.execute(
+        text("""CREATE TABLE IF NOT EXISTS community_dialects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            word TEXT NOT NULL UNIQUE,
+            meaning TEXT NOT NULL,
+            category TEXT NOT NULL,
+            region TEXT NOT NULL DEFAULT 'Tamil Regional Dialect',
+            confirmed INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL
+        )""")
+    )
+
+
+def learn_dialect_word(
+    engine,
+    word: str,
+    meaning: str,
+    category: str,
+    region: str = "Tamil Regional Dialect",
+):
+    with engine.begin() as db:
+        ensure_dialect_table(db)
+        db.execute(
+            text("""INSERT INTO community_dialects (word, meaning, category, region, confirmed, created_at)
+            VALUES (:word, :meaning, :category, :region, 1, :at)
+            ON CONFLICT(word) DO UPDATE SET meaning=:meaning, category=:category, confirmed=1"""),
+            {
+                "word": word.strip().title(),
+                "meaning": meaning.strip(),
+                "category": category,
+                "region": region,
+                "at": now(),
+            },
+        )
+    return list_learned_dialects(engine)
+
+
+def list_learned_dialects(engine):
+    with engine.begin() as db:
+        ensure_dialect_table(db)
+        rows = (
+            db.execute(
+                text(
+                    "SELECT word, meaning, category, region, confirmed, created_at FROM community_dialects ORDER BY id DESC"
+                )
+            )
+            .mappings()
+            .all()
+        )
+        return [dict(r) for r in rows]

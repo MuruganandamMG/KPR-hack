@@ -7,14 +7,21 @@ from starlette.concurrency import run_in_threadpool
 from .audio import MAX_AUDIO_BYTES, audio_mime, normalize_audio
 from .repository import (
     clarify_complaint,
+    complete_complaint_details,
     get_audio,
     get_complaint,
+    learn_dialect_word,
     list_complaints,
+    list_learned_dialects,
     update_complaint,
+    validate_complaint,
 )
 from .schemas import (
+    CitizenValidationRequest,
     Complaint,
     ComplaintPage,
+    CompleteDetailsRequest,
+    DialectLearnRequest,
     FollowUpClarification,
     OfficerDecision,
     Status,
@@ -130,6 +137,44 @@ def officer_decision(tracking_id: str, body: OfficerDecision, request: Request):
 )
 def clarify(tracking_id: str, body: FollowUpClarification, request: Request):
     return clarify_complaint(request.app.state.engine, tracking_id, body)
+
+
+@router.post(
+    "/{tracking_id}/validate",
+    response_model=Complaint,
+    responses={
+        404: {"description": "Unknown tracking ID"},
+        422: {"description": "Cannot validate complaint"},
+    },
+)
+def validate(tracking_id: str, body: CitizenValidationRequest, request: Request):
+    return validate_complaint(request.app.state.engine, tracking_id, body.is_confirmed)
+
+
+@router.post(
+    "/{tracking_id}/complete",
+    response_model=Complaint,
+    responses={
+        404: {"description": "Unknown tracking ID"},
+        422: {"description": "Cannot complete complaint details"},
+    },
+)
+def complete_details(tracking_id: str, body: CompleteDetailsRequest, request: Request):
+    return complete_complaint_details(
+        request.app.state.engine, tracking_id, body.field_name, body.value
+    )
+
+
+@router.get("/dialects/community")
+def get_dialects(request: Request):
+    return list_learned_dialects(request.app.state.engine)
+
+
+@router.post("/dialects/community")
+def add_dialect(body: DialectLearnRequest, request: Request):
+    return learn_dialect_word(
+        request.app.state.engine, body.word, body.meaning, body.category, body.region
+    )
 
 
 @router.get(

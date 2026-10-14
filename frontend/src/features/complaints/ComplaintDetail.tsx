@@ -9,6 +9,15 @@ import { ExplainabilityPanel } from "./ExplainabilityPanel";
 import { OfficerSummaryCard } from "./OfficerSummaryCard";
 import { SelfVerificationCard } from "./SelfVerificationCard";
 import { SmartFollowUpCard } from "./SmartFollowUpCard";
+import { CitizenValidationCard } from "./CitizenValidationCard";
+import { CompletenessCard } from "./CompletenessCard";
+import { EmotionalUrgencyCard } from "./EmotionalUrgencyCard";
+import { CommunityDialectCard } from "./CommunityDialectCard";
+import { RoutingRiskCard } from "./RoutingRiskCard";
+import { DepartmentExplanationCard } from "./DepartmentExplanationCard";
+import { ResolutionPredictorCard } from "./ResolutionPredictorCard";
+import { FasterResolutionCard } from "./FasterResolutionCard";
+import { HallucinationGuardrailCard } from "./HallucinationGuardrailCard";
 import { formalComplaint } from "./formalComplaint";
 import { statusLabels, type Complaint } from "./types";
 
@@ -104,11 +113,36 @@ export function ComplaintDetail({
       {complaint.review_reason && complaint.requires_review && (
         <div className="notice">{complaint.review_reason}</div>
       )}
+      {analysis?.citizen_validation && (
+        <CitizenValidationCard
+          complaint={complaint}
+          onComplaintUpdated={onComplaintUpdated}
+        />
+      )}
       {analysis?.smart_follow_up && (
         <SmartFollowUpCard
           complaint={complaint}
           onComplaintUpdated={onComplaintUpdated}
         />
+      )}
+      {analysis?.completeness && (
+        <CompletenessCard
+          complaint={complaint}
+          onComplaintUpdated={onComplaintUpdated}
+        />
+      )}
+      {analysis?.resolution_predictor && (
+        <ResolutionPredictorCard complaint={complaint} />
+      )}
+      {analysis?.faster_resolution && (
+        <FasterResolutionCard complaint={complaint} />
+      )}
+      {analysis?.emotional_urgency && (
+        <EmotionalUrgencyCard complaint={complaint} />
+      )}
+      {analysis?.routing_risk && <RoutingRiskCard complaint={complaint} />}
+      {analysis?.learned_dialect && (
+        <CommunityDialectCard complaint={complaint} />
       )}
       {analysis && (
         <OfficerSummaryCard
@@ -152,6 +186,9 @@ export function ComplaintDetail({
           </div>
         </dl>
       </section>
+      {analysis?.department_explanation && (
+        <DepartmentExplanationCard complaint={complaint} />
+      )}
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
         <p className="eyebrow text-emerald-800">Formal complaint for staff</p>
         <p className="mt-3 text-lg leading-relaxed text-stone-800">
@@ -226,6 +263,11 @@ export function ComplaintDetail({
       {analysis && (
         <div className="border-t border-stone-100 pt-5">
           <SelfVerificationCard complaint={complaint} />
+        </div>
+      )}
+      {analysis?.hallucination_guardrail && (
+        <div className="border-t border-stone-100 pt-5">
+          <HallucinationGuardrailCard complaint={complaint} />
         </div>
       )}
       {analysis && (

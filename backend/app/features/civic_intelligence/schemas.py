@@ -76,6 +76,105 @@ class SmartFollowUp(BaseModel):
     answered_option: str | None = None
 
 
+class EmotionalUrgency(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    detected: bool
+    distress_signals: list[Nonempty] = Field(default_factory=list, max_length=10)
+    emotional_score: float = Field(ge=0, le=1, allow_inf_nan=False)
+    base_urgency: Urgency
+    escalated_urgency: Urgency
+    escalation_reason: str = ""
+
+
+class MissingInfoItem(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    field_name: Nonempty
+    is_missing: bool
+    prompt_question: Nonempty
+    example_suggestion: Nonempty
+
+
+class ComplaintCompleteness(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    score: int = Field(ge=0, le=100)
+    missing_fields: list[MissingInfoItem] = Field(default_factory=list, max_length=10)
+
+
+class LearnedDialectWord(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    word: Nonempty
+    suggested_meaning: Nonempty
+    category: Category
+    confirmed: bool = False
+    region: Nonempty = "Tamil Regional Vernacular"
+
+
+class CitizenValidation(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    summary_statement: Nonempty
+    is_confirmed: bool = False
+    confirmed_at: str | None = None
+
+
+class RoutingRisk(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    level: Literal["Low", "Medium", "High", "Critical"]
+    score: float = Field(ge=0, le=1, allow_inf_nan=False)
+    risk_factors: list[Nonempty] = Field(default_factory=list, max_length=10)
+    recommendation: Nonempty
+    mitigation_notes: str = ""
+
+
+class ExcludedDepartment(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    department: str
+    exclusion_reason: str
+
+
+class DepartmentExplanation(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    selected_department: Department
+    why_selected: Nonempty
+    excluded_departments: list[ExcludedDepartment] = Field(default_factory=list, max_length=10)
+    jurisdiction_basis: Nonempty
+
+
+class ResolutionPredictor(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    estimated_hours_min: int = Field(ge=1)
+    estimated_hours_max: int = Field(ge=1)
+    estimated_timeline_label: Nonempty
+    sla_category: Nonempty
+    completeness_time_saved: Nonempty
+    bottleneck_warning: str | None = None
+
+
+class FasterResolutionSuggestion(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    item_name: Nonempty
+    potential_time_saved: Nonempty
+    impact_rationale: Nonempty
+    example: Nonempty
+
+
+class FasterResolution(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    suggestions: list[FasterResolutionSuggestion] = Field(min_length=1, max_length=5)
+    overall_speedup_factor: Nonempty
+
+
+class HallucinationGuardrail(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    is_safe_to_route: bool
+    certainty_level: Literal[
+        "High Certainty", "Moderate Certainty", "Low Certainty / Unsafe to Auto-Route"
+    ]
+    known_facts: list[Nonempty] = Field(default_factory=list, max_length=10)
+    ambiguous_elements: list[Nonempty] = Field(default_factory=list, max_length=10)
+    human_oversight_required: bool
+    safeguard_reason: Nonempty
+
+
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     transcript: Nonempty
@@ -108,6 +207,15 @@ class Analysis(BaseModel):
     officer_summary: OfficerSummary | None = None
     self_verification: SelfVerification | None = None
     smart_follow_up: SmartFollowUp | None = None
+    emotional_urgency: EmotionalUrgency | None = None
+    completeness: ComplaintCompleteness | None = None
+    learned_dialect: LearnedDialectWord | None = None
+    citizen_validation: CitizenValidation | None = None
+    routing_risk: RoutingRisk | None = None
+    department_explanation: DepartmentExplanation | None = None
+    resolution_predictor: ResolutionPredictor | None = None
+    faster_resolution: FasterResolution | None = None
+    hallucination_guardrail: HallucinationGuardrail | None = None
 
     @model_validator(mode="after")
     def unique_departments(self):

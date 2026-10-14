@@ -21,6 +21,16 @@ import { OfficerSummaryCard } from "./OfficerSummaryCard";
 import { SelfVerificationCard } from "./SelfVerificationCard";
 import { SmartFollowUpCard } from "./SmartFollowUpCard";
 import { ThinkingTimeline } from "./ThinkingTimeline";
+import { GrievanceCopilot } from "./GrievanceCopilot";
+import { EmotionalUrgencyCard } from "./EmotionalUrgencyCard";
+import { CompletenessCard } from "./CompletenessCard";
+import { CommunityDialectCard } from "./CommunityDialectCard";
+import { CitizenValidationCard } from "./CitizenValidationCard";
+import { RoutingRiskCard } from "./RoutingRiskCard";
+import { DepartmentExplanationCard } from "./DepartmentExplanationCard";
+import { ResolutionPredictorCard } from "./ResolutionPredictorCard";
+import { FasterResolutionCard } from "./FasterResolutionCard";
+import { HallucinationGuardrailCard } from "./HallucinationGuardrailCard";
 import type { Complaint } from "./types";
 
 const complaint = {
@@ -959,5 +969,456 @@ it("renders ExplainabilityPanel with Water Department specific routing as per us
   expect(screen.getByText("✔ High Priority")).toBeInTheDocument();
   expect(
     screen.getByText("✔ Routed to Water Supply Department"),
+  ).toBeInTheDocument();
+});
+
+// --- BATCH 1 USPs TESTS ---
+
+it("renders GrievanceCopilot (USP 1) and handles prompt appending", async () => {
+  const onAppend = vi.fn();
+  render(
+    <GrievanceCopilot currentText="water problem" onAppendText={onAppend} />,
+  );
+
+  expect(screen.getByText("AI Grievance Copilot")).toBeInTheDocument();
+  expect(screen.getByText(/USP 1 · Adaptive Intake/i)).toBeInTheDocument();
+  expect(screen.getByText(/Your grievance is brief/i)).toBeInTheDocument();
+
+  const addLandmarkBtn = screen.getByRole("button", {
+    name: /\+ Add Landmark/i,
+  });
+  expect(addLandmarkBtn).toBeInTheDocument();
+
+  await userEvent.click(addLandmarkBtn);
+  expect(onAppend).toHaveBeenCalledWith(" near the main bus stop / school");
+});
+
+it("renders EmotionalUrgencyCard (USP 2) with distress signals and escalation badge", () => {
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      emotional_urgency: {
+        detected: true,
+        distress_signals: [
+          "Prolonged disruption (>3 days)",
+          "Vulnerable population (infants & elderly)",
+        ],
+        emotional_score: 0.88,
+        base_urgency: "Medium" as const,
+        escalated_urgency: "High" as const,
+        escalation_reason:
+          "Essential drinking water disruption exceeding 3 days with vulnerable residents affected.",
+      },
+    },
+  };
+
+  render(
+    <EmotionalUrgencyCard complaint={mockComplaint as unknown as Complaint} />,
+  );
+
+  expect(
+    screen.getByText("USP 2 · AI Distress & Urgency Detection"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Emotional Distress & Urgency Elevated"),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Elevated: Medium → High/i)).toBeInTheDocument();
+  expect(screen.getByText(/Distress index: 88%/i)).toBeInTheDocument();
+  expect(
+    screen.getByText("Prolonged disruption (>3 days)"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Vulnerable population (infants & elderly)"),
+  ).toBeInTheDocument();
+});
+
+it("renders CompletenessCard (USP 3) and allows inline addition of missing information", async () => {
+  const mockOnUpdated = vi.fn();
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      completeness: {
+        score: 60,
+        missing_fields: [
+          {
+            field_name: "Landmark",
+            is_missing: true,
+            prompt_question: "What is the nearest landmark?",
+            example_suggestion: "e.g. Near Bus Stand",
+          },
+        ],
+      },
+    },
+  };
+
+  vi.spyOn(globalThis, "fetch").mockImplementationOnce(() =>
+    Promise.resolve(
+      new Response(
+        JSON.stringify({
+          ...mockComplaint,
+          analysis: {
+            ...mockComplaint.analysis,
+            completeness: {
+              score: 80,
+              missing_fields: [],
+            },
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    ),
+  );
+
+  render(
+    <CompletenessCard
+      complaint={mockComplaint as unknown as Complaint}
+      onComplaintUpdated={mockOnUpdated}
+    />,
+  );
+
+  expect(
+    screen.getByText("USP 3 · Missing Information Detection"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Complaint Completeness: 60%")).toBeInTheDocument();
+  expect(screen.getByText("1 detail(s) missing")).toBeInTheDocument();
+  expect(screen.getByText("What is the nearest landmark?")).toBeInTheDocument();
+
+  // Open inline input
+  const addBtn = screen.getByRole("button", { name: /Add Landmark/i });
+  await userEvent.click(addBtn);
+
+  const input = screen.getByPlaceholderText(/Enter landmark\.\.\./i);
+  await userEvent.type(input, "Near Temple Gate");
+
+  const saveBtn = screen.getByRole("button", { name: "Save" });
+  await userEvent.click(saveBtn);
+
+  await waitFor(() => {
+    expect(mockOnUpdated).toHaveBeenCalled();
+  });
+});
+
+it("renders CommunityDialectCard (USP 4) and displays learned terms and dictionary modal", async () => {
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      learned_dialect: {
+        word: "Sombu",
+        suggested_meaning: "Water container or pipeline tap",
+        category: "Water Supply",
+        confirmed: true,
+        region: "Tamil Regional Vernacular",
+      },
+    },
+  };
+
+  vi.spyOn(globalThis, "fetch").mockImplementationOnce(() =>
+    Promise.resolve(
+      new Response(
+        JSON.stringify([
+          {
+            word: "Sombu",
+            meaning: "Water tap",
+            category: "Water Supply",
+            region: "Tamil Vernacular",
+            confirmed: true,
+          },
+        ]),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    ),
+  );
+
+  render(
+    <CommunityDialectCard complaint={mockComplaint as unknown as Complaint} />,
+  );
+
+  expect(
+    screen.getByText("USP 4 · Community Dialect Learning"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("“Sombu”")).toBeInTheDocument();
+  expect(
+    screen.getByText(/Water container or pipeline tap/i),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Learned & Verified/i)).toBeInTheDocument();
+
+  // Open Lexicon Modal
+  const viewBtn = screen.getByRole("button", { name: /View Dialect Lexicon/i });
+  await userEvent.click(viewBtn);
+
+  expect(
+    screen.getByText("Community Dialect Knowledge Base"),
+  ).toBeInTheDocument();
+});
+
+it("renders CitizenValidationCard (USP 5) and allows confirming summary", async () => {
+  const mockOnUpdated = vi.fn();
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      citizen_validation: {
+        summary_statement:
+          "Drinking water connection interrupted for 3 days near Gandhi Road.",
+        is_confirmed: false,
+        confirmed_at: null,
+      },
+    },
+  };
+
+  vi.spyOn(globalThis, "fetch").mockImplementationOnce(() =>
+    Promise.resolve(
+      new Response(
+        JSON.stringify({
+          ...mockComplaint,
+          analysis: {
+            ...mockComplaint.analysis,
+            citizen_validation: {
+              summary_statement:
+                "Drinking water connection interrupted for 3 days near Gandhi Road.",
+              is_confirmed: true,
+              confirmed_at: "2026-10-15T00:00:00Z",
+            },
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    ),
+  );
+
+  render(
+    <CitizenValidationCard
+      complaint={mockComplaint as unknown as Complaint}
+      onComplaintUpdated={mockOnUpdated}
+    />,
+  );
+
+  expect(
+    screen.getByText("USP 5 · Citizen Validation Layer"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Awaiting Citizen Confirmation")).toBeInTheDocument();
+  expect(
+    screen.getByText(/Drinking water connection interrupted for 3 days/i),
+  ).toBeInTheDocument();
+
+  const confirmBtn = screen.getByRole("button", {
+    name: /Yes, Exactly Correct/i,
+  });
+  await userEvent.click(confirmBtn);
+
+  await waitFor(() => {
+    expect(mockOnUpdated).toHaveBeenCalled();
+  });
+});
+
+// --- BATCH 2 USPs TESTS ---
+
+it("renders RoutingRiskCard (USP 6) with risk score, factors, and recommendation", () => {
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      routing_risk: {
+        level: "High" as const,
+        score: 0.85,
+        risk_factors: [
+          "Core lifeline utility dependency (Water Supply)",
+          "Acute public safety hazard identified",
+        ],
+        recommendation:
+          "Manual Officer Pre-Verification Required before field crew dispatch",
+        mitigation_notes:
+          "High risk of delayed response if misrouted. Dual-officer confirmation recommended.",
+      },
+    },
+  };
+
+  render(<RoutingRiskCard complaint={mockComplaint as unknown as Complaint} />);
+
+  expect(screen.getByText("USP 6 · Misrouting Prevention")).toBeInTheDocument();
+  expect(
+    screen.getByText(/Routing Risk Score: High \(85%\)/i),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Manual Officer Pre-Verification Required before field crew dispatch",
+    ),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Core lifeline utility dependency (Water Supply)"),
+  ).toBeInTheDocument();
+});
+
+it("renders DepartmentExplanationCard (USP 7) with differential diagnosis", () => {
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      department_explanation: {
+        selected_department: "Water Supply",
+        why_selected:
+          "Primary complaint factors directly match Water Supply remit: Drinking water infrastructure.",
+        excluded_departments: [
+          {
+            department: "Public Works (Roads)",
+            exclusion_reason:
+              "No structural asphalt, roadway crater, or pavement defect reported.",
+          },
+          {
+            department: "Electricity Department",
+            exclusion_reason:
+              "No power distribution fault or overhead wire hazard detected.",
+          },
+        ],
+        jurisdiction_basis:
+          "Section 24 of Municipal Water Supply Act: Potable water distribution.",
+      },
+    },
+  };
+
+  render(
+    <DepartmentExplanationCard
+      complaint={mockComplaint as unknown as Complaint}
+    />,
+  );
+
+  expect(
+    screen.getByText("USP 7 · Transparent Department Explanation"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/Differential Routing Diagnosis: Water Supply/i),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Public Works (Roads)")).toBeInTheDocument();
+  expect(
+    screen.getByText(/No structural asphalt, roadway crater/i),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/Section 24 of Municipal Water Supply Act/i),
+  ).toBeInTheDocument();
+});
+
+it("renders ResolutionPredictorCard (USP 8) with SLA and time-saved metrics", () => {
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      resolution_predictor: {
+        estimated_hours_min: 12,
+        estimated_hours_max: 36,
+        estimated_timeline_label: "12–36 Hours",
+        sla_category: "Priority Municipal Service SLA (Tier 2)",
+        completeness_time_saved:
+          "18 hours saved via verified location and timeframe",
+        bottleneck_warning: null,
+      },
+    },
+  };
+
+  render(
+    <ResolutionPredictorCard
+      complaint={mockComplaint as unknown as Complaint}
+    />,
+  );
+
+  expect(
+    screen.getByText("USP 8 · Resolution SLA Predictor"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Estimated Resolution: 12–36 Hours"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Priority Municipal Service SLA (Tier 2)"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("18 hours saved via verified location and timeframe"),
+  ).toBeInTheDocument();
+});
+
+it("renders FasterResolutionCard (USP 9) with high-leverage field acceleration suggestions", () => {
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      faster_resolution: {
+        suggestions: [
+          {
+            item_name: "Pipeline / Valve Asset Number",
+            potential_time_saved: "~12 Hours",
+            impact_rationale:
+              "Allows water engineers to locate the exact distribution valve without street survey.",
+            example: "e.g. Valve Tag #W-18 near cross junction",
+          },
+        ],
+        overall_speedup_factor:
+          "Up to 45% faster resolution when field clues are attached",
+      },
+    },
+  };
+
+  render(
+    <FasterResolutionCard complaint={mockComplaint as unknown as Complaint} />,
+  );
+
+  expect(
+    screen.getByText("USP 9 · Actionable Acceleration Clues"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("AI Suggests Faster Field Resolution"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Pipeline / Valve Asset Number")).toBeInTheDocument();
+  expect(screen.getByText("Save ~12 Hours")).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Up to 45% faster resolution when field clues are attached",
+    ),
+  ).toBeInTheDocument();
+});
+
+it("renders HallucinationGuardrailCard (USP 10) with safety lock and known facts", () => {
+  const mockComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      hallucination_guardrail: {
+        is_safe_to_route: false,
+        certainty_level: "Low Certainty / Unsafe to Auto-Route" as const,
+        known_facts: [
+          "Reported input text captured faithfully in evidence log",
+        ],
+        ambiguous_elements: [
+          "Confidence score is below the 70% threshold required for automatic civic dispatch",
+        ],
+        human_oversight_required: true,
+        safeguard_reason:
+          "Hallucination prevention safeguard active: AI refuses automated dispatch to prevent misrouting.",
+      },
+    },
+  };
+
+  render(
+    <HallucinationGuardrailCard
+      complaint={mockComplaint as unknown as Complaint}
+    />,
+  );
+
+  expect(
+    screen.getByText("USP 10 · AI Knows When It Doesn't Know"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      /Certainty Guardrail: Low Certainty \/ Unsafe to Auto-Route/i,
+    ),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Safety Lock Active · Officer Review Mandated"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Reported input text captured faithfully in evidence log"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/Confidence score is below the 70% threshold/i),
   ).toBeInTheDocument();
 });

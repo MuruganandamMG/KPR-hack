@@ -4,6 +4,7 @@ import type {
   ComplaintPage,
   Decision,
   FollowUpClarification,
+  LearnedDialectWord,
   Meta,
   Status,
 } from "./types";
@@ -68,6 +69,35 @@ export const clarifyComplaint = (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(clarification),
+  });
+export const validateComplaint = (id: string, is_confirmed: boolean) =>
+  request<Complaint>(`/complaints/${encodeURIComponent(id)}/validate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ is_confirmed }),
+  });
+export const completeComplaintDetails = (
+  id: string,
+  field_name: string,
+  value: string,
+) =>
+  request<Complaint>(`/complaints/${encodeURIComponent(id)}/complete`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ field_name, value }),
+  });
+export const getCommunityDialects = (signal?: AbortSignal) =>
+  request<LearnedDialectWord[]>("/complaints/dialects/community", { signal });
+export const addCommunityDialect = (entry: {
+  word: string;
+  meaning: string;
+  category: string;
+  region?: string;
+}) =>
+  request<LearnedDialectWord>("/complaints/dialects/community", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(entry),
   });
 export const audioUrl = (id: string) =>
   `/api/complaints/${encodeURIComponent(id)}/audio`;

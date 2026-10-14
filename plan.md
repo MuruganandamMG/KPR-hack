@@ -1,71 +1,903 @@
-# ACIE Implementation Plan
+# 🏆 Next-Generation USP Ideas for Winning the Hackathon
 
-**Goal:** Deliver the PRD's hackathon prototype: multilingual text/voice intake, explainable Gemini analysis, validated officer routing, immutable originals, and citizen tracking.
+> **Vision**
+>
+> Most teams will build an **AI Grievance Router**.
+>
+> We will build an **AI Grievance Copilot**.
+>
+> Instead of simply classifying complaints, our AI actively collaborates with citizens, improves complaint quality, verifies its own reasoning, reduces ambiguity, and only then routes the grievance.
+>
+> This transforms the solution from **"an AI classifier"** into **"an AI decision-support system."**
 
-**Architecture:** One React/TypeScript/Vite/Tailwind frontend and one FastAPI backend. SQLite stores complaints, original audio, validated AI results, and append-only status events. A dedicated AI gateway uses Gemini; SQLAlchemy handles persistence and Pydantic validates boundaries. Docker serves the built frontend and API together.
+---
 
-**Spec:** `PRD.md`, with the scope resolutions below. Work is authorized by the user's request to plan and implement. Execute inline; retain changes in the shared workspace for review.
+# USP 1 — Adaptive AI Conversation (AI Grievance Copilot)
 
-## Scope resolutions and acceptance criteria
+## The Problem
 
-- Repository instructions take precedence over PRD provider differences: Gemini only; no Grok integration or claim of provider failover. Retry malformed or transient Gemini responses once, then preserve the complaint for manual review.
-- Authentication/RBAC and actual government integration remain out of scope. Officer endpoints are prototype endpoints and must not be exposed to real citizen data without access controls.
-- Indian languages, dialects, spelling errors, and mixed-language input are sent unchanged to Gemini. Language coverage and accuracy are model capabilities to evaluate, not guaranteed by code.
-- Accept text of 3–5000 nonblank characters. Voice is limited to 10 MiB and 120 seconds, normalized by FFmpeg into WAV for inference; retain uploaded bytes and original transcript.
-- Every accepted complaint is persisted with an unpredictable `GRV-<year>-<random>` tracking ID before AI analysis. Idempotency keys prevent duplicate submissions and reject reuse with different content.
-- AI output must match a strict schema: transcript, normalized English administrative complaint, detected language/dialect, category, intent, primary/secondary department, urgency, confidence [0,1], keywords, meaning, and concise decision explanation. Do not request private chain-of-thought.
-- Department names belong to a server allowlist. Category/department mismatches, ambiguous categories, and confidence below 0.75 require human review. All routing is approved by an officer; AI never executes routing.
-- Store originals immutably. Status changes and routing decisions add audit events atomically. Version checks reject stale officer updates.
-- Citizen interface: text/voice intake, loading/error states, analysis result, tracking ID, status timeline. Officer interface: searchable/filterable queue, original/transcript and recommendation details, department override with a reason, route approval, and progress/resolution updates.
-- Render/Docker configuration is provided, not deployed. SQLite requires persistent storage. No fabricated demo inference or measured accuracy claims.
+Most teams will design the system like this:
 
-## Feature and interface map
+```text
+Citizen Complaint
+        │
+        ▼
+AI Analysis
+        │
+        ▼
+Department Assigned
+```
 
-| Responsibility | Backend | Frontend |
-| --- | --- | --- |
-| Intake, analysis, storage, tracking, officer review | `backend/app/features/complaints/` | `frontend/src/features/complaints/` |
-| Gemini adapter and inference schema | `backend/app/features/civic_intelligence/` | Analysis presentation inside complaints |
-| Configuration/database/transport | `backend/app/shared/` | `frontend/src/shared/` |
-| Cross-boundary specification | `contracts/openapi.json` (generated from FastAPI) | TypeScript types and API module |
+This assumes that every citizen submits a complete and unambiguous complaint.
 
-API operations: `POST /api/complaints` (JSON text), `POST /api/complaints/voice` (multipart audio), `GET /api/complaints` (paginated officer queue), `GET /api/complaints/{tracking_id}`, `PATCH /api/complaints/{tracking_id}` (versioned officer decision), `GET /api/complaints/{tracking_id}/audio`, `GET /api/meta`, `GET /api/health`. Error responses use `detail`; invalid inputs 422, missing records 404, stale updates/idempotency conflicts 409, invalid audio 422, oversized audio 413. Accepted complaints return 201 even when analysis fails, with explicit `analysis_failed` state and explanation.
+Unfortunately, this is rarely true.
 
-Statuses: `received → awaiting_review | analysis_failed → routed → in_progress → resolved`. Manual routing of failed analysis is permitted with department and reason. No silent regression of status. Review threshold is server configuration. Confidence is an uncalibrated model estimate, not a probability guarantee.
+Examples:
 
-## Review focus
+> Water problem.
 
-1. Wrong or malformed AI output cannot assign an unsupported department or bypass review.
-2. Double-clicks/network retries cannot create duplicate complaints; key reuse with different content returns 409.
-3. AI failure cannot lose original text/audio or leave the citizen without a tracking ID.
-4. Simultaneous officer updates cannot overwrite decisions or mutate original evidence.
-5. Invalid, oversized, or overlong audio cannot bypass validation; microphone denial and recording cleanup have usable UI behavior.
+> Street light issue.
 
-## Task 1: Complaint intake and civic inference
+> Garbage.
 
-- [x] Establish manifests, central configuration, versioned SQLite migration, inference schema, and feature folders.
-- [x] Cover malformed recommendations, threshold rules, preserved inputs/provider failure, idempotency and text validation.
-- [x] Implement Gemini gateway with JSON schema generation and one bounded retry; verify with controlled HTTP transport.
-- [x] Implement repository/service, text/voice handlers, audio normalization, and immutable original protection.
-- [x] Verify full backend suite.
+These complaints contain insufficient information.
 
-## Task 2: Officer workflow and citizen tracking
+If AI tries to classify them immediately, the routing confidence becomes very low.
 
-- [x] Cover routing, mandatory notes, legal transitions, stale/concurrent versions, unknown IDs, pagination and audit history.
-- [x] Implement named queue/get/update/audio operations using transactions and explicit schemas.
-- [x] Generate `contracts/openapi.json`; document public interfaces and feature ownership.
-- [x] Verify the backend suite and contract generation.
+---
 
-## Task 3: Frontend and packaging
+## Our Solution
 
-- [x] Add typed request client and complaint API operations outside components.
-- [x] Build responsive citizen intake/tracking and officer queue/detail, accessible controls and state feedback, audio upload and MediaRecorder cleanup.
-- [x] Add UI tests for submission/retries, tracking errors, routing, pending/cancelled microphone acquisition and stale permission failures.
-- [x] Add Docker/Render files, safe environment examples, setup/feature map and evaluation fixtures/instructions.
-- [x] Verify automated tests/build, review code independently, and fix substantive findings.
-- [x] Inspect browser rendering at desktop/mobile sizes and exercise text intake, tracking and the complete manual officer workflow. Evidence: `docs/test-results/browser-check.md`.
+Instead of immediately predicting the department, our AI first checks whether enough information exists.
 
-## Completion evidence
+If required information is missing, the AI starts a short conversation.
 
-Automated verification: 31 backend tests; 8 frontend tests; TypeScript/Vite production build; Ruff lint/format; Prettier; npm audit (zero vulnerabilities); OpenAPI generation and Git whitespace review. Independent review found unsafe upload MIME replay and microphone permission/cleanup races; reproduced with failing regression checks and fixed. Original audio is now served using a container-derived allowlisted MIME. Browser testing also discovered stale future-review wording after manual resolution; a failing UI regression was added, the wording was fixed, and the live resolved screen was rechecked. A subsequent backend regression verifies root environment/data/frontend configuration from other launch directories.
+Example
 
-Gemini is now configured after fixing root `.env` loading and updating the unavailable old model to `gemini-3.8-flash`. Live requests currently return Google's temporary HTTP 503 high-demand response, including on an account-exposed alternative model; no successful live interpretation/accuracy is claimed. Evidence: `docs/test-results/gemini-configuration.md`. Audio tests run real FFmpeg decoding with a controlled inference gateway. Desktop/mobile testing passed via Edge at `localhost:5173`, including intake, not-found tracking, manual routing, progress and resolution. Hardware recording, browser upload, Docker runtime and Render deployment remain unverified. Browser upload requires the extension's file URL permission, which was not changed; Docker is unavailable. One upstream Starlette/httpx TestClient deprecation warning remains; all automated tests pass.
+### Citizen
+
+> Water problem.
+
+---
+
+### AI
+
+I need one more detail.
+
+Which of these best describes your issue?
+
+- No water supply
+- Dirty water
+- Pipeline leakage
+- Low water pressure
+
+---
+
+### Citizen
+
+> No water supply.
+
+---
+
+### AI
+
+How long has this issue existed?
+
+- Today
+- 1 Day
+- 2–3 Days
+- More than 3 Days
+
+---
+
+### Citizen
+
+> Three days.
+
+---
+
+### Final AI Understanding
+
+```text
+Complaint
+
+Water supply unavailable.
+
+Duration
+
+Three days.
+
+Priority
+
+High
+
+Department
+
+Water Supply Department
+
+Confidence
+
+98%
+```
+
+---
+
+## Why This Matters
+
+Instead of forcing AI to guess,
+
+the AI gathers missing information before making a decision.
+
+Exactly like a government operator would.
+
+---
+
+## Benefits
+
+✔ Higher routing accuracy
+
+✔ Better complaint quality
+
+✔ Less ambiguity
+
+✔ Better citizen experience
+
+✔ Lower hallucination rate
+
+---
+
+## Why Judges Will Remember It
+
+Every team will classify complaints.
+
+Your AI will **collaborate with the citizen before making a decision.**
+
+That is a completely different interaction model.
+
+---
+
+# USP 2 — Emotional Urgency Detection
+
+## The Problem
+
+Most AI systems only detect the complaint category.
+
+Example
+
+Citizen A
+
+> Water not coming.
+
+Citizen B
+
+> Please help. My children haven't had water for three days.
+
+Most systems classify both as
+
+```text
+Category
+
+Water Supply
+```
+
+But they are not equally urgent.
+
+---
+
+## Our Solution
+
+The AI also detects emotional urgency.
+
+Instead of looking only at keywords,
+
+it understands emotional signals.
+
+Example
+
+```text
+Detected Signals
+
+• Distress
+
+• Essential service
+
+• Children mentioned
+
+• Duration > 3 Days
+
+↓
+
+Urgency Increased
+```
+
+---
+
+## Example
+
+Citizen
+
+> Please help...
+>
+> My children haven't had water for three days.
+
+AI
+
+```text
+Complaint
+
+Water Supply Failure
+
+Priority
+
+Critical
+
+Reason
+
+Essential utility unavailable
+
+Children affected
+
+Extended duration detected
+```
+
+---
+
+## Benefits
+
+✔ Better prioritization
+
+✔ Human-centric AI
+
+✔ Social impact
+
+✔ Better emergency response
+
+---
+
+## Judge Perspective
+
+This demonstrates
+
+> AI understands **human context**, not just text.
+
+---
+
+# USP 3 — Missing Information Detection
+
+## Problem
+
+Many complaints cannot be acted upon because they lack important details.
+
+Example
+
+> Street light not working.
+
+Questions
+
+Which street?
+
+Which pole?
+
+Which area?
+
+Since when?
+
+---
+
+## Our Solution
+
+Instead of routing immediately,
+
+the AI detects what information is missing.
+
+Example
+
+```text
+Complaint Analysis
+
+Complaint
+
+Street Light Issue
+
+Missing Information
+
+✓ Street Name
+
+✓ Landmark
+
+✓ Duration
+
+Complaint Completeness
+
+63%
+```
+
+The AI asks only the missing questions.
+
+Example
+
+AI
+
+> Could you tell me the street name?
+
+Citizen
+
+> Gandhi Street.
+
+AI
+
+> Is only one street light affected or the whole street?
+
+Citizen
+
+> Entire street.
+
+Complaint Completeness
+
+100%
+
+---
+
+## Benefits
+
+✔ Better quality complaints
+
+✔ Faster government processing
+
+✔ Less manual follow-up
+
+---
+
+# USP 4 — Community Dialect Learning
+
+## Problem
+
+India has thousands of local dialects.
+
+No AI model knows every regional word.
+
+Example
+
+Citizen
+
+> Sombu odanju pochu.
+
+Suppose
+
+"Sombu"
+
+is unknown.
+
+Most AI systems fail.
+
+---
+
+## Our Solution
+
+Instead of guessing,
+
+the AI asks.
+
+Example
+
+AI
+
+> I haven't seen this dialect word before.
+>
+> Does "Sombu" refer to a water pipe?
+
+Citizen
+
+> Yes.
+
+AI
+
+```text
+New Local Word Learned
+
+Word
+
+Sombu
+
+Meaning
+
+Water Pipe
+
+Region
+
+Local Dialect
+
+Status
+
+Added to Local Vocabulary
+```
+
+Next time,
+
+the AI automatically understands it.
+
+---
+
+## Benefits
+
+✔ Continuous learning
+
+✔ Community-driven improvement
+
+✔ Better dialect coverage
+
+---
+
+## Judge Perspective
+
+Instead of a static AI,
+
+you built
+
+**a continuously learning civic language model.**
+
+---
+
+# USP 5 — Citizen Validation Layer
+
+## Problem
+
+Sometimes AI misunderstands dialects.
+
+Citizen
+
+> Anna thanni varala.
+
+AI assumes
+
+> Water supply unavailable.
+
+But perhaps
+
+the citizen actually meant
+
+low water pressure.
+
+Submitting without confirmation creates incorrect tickets.
+
+---
+
+## Our Solution
+
+Before submission,
+
+the AI asks for confirmation.
+
+Example
+
+```text
+I understood your complaint as
+
+"Water supply has been unavailable."
+
+Is this correct?
+
+✓ Yes
+
+✗ Edit
+```
+
+Citizen confirms.
+
+Only then
+
+↓
+
+Ticket generated.
+
+---
+
+## Benefits
+
+✔ Reduces incorrect routing
+
+✔ Builds trust
+
+✔ Citizen becomes part of the AI decision
+
+---
+
+# USP 6 — Routing Risk Score
+
+## Problem
+
+Confidence alone doesn't tell the whole story.
+
+Example
+
+Confidence
+
+85%
+
+But
+
+what if the complaint is
+
+Live electrical wire?
+
+Routing incorrectly could delay emergency response.
+
+---
+
+## Our Solution
+
+Calculate another metric
+
+Routing Risk.
+
+Example
+
+```text
+Confidence
+
+85%
+
+Routing Risk
+
+HIGH
+
+Reason
+
+Emergency utility complaint.
+
+Incorrect routing may delay response.
+
+Recommendation
+
+Manual Verification
+```
+
+---
+
+## Another Example
+
+Complaint
+
+Road pothole.
+
+```text
+Confidence
+
+85%
+
+Routing Risk
+
+LOW
+
+Reason
+
+Non-emergency complaint.
+```
+
+---
+
+## Benefits
+
+✔ Government trust
+
+✔ Safer AI
+
+✔ Better prioritization
+
+---
+
+# USP 7 — Department Explanation
+
+## Problem
+
+Citizens don't know
+
+why AI selected a department.
+
+---
+
+## Our Solution
+
+AI explains
+
+its reasoning
+
+in plain language.
+
+Example
+
+```text
+Selected Department
+
+Water Supply Department
+
+Reason
+
+Detected
+
+"Thanni"
+
+↓
+
+Water Supply
+
+No evidence of
+
+Road Damage
+
+Garbage
+
+Drainage
+
+Hence
+
+Water Supply Department selected.
+```
+
+---
+
+## Benefits
+
+✔ Explainability
+
+✔ Transparency
+
+✔ Better citizen trust
+
+---
+
+# USP 8 — Complaint Completeness Score
+
+## Problem
+
+Poor-quality complaints delay resolution.
+
+Example
+
+```text
+Water problem.
+```
+
+Missing
+
+- Location
+
+- Duration
+
+- Landmark
+
+---
+
+## Our Solution
+
+Every complaint receives a completeness score.
+
+Example
+
+```text
+Complaint Completeness
+
+██████░░░░
+
+60%
+
+Missing
+
+✓ Area
+
+✓ Landmark
+
+✓ Duration
+```
+
+As AI gathers information,
+
+the score increases.
+
+```text
+60%
+
+↓
+
+85%
+
+↓
+
+100%
+```
+
+---
+
+## Benefits
+
+✔ Better complaint quality
+
+✔ Less government effort
+
+✔ Faster issue resolution
+
+---
+
+# USP 9 — AI Suggests Faster Resolution
+
+## Problem
+
+Most systems
+
+only submit complaints.
+
+They don't help citizens improve them.
+
+---
+
+## Our Solution
+
+AI suggests additional information
+
+that could speed up resolution.
+
+Example
+
+Complaint
+
+Street light not working.
+
+AI
+
+```text
+Suggestion
+
+Adding
+
+Nearest Landmark
+
+Pole Number
+
+Photo
+
+can help officers resolve this issue faster.
+```
+
+---
+
+## Benefits
+
+✔ Faster response
+
+✔ Better government workflow
+
+✔ More practical system
+
+---
+
+# USP 10 — AI Knows When It Doesn't Know
+
+## Problem
+
+Most AI systems always produce an answer.
+
+Even when uncertain.
+
+This is dangerous.
+
+---
+
+## Our Solution
+
+If confidence falls below a threshold,
+
+AI refuses automatic routing.
+
+Example
+
+```text
+Confidence
+
+42%
+
+Status
+
+Unable to determine correct department.
+
+Recommendation
+
+Human Verification Required.
+```
+
+---
+
+## Benefits
+
+✔ Responsible AI
+
+✔ Lower routing mistakes
+
+✔ Government-grade reliability
+
+---
+
+# Final Vision
+
+## Traditional AI
+
+```text
+Citizen
+
+↓
+
+AI
+
+↓
+
+Department
+
+↓
+
+Done
+```
+
+---
+
+## Our AI Grievance Copilot
+
+```text
+Citizen
+
+↓
+
+AI Understands Complaint
+
+↓
+
+AI Detects Missing Information
+
+↓
+
+AI Starts Smart Conversation
+
+↓
+
+Citizen Confirms AI Understanding
+
+↓
+
+AI Learns New Dialect Words
+
+↓
+
+AI Calculates Complaint Completeness
+
+↓
+
+AI Self-Verifies Decision
+
+↓
+
+AI Calculates Routing Risk
+
+↓
+
+AI Explains Every Decision
+
+↓
+
+Complaint Routed
+
+↓
+
+Citizen Receives Confirmation
+```
+
+---
+
+# Why This Architecture Can Win
+
+Most teams focus on
+
+> "Can AI classify complaints?"
+
+Our system answers a much bigger question:
+
+> "Can AI collaborate with citizens to create better complaints, reduce ambiguity, learn new dialects, explain every decision, assess risk, and only route complaints when it is confident?"
+
+That shift—from **classification** to **collaborative decision-making**—is what transforms the project from a hackathon demo into a realistic public-sector AI solution.

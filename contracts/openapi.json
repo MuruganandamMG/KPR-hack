@@ -433,6 +433,158 @@
         }
       }
     },
+    "/api/complaints/{tracking_id}/validate": {
+      "post": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Validate",
+        "operationId": "validate_api_complaints__tracking_id__validate_post",
+        "parameters": [
+          {
+            "name": "tracking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tracking Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CitizenValidationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Complaint"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown tracking ID"
+          },
+          "422": {
+            "description": "Cannot validate complaint"
+          }
+        }
+      }
+    },
+    "/api/complaints/{tracking_id}/complete": {
+      "post": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Complete Details",
+        "operationId": "complete_details_api_complaints__tracking_id__complete_post",
+        "parameters": [
+          {
+            "name": "tracking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tracking Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteDetailsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Complaint"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown tracking ID"
+          },
+          "422": {
+            "description": "Cannot complete complaint details"
+          }
+        }
+      }
+    },
+    "/api/complaints/dialects/community": {
+      "get": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Get Dialects",
+        "operationId": "get_dialects_api_complaints_dialects_community_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Add Dialect",
+        "operationId": "add_dialect_api_complaints_dialects_community_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DialectLearnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/complaints/{tracking_id}/audio": {
       "get": {
         "tags": [
@@ -718,6 +870,96 @@
                 "type": "null"
               }
             ]
+          },
+          "emotional_urgency": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EmotionalUrgency"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completeness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ComplaintCompleteness"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "learned_dialect": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LearnedDialectWord"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "citizen_validation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CitizenValidation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "routing_risk": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RoutingRisk"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "department_explanation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DepartmentExplanation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution_predictor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResolutionPredictor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "faster_resolution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FasterResolution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hallucination_guardrail": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HallucinationGuardrail"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -818,6 +1060,52 @@
           "audio"
         ],
         "title": "Body_submit_voice_api_complaints_voice_post"
+      },
+      "CitizenValidation": {
+        "properties": {
+          "summary_statement": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Summary Statement"
+          },
+          "is_confirmed": {
+            "type": "boolean",
+            "title": "Is Confirmed",
+            "default": false
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "summary_statement"
+        ],
+        "title": "CitizenValidation"
+      },
+      "CitizenValidationRequest": {
+        "properties": {
+          "is_confirmed": {
+            "type": "boolean",
+            "title": "Is Confirmed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "is_confirmed"
+        ],
+        "title": "CitizenValidationRequest"
       },
       "Complaint": {
         "properties": {
@@ -981,6 +1269,30 @@
         ],
         "title": "Complaint"
       },
+      "ComplaintCompleteness": {
+        "properties": {
+          "score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "missing_fields": {
+            "items": {
+              "$ref": "#/components/schemas/MissingInfoItem"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Missing Fields"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "score"
+        ],
+        "title": "ComplaintCompleteness"
+      },
       "ComplaintPage": {
         "properties": {
           "items": {
@@ -1011,6 +1323,29 @@
           "offset"
         ],
         "title": "ComplaintPage"
+      },
+      "CompleteDetailsRequest": {
+        "properties": {
+          "field_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Field Name"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field_name",
+          "value"
+        ],
+        "title": "CompleteDetailsRequest"
       },
       "ConfidenceBreakdown": {
         "properties": {
@@ -1049,6 +1384,144 @@
         ],
         "title": "ConfidenceBreakdown"
       },
+      "DepartmentExplanation": {
+        "properties": {
+          "selected_department": {
+            "type": "string",
+            "enum": [
+              "Water Supply",
+              "Public Works",
+              "Sanitation",
+              "Electricity",
+              "Drainage",
+              "General Administration"
+            ],
+            "title": "Selected Department"
+          },
+          "why_selected": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Why Selected"
+          },
+          "excluded_departments": {
+            "items": {
+              "$ref": "#/components/schemas/ExcludedDepartment"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Excluded Departments"
+          },
+          "jurisdiction_basis": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Jurisdiction Basis"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "selected_department",
+          "why_selected",
+          "jurisdiction_basis"
+        ],
+        "title": "DepartmentExplanation"
+      },
+      "DialectLearnRequest": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Word"
+          },
+          "meaning": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Meaning"
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Category"
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Region",
+            "default": "Tamil Regional Dialect"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "word",
+          "meaning",
+          "category"
+        ],
+        "title": "DialectLearnRequest"
+      },
+      "EmotionalUrgency": {
+        "properties": {
+          "detected": {
+            "type": "boolean",
+            "title": "Detected"
+          },
+          "distress_signals": {
+            "items": {
+              "type": "string",
+              "maxLength": 5000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Distress Signals"
+          },
+          "emotional_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Emotional Score"
+          },
+          "base_urgency": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Base Urgency"
+          },
+          "escalated_urgency": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Escalated Urgency"
+          },
+          "escalation_reason": {
+            "type": "string",
+            "title": "Escalation Reason",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "detected",
+          "emotional_score",
+          "base_urgency",
+          "escalated_urgency"
+        ],
+        "title": "EmotionalUrgency"
+      },
       "EvidenceItem": {
         "properties": {
           "phrase": {
@@ -1078,6 +1551,88 @@
           "significance"
         ],
         "title": "EvidenceItem"
+      },
+      "ExcludedDepartment": {
+        "properties": {
+          "department": {
+            "type": "string",
+            "title": "Department"
+          },
+          "exclusion_reason": {
+            "type": "string",
+            "title": "Exclusion Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "department",
+          "exclusion_reason"
+        ],
+        "title": "ExcludedDepartment"
+      },
+      "FasterResolution": {
+        "properties": {
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/FasterResolutionSuggestion"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Suggestions"
+          },
+          "overall_speedup_factor": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Overall Speedup Factor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "suggestions",
+          "overall_speedup_factor"
+        ],
+        "title": "FasterResolution"
+      },
+      "FasterResolutionSuggestion": {
+        "properties": {
+          "item_name": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Item Name"
+          },
+          "potential_time_saved": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Potential Time Saved"
+          },
+          "impact_rationale": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Impact Rationale"
+          },
+          "example": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Example"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "item_name",
+          "potential_time_saved",
+          "impact_rationale",
+          "example"
+        ],
+        "title": "FasterResolutionSuggestion"
       },
       "FollowUpClarification": {
         "properties": {
@@ -1165,6 +1720,145 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HallucinationGuardrail": {
+        "properties": {
+          "is_safe_to_route": {
+            "type": "boolean",
+            "title": "Is Safe To Route"
+          },
+          "certainty_level": {
+            "type": "string",
+            "enum": [
+              "High Certainty",
+              "Moderate Certainty",
+              "Low Certainty / Unsafe to Auto-Route"
+            ],
+            "title": "Certainty Level"
+          },
+          "known_facts": {
+            "items": {
+              "type": "string",
+              "maxLength": 5000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Known Facts"
+          },
+          "ambiguous_elements": {
+            "items": {
+              "type": "string",
+              "maxLength": 5000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Ambiguous Elements"
+          },
+          "human_oversight_required": {
+            "type": "boolean",
+            "title": "Human Oversight Required"
+          },
+          "safeguard_reason": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Safeguard Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "is_safe_to_route",
+          "certainty_level",
+          "human_oversight_required",
+          "safeguard_reason"
+        ],
+        "title": "HallucinationGuardrail"
+      },
+      "LearnedDialectWord": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Word"
+          },
+          "suggested_meaning": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Suggested Meaning"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Water Supply",
+              "Roads",
+              "Sanitation",
+              "Electricity",
+              "Drainage",
+              "Other"
+            ],
+            "title": "Category"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "title": "Confirmed",
+            "default": false
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Region",
+            "default": "Tamil Regional Vernacular"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "word",
+          "suggested_meaning",
+          "category"
+        ],
+        "title": "LearnedDialectWord"
+      },
+      "MissingInfoItem": {
+        "properties": {
+          "field_name": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Field Name"
+          },
+          "is_missing": {
+            "type": "boolean",
+            "title": "Is Missing"
+          },
+          "prompt_question": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Prompt Question"
+          },
+          "example_suggestion": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Example Suggestion"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field_name",
+          "is_missing",
+          "prompt_question",
+          "example_suggestion"
+        ],
+        "title": "MissingInfoItem"
       },
       "OfficerDecision": {
         "properties": {
@@ -1300,6 +1994,108 @@
           "suggested_action"
         ],
         "title": "OfficerSummary"
+      },
+      "ResolutionPredictor": {
+        "properties": {
+          "estimated_hours_min": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Estimated Hours Min"
+          },
+          "estimated_hours_max": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Estimated Hours Max"
+          },
+          "estimated_timeline_label": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Estimated Timeline Label"
+          },
+          "sla_category": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Sla Category"
+          },
+          "completeness_time_saved": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Completeness Time Saved"
+          },
+          "bottleneck_warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bottleneck Warning"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "estimated_hours_min",
+          "estimated_hours_max",
+          "estimated_timeline_label",
+          "sla_category",
+          "completeness_time_saved"
+        ],
+        "title": "ResolutionPredictor"
+      },
+      "RoutingRisk": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Level"
+          },
+          "score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "risk_factors": {
+            "items": {
+              "type": "string",
+              "maxLength": 5000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Risk Factors"
+          },
+          "recommendation": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Recommendation"
+          },
+          "mitigation_notes": {
+            "type": "string",
+            "title": "Mitigation Notes",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level",
+          "score",
+          "recommendation"
+        ],
+        "title": "RoutingRisk"
       },
       "SelfVerification": {
         "properties": {

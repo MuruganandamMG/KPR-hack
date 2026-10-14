@@ -84,3 +84,22 @@ class FollowUpClarification(BaseModel):
     selected_option: str = Field(min_length=1, max_length=200)
     urgency: Literal["Low", "Medium", "High", "Critical"]
     note: str = Field(default="", max_length=1000)
+
+
+class CitizenValidationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    is_confirmed: bool
+
+
+class CompleteDetailsRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    field_name: str = Field(min_length=1, max_length=100)
+    value: str = Field(min_length=1, max_length=500)
+
+
+class DialectLearnRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    word: str = Field(min_length=1, max_length=100)
+    meaning: str = Field(min_length=1, max_length=300)
+    category: str = Field(min_length=1, max_length=100)
+    region: str = Field(default="Tamil Regional Dialect", max_length=100)

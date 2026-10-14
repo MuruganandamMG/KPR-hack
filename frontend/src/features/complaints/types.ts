@@ -48,6 +48,94 @@ export interface FollowUpClarification {
   urgency: "Low" | "Medium" | "High" | "Critical";
   note?: string;
 }
+export interface EmotionalUrgency {
+  detected: boolean;
+  distress_signals: string[];
+  emotional_score: number;
+  base_urgency: "Low" | "Medium" | "High" | "Critical";
+  escalated_urgency: "Low" | "Medium" | "High" | "Critical";
+  escalation_reason: string;
+}
+
+export interface MissingInfoItem {
+  field_name: string;
+  is_missing: boolean;
+  prompt_question: string;
+  example_suggestion: string;
+}
+
+export interface ComplaintCompleteness {
+  score: number;
+  missing_fields: MissingInfoItem[];
+}
+
+export interface LearnedDialectWord {
+  word: string;
+  suggested_meaning: string;
+  category: string;
+  confirmed: boolean;
+  region: string;
+}
+
+export interface CitizenValidation {
+  summary_statement: string;
+  is_confirmed: boolean;
+  confirmed_at?: string | null;
+}
+
+export interface RoutingRisk {
+  level: "Low" | "Medium" | "High" | "Critical";
+  score: number;
+  risk_factors: string[];
+  recommendation: string;
+  mitigation_notes: string;
+}
+
+export interface ExcludedDepartment {
+  department: string;
+  exclusion_reason: string;
+}
+
+export interface DepartmentExplanation {
+  selected_department: string;
+  why_selected: string;
+  excluded_departments: ExcludedDepartment[];
+  jurisdiction_basis: string;
+}
+
+export interface ResolutionPredictor {
+  estimated_hours_min: number;
+  estimated_hours_max: number;
+  estimated_timeline_label: string;
+  sla_category: string;
+  completeness_time_saved: string;
+  bottleneck_warning?: string | null;
+}
+
+export interface FasterResolutionSuggestion {
+  item_name: string;
+  potential_time_saved: string;
+  impact_rationale: string;
+  example: string;
+}
+
+export interface FasterResolution {
+  suggestions: FasterResolutionSuggestion[];
+  overall_speedup_factor: string;
+}
+
+export interface HallucinationGuardrail {
+  is_safe_to_route: boolean;
+  certainty_level:
+    | "High Certainty"
+    | "Moderate Certainty"
+    | "Low Certainty / Unsafe to Auto-Route";
+  known_facts: string[];
+  ambiguous_elements: string[];
+  human_oversight_required: boolean;
+  safeguard_reason: string;
+}
+
 export interface Analysis {
   transcript: string;
   normalized_complaint: string;
@@ -67,6 +155,15 @@ export interface Analysis {
   officer_summary?: OfficerSummary;
   self_verification?: SelfVerification;
   smart_follow_up?: SmartFollowUp | null;
+  emotional_urgency?: EmotionalUrgency | null;
+  completeness?: ComplaintCompleteness | null;
+  learned_dialect?: LearnedDialectWord | null;
+  citizen_validation?: CitizenValidation | null;
+  routing_risk?: RoutingRisk | null;
+  department_explanation?: DepartmentExplanation | null;
+  resolution_predictor?: ResolutionPredictor | null;
+  faster_resolution?: FasterResolution | null;
+  hallucination_guardrail?: HallucinationGuardrail | null;
 }
 export interface Complaint {
   tracking_id: string;

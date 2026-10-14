@@ -2,7 +2,19 @@ import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
-from app.features.civic_intelligence.gateway import InferenceError, build_smart_follow_up
+from app.features.civic_intelligence.gateway import (
+    InferenceError,
+    build_citizen_validation,
+    build_complaint_completeness,
+    build_department_explanation,
+    build_emotional_urgency,
+    build_faster_resolution,
+    build_hallucination_guardrail,
+    build_learned_dialect,
+    build_resolution_predictor,
+    build_routing_risk,
+    build_smart_follow_up,
+)
 from app.features.civic_intelligence.schemas import Analysis
 from app.main import create_app
 from app.shared.config import Settings
@@ -82,6 +94,37 @@ def prediction(**changes):
             ],
             "answered_option": None,
         },
+        emotional_urgency={
+            "detected": False,
+            "distress_signals": [],
+            "emotional_score": 0.2,
+            "base_urgency": "High",
+            "escalated_urgency": "High",
+            "escalation_reason": "Standard complaint evaluation.",
+        },
+        completeness={
+            "score": 75,
+            "missing_fields": [
+                {
+                    "field_name": "Nearest Landmark",
+                    "is_missing": True,
+                    "prompt_question": "Is there a nearby landmark or asset number?",
+                    "example_suggestion": "e.g. Near Murugan Temple",
+                }
+            ],
+        },
+        learned_dialect={
+            "word": "Mosama",
+            "suggested_meaning": "Severe physical deterioration",
+            "category": "Roads",
+            "confirmed": True,
+            "region": "Tamil Regional Vernacular",
+        },
+        citizen_validation={
+            "summary_statement": "The road is severely damaged. (Classified as Roads · Priority: High)",
+            "is_confirmed": False,
+            "confirmed_at": None,
+        },
     )
     return Analysis.model_validate(data | changes)
 
@@ -96,6 +139,17 @@ class FakeGateway:
             category=category,
             primary_department=dept,
             smart_follow_up=build_smart_follow_up(category, transcript),
+            emotional_urgency=build_emotional_urgency(transcript, "High", category),
+            completeness=build_complaint_completeness(transcript),
+            learned_dialect=build_learned_dialect(transcript, category, ["mosama"]),
+            citizen_validation=build_citizen_validation(
+                "The road is severely damaged.", category, "High"
+            ),
+            routing_risk=build_routing_risk(category, "High", 0.92, transcript),
+            department_explanation=build_department_explanation(dept, category, transcript),
+            resolution_predictor=build_resolution_predictor(category, "High", 75),
+            faster_resolution=build_faster_resolution(category),
+            hallucination_guardrail=build_hallucination_guardrail(0.92, category, ["road"]),
         )
 
 
@@ -315,3 +369,108 @@ def test_smart_follow_up_clarification_updates_urgency_and_event(client):
     )
     assert updated["analysis"]["officer_summary"]["priority"] == "Critical"
     assert any("Citizen Follow-Up Clarification" in e["note"] for e in updated["events"])
+
+
+def test_emotional_urgency_escalation_and_distress_detection(client):
+    record = submit(
+        client,
+        text="Please help! My children haven't had drinking water for three days in Ward 18.",
+        key="emotional-test-key",
+    ).json()
+    analysis = record["analysis"]
+    assert analysis["emotional_urgency"] is not None
+    assert analysis["emotional_urgency"]["detected"] is True
+    assert len(analysis["emotional_urgency"]["distress_signals"]) >= 2
+    assert analysis["emotional_urgency"]["escalated_urgency"] in ("High", "Critical")
+
+
+def test_missing_information_completion_flow(client):
+    record = submit(client, text="Water problem.", key="missing-info-key").json()
+    tracking_id = record["tracking_id"]
+    completeness = record["analysis"]["completeness"]
+    assert completeness is not None
+    initial_score = completeness["score"]
+
+    # Fill in a missing field
+    res = client.post(
+        f"/api/complaints/{tracking_id}/complete",
+        json={"field_name": "Street / Locality Name", "value": "Gandhi Street, Ward 12"},
+    )
+    assert res.status_code == 200
+    updated = res.json()
+    assert updated["analysis"]["completeness"]["score"] >= initial_score
+    assert any("Citizen Added Missing Detail" in e["note"] for e in updated["events"])
+
+
+def test_citizen_validation_confirmation_flow(client):
+    record = submit(client, key="validation-key").json()
+    tracking_id = record["tracking_id"]
+    assert record["analysis"]["citizen_validation"] is not None
+    assert record["analysis"]["citizen_validation"]["is_confirmed"] is False
+
+    # Confirm AI understanding
+    res = client.post(f"/api/complaints/{tracking_id}/validate", json={"is_confirmed": True})
+    assert res.status_code == 200
+    updated = res.json()
+    assert updated["analysis"]["citizen_validation"]["is_confirmed"] is True
+    assert any("Citizen Validation Confirmed" in e["note"] for e in updated["events"])
+
+
+def test_community_dialect_learning_registry(client):
+    # Add a new local dialect word
+    post_res = client.post(
+        "/api/complaints/dialects/community",
+        json={
+            "word": "Sombu",
+            "meaning": "Water pipe / domestic tap connection",
+            "category": "Water Supply",
+            "region": "Tamil Regional Dialect",
+        },
+    )
+    assert post_res.status_code == 200
+    dialects = post_res.json()
+    assert any(d["word"] == "Sombu" for d in dialects)
+
+    # Retrieve all dialects
+    get_res = client.get("/api/complaints/dialects/community")
+    assert get_res.status_code == 200
+    assert any(d["word"] == "Sombu" for d in get_res.json())
+
+
+def test_routing_risk_score_evaluation(client):
+    record = submit(client, text="Live electrical wire spark on ground", key="risk-key").json()
+    risk = record["analysis"]["routing_risk"]
+    assert risk is not None
+    assert risk["level"] in ["High", "Critical"]
+    assert risk["score"] > 0.5
+    assert len(risk["risk_factors"]) > 0
+
+
+def test_department_differential_explanation(client):
+    record = submit(client, text="Water supply pipe broken", key="dept-exp-key").json()
+    dept_exp = record["analysis"]["department_explanation"]
+    assert dept_exp is not None
+    assert dept_exp["selected_department"] == "Water Supply"
+    assert len(dept_exp["excluded_departments"]) >= 2
+    assert "Section 24" in dept_exp["jurisdiction_basis"]
+
+
+def test_resolution_predictor_and_speedup(client):
+    record = submit(client, text="Road pothole near bus stand", key="res-pred-key").json()
+    predictor = record["analysis"]["resolution_predictor"]
+    faster = record["analysis"]["faster_resolution"]
+    assert predictor is not None
+    assert predictor["estimated_hours_min"] >= 1
+    assert "Hours" in predictor["estimated_timeline_label"]
+    assert faster is not None
+    assert len(faster["suggestions"]) >= 1
+    assert "faster" in faster["overall_speedup_factor"]
+
+
+def test_hallucination_guardrail_safety_lock(client):
+    record = submit(client, text="Normal complaint", key="guard-key").json()
+    guard = record["analysis"]["hallucination_guardrail"]
+    assert guard is not None
+    assert guard["certainty_level"] == "High Certainty"
+    assert guard["is_safe_to_route"] is True
+    assert len(guard["known_facts"]) >= 1

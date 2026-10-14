@@ -20,6 +20,7 @@ import { Button } from "../../shared/ui/button";
 import { submitText, submitVoice } from "./api";
 import { AnalysisPanel } from "./AnalysisPanel";
 import { AudioActivity } from "./AudioActivity";
+import { GrievanceCopilot } from "./GrievanceCopilot";
 import { complaintSamples } from "./samples";
 import type { Complaint } from "./types";
 import { useRecorder } from "./useRecorder";
@@ -238,6 +239,15 @@ export function SubmitComplaint({
                 </span>
                 <span>{text.length}/5000</span>
               </div>
+              <GrievanceCopilot
+                currentText={text}
+                onAppendText={(snippet) =>
+                  setText((prev) =>
+                    prev ? `${prev}${snippet}` : snippet.trim(),
+                  )
+                }
+                disabled={locked}
+              />
             </div>
             <details className="intake-tips">
               <summary>

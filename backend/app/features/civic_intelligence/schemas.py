@@ -26,6 +26,13 @@ CATEGORY_DEPARTMENT = dict(
 )
 
 
+class EvidenceItem(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    phrase: Nonempty
+    translation: Nonempty
+    significance: Nonempty
+
+
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     transcript: Nonempty
@@ -41,6 +48,7 @@ class Analysis(BaseModel):
     keywords: list[Nonempty] = Field(min_length=1, max_length=20)
     detected_meaning: Nonempty
     explanation: Nonempty
+    evidence_highlights: list[EvidenceItem] = Field(default_factory=list, max_length=10)
 
     @model_validator(mode="after")
     def unique_departments(self):

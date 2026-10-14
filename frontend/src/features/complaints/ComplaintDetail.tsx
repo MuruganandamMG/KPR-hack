@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "../../shared/ui/button";
 import { audioUrl } from "./api";
 import { DecisionTree } from "./DecisionTree";
+import { EvidenceHighlight } from "./EvidenceHighlight";
 import { statusLabels, type Complaint } from "./types";
 
 export function ComplaintDetail({
@@ -127,6 +128,11 @@ export function ComplaintDetail({
           </>
         )}
       </dl>
+      {analysis && (
+        <div className="border-t border-stone-100 pt-5">
+          <EvidenceHighlight complaint={complaint} />
+        </div>
+      )}
       {analysis && (
         <div className="border-t border-stone-100 pt-5">
           <DecisionTree complaint={complaint} />

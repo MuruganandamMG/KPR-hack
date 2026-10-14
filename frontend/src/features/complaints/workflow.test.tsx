@@ -13,6 +13,7 @@ import { OfficerDashboard } from "./OfficerDashboard";
 import { useRecorder } from "./useRecorder";
 import { ComplaintDetail } from "./ComplaintDetail";
 import { DecisionTree } from "./DecisionTree";
+import { EvidenceHighlight } from "./EvidenceHighlight";
 import type { Complaint } from "./types";
 
 const complaint = {
@@ -522,4 +523,56 @@ it("renders voice input details in decision tree and handles null analysis fallb
   );
   expect(screen.getByText("Decision Tree Unavailable")).toBeInTheDocument();
   expect(screen.getByText("AI analysis was unavailable.")).toBeInTheDocument();
+});
+
+it("renders evidence highlighting with phrase glossing and reasoning bridge", () => {
+  const waterComplaint = {
+    ...complaint,
+    original_text: "Moonu naala thanni varala.",
+    analysis: {
+      ...complaint.analysis,
+      transcript: "Moonu naala thanni varala.",
+      language: "Tamil",
+      dialect: "Madurai Tamil",
+      category: "Water Supply",
+      intent: "Restore drinking water supply",
+      primary_department: "Water Supply",
+      urgency: "High",
+      keywords: ["thanni", "naala"],
+      detected_meaning: "No water supply for 3 days",
+      explanation:
+        "Water outage lasting 3 days requires urgent restoration by Water Supply.",
+      evidence_highlights: [
+        {
+          phrase: "Moonu naala",
+          translation: "3 Days",
+          significance:
+            "Duration of essential service deprivation driving High urgency",
+        },
+        {
+          phrase: "thanni",
+          translation: "Water Supply",
+          significance: "Civic resource assigned to Water Supply Department",
+        },
+      ],
+    },
+  };
+
+  render(
+    <EvidenceHighlight complaint={waterComplaint as unknown as Complaint} />,
+  );
+  expect(
+    screen.getByRole("region", { name: "Evidence Highlighting" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Evidence Highlighting & Translation"),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Moonu naala thanni varala/i)).toBeInTheDocument();
+  expect(screen.getByText("Moonu naala")).toBeInTheDocument();
+  expect(screen.getByText("3 Days")).toBeInTheDocument();
+  expect(screen.getByText("thanni")).toBeInTheDocument();
+  expect(screen.getByText("Water Supply")).toBeInTheDocument();
+  expect(
+    screen.getByText(/Reasoning Bridge · Why Urgency is High/i),
+  ).toBeInTheDocument();
 });

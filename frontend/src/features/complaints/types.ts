@@ -5,6 +5,11 @@ export type Status =
   | "routed"
   | "in_progress"
   | "resolved";
+export interface EvidenceItem {
+  phrase: string;
+  translation: string;
+  significance: string;
+}
 export interface Analysis {
   transcript: string;
   normalized_complaint: string;
@@ -19,6 +24,7 @@ export interface Analysis {
   keywords: string[];
   detected_meaning: string;
   explanation: string;
+  evidence_highlights?: EvidenceItem[];
 }
 export interface Complaint {
   tracking_id: string;

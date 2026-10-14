@@ -549,6 +549,14 @@
             "maxLength": 5000,
             "minLength": 1,
             "title": "Explanation"
+          },
+          "evidence_highlights": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceItem"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Evidence Highlights"
           }
         },
         "additionalProperties": false,
@@ -812,6 +820,36 @@
           "offset"
         ],
         "title": "ComplaintPage"
+      },
+      "EvidenceItem": {
+        "properties": {
+          "phrase": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Phrase"
+          },
+          "translation": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Translation"
+          },
+          "significance": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Significance"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "phrase",
+          "translation",
+          "significance"
+        ],
+        "title": "EvidenceItem"
       },
       "HTTPValidationError": {
         "properties": {

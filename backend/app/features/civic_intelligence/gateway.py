@@ -26,8 +26,10 @@ departments using only the provided schema. Roads maps to Public Works; Other ma
 Administration. Recommend secondary departments only when supported by the complaint.
 Confidence must reflect uncertainty, not assumed accuracy. Non-civic or unintelligible input is
 Other, General Administration, Low confidence. Explain recommendations with brief observable
-evidence, keywords and detected meaning, without private chain-of-thought. Critical urgency means
-an immediate threat to life or safety; do not infer one without evidence."""
+evidence, keywords and detected meaning, without private chain-of-thought. Extract evidence_highlights
+mapping key regional dialect phrases to English translation and civic significance (e.g. why urgency
+or department was chosen). Critical urgency means an immediate threat to life or safety; do not
+infer one without evidence."""
 
 
 class GeminiGateway:

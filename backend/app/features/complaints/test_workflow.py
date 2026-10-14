@@ -24,6 +24,18 @@ def prediction(**changes):
         keywords=["road", "mosama"],
         detected_meaning="A badly damaged road",
         explanation="Road damage is maintained by Public Works.",
+        evidence_highlights=[
+            {
+                "phrase": "mosama",
+                "translation": "severely damaged",
+                "significance": "Hazardous road condition driving High urgency",
+            },
+            {
+                "phrase": "Road",
+                "translation": "Roadway infrastructure",
+                "significance": "Public road asset belonging to Public Works",
+            },
+        ],
     )
     return Analysis.model_validate(data | changes)
 

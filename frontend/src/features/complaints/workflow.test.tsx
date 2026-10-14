@@ -11,11 +11,14 @@ import { SubmitComplaint } from "./SubmitComplaint";
 import { TrackComplaint } from "./TrackComplaint";
 import { OfficerDashboard } from "./OfficerDashboard";
 import { useRecorder } from "./useRecorder";
+import { AnalysisPanel } from "./AnalysisPanel";
 import { ComplaintDetail } from "./ComplaintDetail";
 import { ConfidenceMeter } from "./ConfidenceMeter";
 import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
 import { OfficerSummaryCard } from "./OfficerSummaryCard";
+import { SelfVerificationCard } from "./SelfVerificationCard";
+import { ThinkingTimeline } from "./ThinkingTimeline";
 import type { Complaint } from "./types";
 
 const complaint = {
@@ -691,4 +694,104 @@ it("renders the 6-point officer executive summary card and supports 1-click deci
   expect(onSelectAction).toHaveBeenCalledWith(
     "Inspect pipeline and restore feeder valves.",
   );
+});
+
+it("renders dual-AI self verification with consensus audit result", () => {
+  const verifiedComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      self_verification: {
+        status: "Verified" as const,
+        critique:
+          "Critic pass audited raw statement and confirmed Public Works allocation.",
+        agreement: true,
+        verification_confidence: 0.97,
+      },
+    },
+  };
+
+  render(
+    <SelfVerificationCard
+      complaint={verifiedComplaint as unknown as Complaint}
+    />,
+  );
+  expect(
+    screen.getByRole("region", { name: "AI Self Verification" }),
+  ).toBeInTheDocument();
+  expect(screen.getByText("AI Self-Verification Pass")).toBeInTheDocument();
+  expect(screen.getByText("Verified (Correct)")).toBeInTheDocument();
+  expect(screen.getByText(/1st AI · Primary Generator/i)).toBeInTheDocument();
+  expect(screen.getByText(/2nd AI · Critic Review/i)).toBeInTheDocument();
+  expect(screen.getByText("Consensus Reached (Agreed)")).toBeInTheDocument();
+  expect(
+    screen.getByText(/Critic pass audited raw statement/i),
+  ).toBeInTheDocument();
+});
+
+it("renders disputed / flagged state when self-verification detects conflict", () => {
+  const disputedComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      self_verification: {
+        status: "Flagged for Review" as const,
+        critique:
+          "Critic model identified conflicting electrical and drainage concerns.",
+        agreement: false,
+        verification_confidence: 0.62,
+      },
+    },
+  };
+
+  render(
+    <SelfVerificationCard
+      complaint={disputedComplaint as unknown as Complaint}
+    />,
+  );
+  expect(screen.getByText("Disputed / Review Needed")).toBeInTheDocument();
+  expect(
+    screen.getByText(/Critic model identified conflicting/i),
+  ).toBeInTheDocument();
+});
+
+it("renders ThinkingTimeline with text steps and advances dynamically", async () => {
+  vi.useFakeTimers();
+  try {
+    render(<ThinkingTimeline mode="text" stepIntervalMs={100} />);
+    expect(
+      screen.getByText("AI Cognitive Reasoning Pipeline"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Ingesting Citizen Text...")).toBeInTheDocument();
+    expect(screen.getByText("Normalizing Vocabulary...")).toBeInTheDocument();
+    expect(screen.getByText("Step 1 of 10")).toBeInTheDocument();
+
+    // Advance 1 step
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(screen.getByText("Step 2 of 10")).toBeInTheDocument();
+
+    // Advance to end
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByText("Step 10 of 10")).toBeInTheDocument();
+    expect(screen.getByText("Finalizing Analysis...")).toBeInTheDocument();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it("renders ThinkingTimeline with voice steps", () => {
+  render(<ThinkingTimeline mode="voice" />);
+  expect(screen.getByText("Receiving Voice Stream...")).toBeInTheDocument();
+  expect(screen.getByText("Converting Speech to Text...")).toBeInTheDocument();
+  expect(screen.getByText("Finding Complaint & Intent...")).toBeInTheDocument();
+});
+
+it("renders ThinkingTimeline in AnalysisPanel when pending is true", () => {
+  render(<AnalysisPanel complaint={null} pending={true} mode="voice" />);
+  expect(screen.getByLabelText("AI Thinking Timeline")).toBeInTheDocument();
+  expect(screen.getByText("Receiving Voice Stream...")).toBeInTheDocument();
 });

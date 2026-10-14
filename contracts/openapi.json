@@ -650,6 +650,16 @@
                 "type": "null"
               }
             ]
+          },
+          "self_verification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SelfVerification"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -1158,6 +1168,44 @@
           "suggested_action"
         ],
         "title": "OfficerSummary"
+      },
+      "SelfVerification": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "Verified",
+              "Disputed",
+              "Flagged for Review"
+            ],
+            "title": "Status"
+          },
+          "critique": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Critique"
+          },
+          "agreement": {
+            "type": "boolean",
+            "title": "Agreement"
+          },
+          "verification_confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Verification Confidence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "critique",
+          "agreement",
+          "verification_confidence"
+        ],
+        "title": "SelfVerification"
       },
       "TextSubmission": {
         "properties": {

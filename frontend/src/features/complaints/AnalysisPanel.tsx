@@ -1,22 +1,19 @@
-import {
-  CheckCircle2,
-  ChevronRight,
-  LoaderCircle,
-  ScanText,
-  Sparkles,
-} from "lucide-react";
+import { CheckCircle2, ChevronRight, ScanText, Sparkles } from "lucide-react";
 import { Button } from "../../shared/ui/button";
 import { ComplaintDetail } from "./ComplaintDetail";
+import { ThinkingTimeline } from "./ThinkingTimeline";
 import type { Complaint } from "./types";
 
 export function AnalysisPanel({
   complaint,
   pending,
   onTrack,
+  mode,
 }: {
   complaint: Complaint | null;
   pending: boolean;
   onTrack?: (id: string) => void;
+  mode?: "text" | "voice";
 }) {
   return (
     <section
@@ -39,15 +36,7 @@ export function AnalysisPanel({
         {complaint && <CheckCircle2 className="text-emerald-700" size={20} />}
       </div>
       {pending ? (
-        <div className="analysis-placeholder" role="status">
-          <LoaderCircle size={32} className="animate-spin text-emerald-700" />
-          <h3 className="font-semibold">Analyzing your complaint...</h3>
-          <div aria-hidden="true" className="w-full space-y-3">
-            <div className="analysis-skeleton" />
-            <div className="analysis-skeleton w-4/5" />
-            <div className="analysis-skeleton w-3/5" />
-          </div>
-        </div>
+        <ThinkingTimeline mode={mode} />
       ) : complaint ? (
         <>
           <ComplaintDetail complaint={complaint} />

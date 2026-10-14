@@ -24,6 +24,12 @@ export interface OfficerSummary {
   department: string;
   suggested_action: string;
 }
+export interface SelfVerification {
+  status: "Verified" | "Disputed" | "Flagged for Review";
+  critique: string;
+  agreement: boolean;
+  verification_confidence: number;
+}
 export interface Analysis {
   transcript: string;
   normalized_complaint: string;
@@ -41,6 +47,7 @@ export interface Analysis {
   evidence_highlights?: EvidenceItem[];
   confidence_breakdown?: ConfidenceBreakdown;
   officer_summary?: OfficerSummary;
+  self_verification?: SelfVerification;
 }
 export interface Complaint {
   tracking_id: string;

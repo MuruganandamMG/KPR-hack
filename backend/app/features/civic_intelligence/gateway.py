@@ -64,7 +64,10 @@ urgency, and overall. Confidence reflects interpretation/routing uncertainty, no
 Ambiguous, unintelligible or non-civic input is Other / General Administration with confidence below 0.75;
 explain uncertainty rather than inventing an issue. Synthesize an officer_summary with problem,
 area (ward, street or locality, or 'Ward / Locality Unspecified'), duration, priority, department,
-and a concise 1-sentence suggested_action for municipal triage. Critical urgency requires reported immediate
+and a concise 1-sentence suggested_action for municipal triage. Perform an internal self_verification
+critic pass auditing whether the assigned department and urgency accurately represent the raw citizen
+complaint (status: 'Verified', 'Disputed', or 'Flagged for Review'; critique: concise audit evaluation;
+agreement: boolean; verification_confidence: float). Critical urgency requires reported immediate
 danger to life or safety; do not infer one without evidence. Repeated inconvenience alone is not evidence
 of imminent danger. These are recommendations awaiting officer approval, never a claim of actual dispatch."""
 

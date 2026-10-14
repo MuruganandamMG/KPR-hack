@@ -6,6 +6,7 @@ import { ConfidenceMeter } from "./ConfidenceMeter";
 import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
 import { OfficerSummaryCard } from "./OfficerSummaryCard";
+import { SelfVerificationCard } from "./SelfVerificationCard";
 import { formalComplaint } from "./formalComplaint";
 import { statusLabels, type Complaint } from "./types";
 
@@ -210,6 +211,11 @@ export function ComplaintDetail({
       {analysis && (
         <div className="border-t border-stone-100 pt-5">
           <EvidenceHighlight complaint={complaint} />
+        </div>
+      )}
+      {analysis && (
+        <div className="border-t border-stone-100 pt-5">
+          <SelfVerificationCard complaint={complaint} />
         </div>
       )}
       {analysis && (

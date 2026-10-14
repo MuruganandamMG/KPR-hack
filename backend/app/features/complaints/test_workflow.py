@@ -50,6 +50,12 @@ def prediction(**changes):
             "department": "Public Works",
             "suggested_action": "Dispatch road inspection team and schedule asphalt patch repair",
         },
+        self_verification={
+            "status": "Verified",
+            "critique": "Complaint clearly details roadway deterioration, correctly matched to Public Works.",
+            "agreement": True,
+            "verification_confidence": 0.97,
+        },
     )
     return Analysis.model_validate(data | changes)
 

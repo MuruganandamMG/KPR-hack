@@ -51,6 +51,14 @@ class OfficerSummary(BaseModel):
     suggested_action: Nonempty
 
 
+class SelfVerification(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    status: Literal["Verified", "Disputed", "Flagged for Review"]
+    critique: Nonempty
+    agreement: bool
+    verification_confidence: float = Field(ge=0, le=1, allow_inf_nan=False)
+
+
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     transcript: Nonempty
@@ -81,6 +89,7 @@ class Analysis(BaseModel):
     evidence_highlights: list[EvidenceItem] = Field(default_factory=list, max_length=10)
     confidence_breakdown: ConfidenceBreakdown | None = None
     officer_summary: OfficerSummary | None = None
+    self_verification: SelfVerification | None = None
 
     @model_validator(mode="after")
     def unique_departments(self):
@@ -99,4 +108,6 @@ def review_reason(analysis: Analysis, threshold: float) -> str:
         reasons.append("The civic category is ambiguous.")
     if CATEGORY_DEPARTMENT[analysis.category] != analysis.primary_department:
         reasons.append("Category and department recommendation disagree.")
+    if analysis.self_verification and not analysis.self_verification.agreement:
+        reasons.append("AI self-verification critic flagged or disputed this recommendation.")
     return " ".join(reasons)

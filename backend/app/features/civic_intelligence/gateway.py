@@ -54,16 +54,19 @@ and Public Works secondary; leaking supply pipe + damaged road -> Water Supply p
 Public Works secondary; live wire on an intact road -> Electricity primary, no road department.
 For multiple issues, preserve them all in the formal complaint even with one dominant category.
 
-EXPLANATION AND UNCERTAINTY: Give concise observable evidence for category, urgency, primary
+EXPLANATION, METRICS AND OFFICER SUMMARY: Give concise observable evidence for category, urgency, primary
 ownership and the distinct work required from EACH secondary department in explanation.
 Extract evidence_highlights with verbatim phrases from the text/transcript, faithful English
 translations, and significance grounded in those phrases. Return [] when evidence cannot be
 reliably translated; never fabricate phrase mappings. No private chain-of-thought.
-Confidence reflects interpretation/routing uncertainty, not assumed accuracy. Ambiguous,
-unintelligible or non-civic input is Other / General Administration with confidence below 0.75;
-explain uncertainty rather than inventing an issue. Critical urgency requires reported immediate
-danger to life or safety. Repeated inconvenience alone is not evidence of imminent danger.
-These are recommendations awaiting officer approval, never a claim of actual dispatch."""
+Provide confidence_breakdown with calibrated float scores between 0 and 1 for understanding, routing,
+urgency, and overall. Confidence reflects interpretation/routing uncertainty, not assumed accuracy.
+Ambiguous, unintelligible or non-civic input is Other / General Administration with confidence below 0.75;
+explain uncertainty rather than inventing an issue. Synthesize an officer_summary with problem,
+area (ward, street or locality, or 'Ward / Locality Unspecified'), duration, priority, department,
+and a concise 1-sentence suggested_action for municipal triage. Critical urgency requires reported immediate
+danger to life or safety; do not infer one without evidence. Repeated inconvenience alone is not evidence
+of imminent danger. These are recommendations awaiting officer approval, never a claim of actual dispatch."""
 
 
 class GeminiGateway:

@@ -33,6 +33,24 @@ class EvidenceItem(BaseModel):
     significance: Nonempty
 
 
+class ConfidenceBreakdown(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    understanding: float = Field(ge=0, le=1, allow_inf_nan=False)
+    routing: float = Field(ge=0, le=1, allow_inf_nan=False)
+    urgency: float = Field(ge=0, le=1, allow_inf_nan=False)
+    overall: float = Field(ge=0, le=1, allow_inf_nan=False)
+
+
+class OfficerSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    problem: Nonempty
+    area: Nonempty
+    duration: Nonempty
+    priority: Urgency
+    department: Department
+    suggested_action: Nonempty
+
+
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     transcript: Nonempty
@@ -61,6 +79,8 @@ class Analysis(BaseModel):
         "plus the specific necessary work of each secondary department."
     )
     evidence_highlights: list[EvidenceItem] = Field(default_factory=list, max_length=10)
+    confidence_breakdown: ConfidenceBreakdown | None = None
+    officer_summary: OfficerSummary | None = None
 
     @model_validator(mode="after")
     def unique_departments(self):

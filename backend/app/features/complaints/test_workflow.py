@@ -36,6 +36,20 @@ def prediction(**changes):
                 "significance": "Public road asset belonging to Public Works",
             },
         ],
+        confidence_breakdown={
+            "understanding": 0.98,
+            "routing": 0.97,
+            "urgency": 0.95,
+            "overall": 0.92,
+        },
+        officer_summary={
+            "problem": "Severely damaged road surface with potholes",
+            "area": "Ward 12 / Main arterial road",
+            "duration": "3 Days",
+            "priority": "High",
+            "department": "Public Works",
+            "suggested_action": "Dispatch road inspection team and schedule asphalt patch repair",
+        },
     )
     return Analysis.model_validate(data | changes)
 

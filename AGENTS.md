@@ -6,19 +6,20 @@ Maintain a clear, modular frontend and backend that can grow through isolated fe
 
 The project helps municipal grievance systems understand citizen complaints submitted as text or voice in regional dialects, informal vocabulary, and misspelled language. It should normalize complaints, identify civic intent, department, and urgency, preserve original context, expose routing explanations, confidence, and tracking IDs, and evaluate routing accuracy, dialect robustness, and initial response time.
 
-The stack is fixed below. Application code and deployment requirements are not defined yet. Do not scaffold an application just because this file suggests a layout.
+The hackathon prototype follows PRD.md and plan.md. Its feature map and setup/check commands are in README.md. Keep work within that scope; do not scaffold future features.
 
 ## Required technology stack
 
 - Frontend: React + Vite + Tailwind CSS.
 - Backend: Python + FastAPI.
 - AI: Gemini, accessed through the backend. Keep credentials in server-side configuration and AI integration behind a dedicated interface.
-- Database: SQLite, accessed through backend data-access modules.
+- Database: SQLite through SQLAlchemy in backend data-access modules; versioned SQL migrations live in backend/app/shared/migrations.
 - Use this stack for new features. Do not replace or add alternative frameworks, AI providers, or databases unless the user requests a stack change.
 
 ## Working rules
 
 - Read the problem statement, applicable instructions, existing code, and Git status before changing files.
+- At the start of each task, read the current root `AGENTS.md`, applicable local instructions, the root feature map, and the owning feature README. Re-read instructions changed during the session instead of relying on a previous summary.
 - Follow the user's latest explicit direction within platform instructions. Apply this file repository-wide; read any directory-specific `AGENTS.md` before editing that directory.
 - Use judgment for routine decisions and state material assumptions briefly. Ask only when missing information prevents correct work or an action requires authorization.
 - Complete authorized work through implementation and verification. Preserve unrelated work and avoid opportunistic refactoring.
@@ -114,10 +115,16 @@ docs/
 ## Verification and completion
 
 - Discover and use the repository's actual setup, lint, type-check, test, and build commands. Do not invent commands or claim checks ran when they did not.
+- For every implemented feature, define observable acceptance criteria and verify them before calling it complete. Creating files or passing a build alone does not prove the feature works.
 - Verify changed behavior, important error cases, and affected integration points. Add meaningful regression coverage for bugs and tests for nontrivial new behavior.
 - For frontend changes, inspect the affected interface in a browser when available. For API changes, check contract agreement and relevant request/response behavior.
+- For a feature spanning frontend and backend, verify the user flow across the real API and persistence boundary as well as isolated tests. When relevant, check tracking IDs, retrieval, original evidence, routing decisions, and audit records using synthetic data and temporary storage.
+- Check relevant loading, validation, error, retry, and unavailable-provider behavior. Confirm that the new feature does not break affected completed features.
+- Separate checks with controlled AI responses from live Gemini verification. A configured key or passing mocked test is not proof of successful inference, dialect coverage, or routing accuracy; use human-labeled examples for accuracy claims.
+- When a required environment, credential, device, or service prevents a check, report the feature as partially verified and name the missing check. Never silently substitute fabricated success or mark an unverified path as working.
 - Run checks proportionate to the change. Documentation-only changes need a content and diff review rather than unrelated product tests.
 - Investigate failures before fixing them. Distinguish pre-existing failures from failures introduced by the change.
+- Run fresh checks after the final relevant change and report actual command results. Do not claim a failing required check passed; fix failures within scope or explicitly report why completion is blocked.
 - Finish with a concise report of what changed, verification results, and any unresolved limitations.
 
 ## Keeping the project maintainable

@@ -1,0 +1,10 @@
+[
+  {"text":"The road is severely damaged and needs repair.","expected_department":"Public Works","group":"formal"},
+  {"text":"Road romba mosama. Enga theru la periya potholes irukku.","expected_department":"Public Works","group":"mixed Tamil-English"},
+  {"text":"Enga area la moonu naala thanni varala.","expected_department":"Water Supply","group":"colloquial Tamil"},
+  {"text":"हमारे मोहल्ले में तीन दिन से पानी नहीं आ रहा है।","expected_department":"Water Supply","group":"Hindi"},
+  {"text":"Street la garbage edukkave illa, romba smell varudhu.","expected_department":"Sanitation","group":"mixed Tamil-English"},
+  {"text":"The drane is blokd and sewag is floding the street.","expected_department":"Drainage","group":"misspelled English"},
+  {"text":"A live electric wire is lying on the road near children.","expected_department":"Electricity","group":"formal"},
+  {"text":"আমাদের রাস্তায় অনেক বড় গর্ত হয়েছে।","expected_department":"Public Works","group":"Bengali"}
+]

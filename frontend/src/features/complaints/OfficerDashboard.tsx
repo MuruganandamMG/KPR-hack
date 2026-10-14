@@ -1,0 +1,388 @@
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight,
+  Inbox,
+  LoaderCircle,
+  RefreshCw,
+  Search,
+} from "lucide-react";
+import { Button } from "../../shared/ui/button";
+import { listComplaints, trackComplaint, updateComplaint } from "./api";
+import { ApiError } from "../../shared/request";
+import { ComplaintDetail } from "./ComplaintDetail";
+import {
+  statusLabels,
+  type Complaint,
+  type ComplaintPage,
+  type Status,
+} from "./types";
+
+export function OfficerDashboard({ departments }: { departments: string[] }) {
+  const [page, setPage] = useState<ComplaintPage | null>(null);
+  const [selected, setSelected] = useState<Complaint | null>(null);
+  const [status, setStatus] = useState<Status | "">("");
+  const [search, setSearch] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [reload, setReload] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [decisionError, setDecisionError] = useState("");
+  const [department, setDepartment] = useState("");
+  const [note, setNote] = useState("");
+  const lock = useRef(false);
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError("");
+    const timer = setTimeout(() => {
+      listComplaints({ status, search, offset }, controller.signal)
+        .then((result) => {
+          if (!controller.signal.aborted) {
+            setPage(result);
+            setLoading(false);
+          }
+        })
+        .catch((e) => {
+          if (!controller.signal.aborted) {
+            setError(e.message);
+            setLoading(false);
+          }
+        });
+    }, 200);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [status, search, offset, reload]);
+  function select(record: Complaint) {
+    setSelected(record);
+    setDepartment(
+      record.assigned_department ||
+        record.analysis?.primary_department ||
+        departments[0] ||
+        "",
+    );
+    setNote("");
+    setDecisionError("");
+  }
+  async function decide(event: React.FormEvent) {
+    event.preventDefault();
+    if (!selected || lock.current) return;
+    lock.current = true;
+    setSaving(true);
+    setDecisionError("");
+    const next =
+      selected.status === "routed"
+        ? "in_progress"
+        : selected.status === "in_progress"
+          ? "resolved"
+          : "routed";
+    try {
+      const result = await updateComplaint(selected.tracking_id, {
+        version: selected.version,
+        status: next,
+        ...(next === "routed" ? { department } : {}),
+        note,
+      });
+      if (!alive.current) return;
+      select(result);
+      setReload((value) => value + 1);
+    } catch (e) {
+      if (!alive.current) return;
+      setDecisionError(e instanceof Error ? e.message : "Update failed.");
+      if (e instanceof ApiError && e.status === 409) {
+        try {
+          const updated = await trackComplaint(selected.tracking_id);
+          if (alive.current) {
+            setSelected(updated);
+            setDepartment(
+              updated.assigned_department ||
+                updated.analysis?.primary_department ||
+                department,
+            );
+            setReload((value) => value + 1);
+          }
+        } catch {
+          /* Keep the conflict explanation visible. */
+        }
+      }
+    } finally {
+      lock.current = false;
+      if (alive.current) setSaving(false);
+    }
+  }
+  const canRoute =
+    !!selected &&
+    ["awaiting_review", "analysis_failed"].includes(selected.status);
+  const canUpdate =
+    selected &&
+    ["awaiting_review", "analysis_failed", "routed", "in_progress"].includes(
+      selected.status,
+    );
+  return (
+    <div>
+      <div className="notice mb-6">
+        Prototype officer workspace · Authentication is outside this demo’s
+        scope. Use synthetic complaints only.
+      </div>
+      <div className="grid items-start gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+        <section className="panel">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <p className="eyebrow">Officer workspace</p>
+              <h2 className="mt-2 text-xl font-semibold">
+                Complaint queue{" "}
+                <span className="ml-1 text-sm font-normal text-stone-400">
+                  {page?.total ?? "—"}
+                </span>
+              </h2>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Refresh queue"
+              disabled={saving}
+              onClick={() => {
+                setSelected(null);
+                setReload((v) => v + 1);
+              }}
+            >
+              <RefreshCw size={15} />
+            </Button>
+          </div>
+          <label htmlFor="queue-search" className="field-label">
+            Search complaints
+          </label>
+          <div className="relative">
+            <Search
+              size={16}
+              className="absolute left-3 top-3.5 text-stone-400"
+            />
+            <input
+              id="queue-search"
+              disabled={saving}
+              className="field pl-10"
+              placeholder="Tracking ID or complaint…"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setOffset(0);
+                setSelected(null);
+              }}
+            />
+          </div>
+          <label htmlFor="queue-status" className="field-label mt-4">
+            Status
+          </label>
+          <select
+            id="queue-status"
+            disabled={saving}
+            className="field"
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value as Status | "");
+              setOffset(0);
+              setSelected(null);
+            }}
+          >
+            <option value="">All statuses</option>
+            {Object.entries(statusLabels).map(([key, label]) => (
+              <option value={key} key={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+          {error && (
+            <p role="alert" className="mt-5 text-sm text-red-700">
+              {error}
+            </p>
+          )}
+          <div className="mt-6 space-y-3">
+            {loading ? (
+              <p
+                role="status"
+                className="flex items-center gap-2 py-8 text-sm text-stone-500"
+              >
+                <LoaderCircle size={16} className="animate-spin" />
+                Loading complaints…
+              </p>
+            ) : !page?.items.length ? (
+              <div className="py-10 text-center text-stone-400">
+                <Inbox size={30} className="mx-auto mb-3" />
+                <p className="text-sm">No complaints match this view.</p>
+              </div>
+            ) : (
+              page.items.map((item) => (
+                <button
+                  key={item.tracking_id}
+                  disabled={saving}
+                  onClick={() => select(item)}
+                  className={`queue-item ${selected?.tracking_id === item.tracking_id ? "selected" : ""}`}
+                >
+                  <span className="tracking-id block font-mono text-xs text-stone-500">
+                    {item.tracking_id}
+                  </span>
+                  <span className="my-2 block text-sm font-semibold">
+                    {item.analysis?.normalized_complaint ||
+                      item.original_text ||
+                      "Voice complaint · Manual review"}
+                  </span>
+                  <span className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span>{statusLabels[item.status]}</span>
+                    <span
+                      className={
+                        item.analysis?.urgency === "Critical"
+                          ? "text-red-700"
+                          : "text-emerald-700"
+                      }
+                    >
+                      {item.analysis?.urgency || "Unclassified"} ·{" "}
+                      {item.assigned_department ||
+                        item.analysis?.primary_department ||
+                        "Review needed"}
+                    </span>
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+          {page && page.total > 25 && (
+            <div className="mt-5 flex items-center justify-between text-xs">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loading || saving || offset === 0}
+                onClick={() => {
+                  setOffset(Math.max(0, offset - 25));
+                  setSelected(null);
+                }}
+              >
+                Previous
+              </Button>
+              <span>
+                {offset + 1}–{Math.min(offset + 25, page.total)} of {page.total}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loading || saving || offset + 25 >= page.total}
+                onClick={() => {
+                  setOffset(offset + 25);
+                  setSelected(null);
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </section>
+        <section className="panel">
+          {selected ? (
+            <>
+              <ComplaintDetail
+                key={selected.tracking_id}
+                complaint={selected}
+                showOriginal
+              />
+              {canUpdate && (
+                <form
+                  onSubmit={decide}
+                  className="mt-7 border-t border-stone-100 pt-6"
+                >
+                  <h3 className="mb-4 font-semibold">Officer decision</h3>
+                  {canRoute && (
+                    <>
+                      <label
+                        htmlFor="assigned-department"
+                        className="field-label"
+                      >
+                        Assigned department
+                      </label>
+                      <select
+                        id="assigned-department"
+                        className="field mb-4"
+                        disabled={saving}
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        required
+                      >
+                        <option value="" disabled>
+                          Select department
+                        </option>
+                        {departments.map((value) => (
+                          <option key={value}>{value}</option>
+                        ))}
+                      </select>
+                    </>
+                  )}
+                  <label htmlFor="decision-note" className="field-label">
+                    Decision note
+                  </label>
+                  <textarea
+                    id="decision-note"
+                    className="field min-h-24"
+                    disabled={saving}
+                    required
+                    minLength={3}
+                    maxLength={2000}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Explain your review, any department override, or the progress update."
+                  />
+                  {decisionError && (
+                    <p role="alert" className="mt-3 text-sm text-red-700">
+                      {decisionError}
+                    </p>
+                  )}
+                  <Button
+                    className="mt-4 w-full"
+                    type="submit"
+                    disabled={
+                      saving ||
+                      note.trim().length < 3 ||
+                      (canRoute && !department)
+                    }
+                  >
+                    {saving ? (
+                      <LoaderCircle size={16} className="animate-spin" />
+                    ) : (
+                      <ArrowRight size={16} />
+                    )}{" "}
+                    {canRoute
+                      ? "Approve routing"
+                      : selected.status === "routed"
+                        ? "Start work"
+                        : "Mark resolved"}
+                  </Button>
+                </form>
+              )}
+            </>
+          ) : (
+            <div className="flex min-h-96 flex-col items-center justify-center text-center">
+              <Inbox
+                size={36}
+                strokeWidth={1.4}
+                className="mb-4 text-emerald-700"
+              />
+              <h2 className="text-lg font-semibold">
+                Every complaint deserves a closer look.
+              </h2>
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-stone-500">
+                Select a complaint to review its original wording, AI
+                recommendation, and routing explanation.
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}

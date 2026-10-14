@@ -1,0 +1,938 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ACIE Civic Intelligence API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/complaints": {
+      "post": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Submit Text",
+        "operationId": "submit_text_api_complaints_post",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextSubmission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Complaint"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency key was reused with different content"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Queue",
+        "operationId": "queue_api_complaints_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "received",
+                    "awaiting_review",
+                    "analysis_failed",
+                    "routed",
+                    "in_progress",
+                    "resolved"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "default": "",
+              "title": "Search"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplaintPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/complaints/voice": {
+      "post": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Submit Voice",
+        "operationId": "submit_voice_api_complaints_voice_post",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_submit_voice_api_complaints_voice_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Complaint"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency key conflict"
+          },
+          "413": {
+            "description": "Audio exceeds 10 MiB"
+          },
+          "503": {
+            "description": "Audio decoder unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/complaints/{tracking_id}": {
+      "get": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Track",
+        "operationId": "track_api_complaints__tracking_id__get",
+        "parameters": [
+          {
+            "name": "tracking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tracking Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Complaint"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown tracking ID"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Officer Decision",
+        "operationId": "officer_decision_api_complaints__tracking_id__patch",
+        "parameters": [
+          {
+            "name": "tracking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tracking Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfficerDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Complaint"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown tracking ID"
+          },
+          "409": {
+            "description": "Stale complaint version"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/complaints/{tracking_id}/audio": {
+      "get": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Original Audio",
+        "operationId": "original_audio_api_complaints__tracking_id__audio_get",
+        "parameters": [
+          {
+            "name": "tracking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tracking Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Immutable original audio bytes",
+            "content": {
+              "audio/wav": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/ogg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/flac": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/webm": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/aac": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Complaint or audio not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meta": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Metadata",
+        "operationId": "metadata_api_meta_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Analysis": {
+        "properties": {
+          "transcript": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Transcript"
+          },
+          "normalized_complaint": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Normalized Complaint"
+          },
+          "language": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Language"
+          },
+          "dialect": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Dialect"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Water Supply",
+              "Roads",
+              "Sanitation",
+              "Electricity",
+              "Drainage",
+              "Other"
+            ],
+            "title": "Category"
+          },
+          "intent": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Intent"
+          },
+          "primary_department": {
+            "type": "string",
+            "enum": [
+              "Water Supply",
+              "Public Works",
+              "Sanitation",
+              "Electricity",
+              "Drainage",
+              "General Administration"
+            ],
+            "title": "Primary Department"
+          },
+          "secondary_departments": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "Water Supply",
+                "Public Works",
+                "Sanitation",
+                "Electricity",
+                "Drainage",
+                "General Administration"
+              ]
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Secondary Departments"
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Urgency"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "keywords": {
+            "items": {
+              "type": "string",
+              "maxLength": 5000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Keywords"
+          },
+          "detected_meaning": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Detected Meaning"
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Explanation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "transcript",
+          "normalized_complaint",
+          "language",
+          "dialect",
+          "category",
+          "intent",
+          "primary_department",
+          "secondary_departments",
+          "urgency",
+          "confidence",
+          "keywords",
+          "detected_meaning",
+          "explanation"
+        ],
+        "title": "Analysis"
+      },
+      "AuditEvent": {
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "awaiting_review",
+              "analysis_failed",
+              "routed",
+              "in_progress",
+              "resolved"
+            ],
+            "title": "Status"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Water Supply",
+                  "Public Works",
+                  "Sanitation",
+                  "Electricity",
+                  "Drainage",
+                  "General Administration"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "timestamp",
+          "status",
+          "department",
+          "note"
+        ],
+        "title": "AuditEvent"
+      },
+      "Body_submit_voice_api_complaints_voice_post": {
+        "properties": {
+          "audio": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Audio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio"
+        ],
+        "title": "Body_submit_voice_api_complaints_voice_post"
+      },
+      "Complaint": {
+        "properties": {
+          "tracking_id": {
+            "type": "string",
+            "title": "Tracking Id"
+          },
+          "input_type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "voice"
+            ],
+            "title": "Input Type"
+          },
+          "original_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Text"
+          },
+          "audio_mime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Mime"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "awaiting_review",
+              "analysis_failed",
+              "routed",
+              "in_progress",
+              "resolved"
+            ],
+            "title": "Status"
+          },
+          "analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Analysis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "analysis_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Error"
+          },
+          "requires_review": {
+            "type": "boolean",
+            "title": "Requires Review"
+          },
+          "review_reason": {
+            "type": "string",
+            "title": "Review Reason"
+          },
+          "assigned_department": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Water Supply",
+                  "Public Works",
+                  "Sanitation",
+                  "Electricity",
+                  "Drainage",
+                  "General Administration"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Department"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "analysis_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Ms"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/AuditEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tracking_id",
+          "input_type",
+          "original_text",
+          "audio_mime",
+          "created_at",
+          "updated_at",
+          "status",
+          "analysis",
+          "analysis_error",
+          "requires_review",
+          "review_reason",
+          "assigned_department",
+          "version",
+          "analysis_ms",
+          "events"
+        ],
+        "title": "Complaint"
+      },
+      "ComplaintPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Complaint"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "ComplaintPage"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "OfficerDecision": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "routed",
+              "in_progress",
+              "resolved"
+            ],
+            "title": "Status"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Water Supply",
+                  "Public Works",
+                  "Sanitation",
+                  "Electricity",
+                  "Drainage",
+                  "General Administration"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Note"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "version",
+          "status",
+          "note"
+        ],
+        "title": "OfficerDecision"
+      },
+      "TextSubmission": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 3,
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "TextSubmission"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

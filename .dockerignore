@@ -1,0 +1,13 @@
+.git
+.venv
+.env
+.worktrees
+.superpowers
+frontend/node_modules
+frontend/dist
+backend/data
+**/*.db
+**/*.db-*
+**/__pycache__
+**/.pytest_cache
+**/test_*.py

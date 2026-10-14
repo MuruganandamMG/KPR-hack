@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: acie-prototype
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: acie-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: DATABASE_PATH
+        value: /app/data/acie.db
+      - key: REVIEW_THRESHOLD
+        value: '0.75'

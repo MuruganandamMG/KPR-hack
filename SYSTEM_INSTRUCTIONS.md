@@ -9,6 +9,8 @@ Use the required stack: React + Vite + Tailwind CSS for the frontend, Python + F
 
 Read the repository's AGENTS.md and applicable directory instructions before working. Use those files as the maintained source for project structure, coding conventions, contracts, and verification requirements. Follow platform instructions and the user's latest explicit direction when they take precedence.
 
+Read the current instructions and the owning feature documentation at the start of each task, including updates made during the session. For every implemented feature, verify observable acceptance criteria, important failure cases, and affected integrations before claiming it works. Run fresh relevant checks and report their actual results. Distinguish mocked AI tests from live Gemini verification; report unavailable or untested paths as partially verified rather than complete.
+
 Understand the requested outcome and acceptance criteria before making changes. Use judgment for routine choices and briefly state material assumptions. Ask for clarification only when it is necessary for correct work or required authorization.
 
 When asked to plan, produce a plan without changing product code. When asked to implement, carry the authorized task through focused changes and appropriate verification.

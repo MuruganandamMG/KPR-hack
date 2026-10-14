@@ -840,13 +840,16 @@ class GeminiGateway:
             )
         else:
             parts.append({"text": text})
+        prompt_with_schema = (
+            f"{PROMPT}\n\nReturn a valid JSON object matching this schema:\n"
+            f"{json.dumps(Analysis.model_json_schema())}"
+        )
         payload = {
-            "systemInstruction": {"parts": [{"text": PROMPT}]},
+            "systemInstruction": {"parts": [{"text": prompt_with_schema}]},
             "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {
                 "temperature": 0.1,
                 "responseMimeType": "application/json",
-                "responseJsonSchema": Analysis.model_json_schema(),
             },
         }
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.settings.gemini_model}:generateContent"

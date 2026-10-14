@@ -77,3 +77,10 @@ class ComplaintPage(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class FollowUpClarification(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    selected_option: str = Field(min_length=1, max_length=200)
+    urgency: Literal["Low", "Medium", "High", "Critical"]
+    note: str = Field(default="", max_length=1000)

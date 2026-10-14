@@ -76,7 +76,10 @@ export function TrackComplaint({ initialId = "" }: { initialId?: string }) {
         )}
         {record ? (
           <div className="mt-8 border-t border-stone-100 pt-6">
-            <ComplaintDetail complaint={record} />
+            <ComplaintDetail
+              complaint={record}
+              onComplaintUpdated={setRecord}
+            />
           </div>
         ) : (
           !busy &&

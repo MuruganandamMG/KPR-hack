@@ -5,8 +5,21 @@ from fastapi import APIRouter, File, Header, HTTPException, Query, Request, Resp
 from starlette.concurrency import run_in_threadpool
 
 from .audio import MAX_AUDIO_BYTES, audio_mime, normalize_audio
-from .repository import get_audio, get_complaint, list_complaints, update_complaint
-from .schemas import Complaint, ComplaintPage, OfficerDecision, Status, TextSubmission
+from .repository import (
+    clarify_complaint,
+    get_audio,
+    get_complaint,
+    list_complaints,
+    update_complaint,
+)
+from .schemas import (
+    Complaint,
+    ComplaintPage,
+    FollowUpClarification,
+    OfficerDecision,
+    Status,
+    TextSubmission,
+)
 from .service import submit_complaint
 
 router = APIRouter(prefix="/api/complaints", tags=["complaints"])
@@ -105,6 +118,18 @@ def track(tracking_id: str, request: Request):
 )
 def officer_decision(tracking_id: str, body: OfficerDecision, request: Request):
     return update_complaint(request.app.state.engine, tracking_id, body)
+
+
+@router.post(
+    "/{tracking_id}/clarify",
+    response_model=Complaint,
+    responses={
+        404: {"description": "Unknown tracking ID"},
+        422: {"description": "Cannot clarify complaint"},
+    },
+)
+def clarify(tracking_id: str, body: FollowUpClarification, request: Request):
+    return clarify_complaint(request.app.state.engine, tracking_id, body)
 
 
 @router.get(

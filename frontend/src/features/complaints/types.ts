@@ -30,6 +30,24 @@ export interface SelfVerification {
   agreement: boolean;
   verification_confidence: number;
 }
+export interface FollowUpOption {
+  label: string;
+  urgency_impact: "Low" | "Medium" | "High" | "Critical";
+  description: string;
+  priority_weight: string;
+}
+export interface SmartFollowUp {
+  needed: boolean;
+  question: string;
+  category_context: string;
+  options: FollowUpOption[];
+  answered_option?: string | null;
+}
+export interface FollowUpClarification {
+  selected_option: string;
+  urgency: "Low" | "Medium" | "High" | "Critical";
+  note?: string;
+}
 export interface Analysis {
   transcript: string;
   normalized_complaint: string;
@@ -48,6 +66,7 @@ export interface Analysis {
   confidence_breakdown?: ConfidenceBreakdown;
   officer_summary?: OfficerSummary;
   self_verification?: SelfVerification;
+  smart_follow_up?: SmartFollowUp | null;
 }
 export interface Complaint {
   tracking_id: string;

@@ -385,6 +385,54 @@
         }
       }
     },
+    "/api/complaints/{tracking_id}/clarify": {
+      "post": {
+        "tags": [
+          "complaints"
+        ],
+        "summary": "Clarify",
+        "operationId": "clarify_api_complaints__tracking_id__clarify_post",
+        "parameters": [
+          {
+            "name": "tracking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tracking Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpClarification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Complaint"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown tracking ID"
+          },
+          "422": {
+            "description": "Cannot clarify complaint"
+          }
+        }
+      }
+    },
     "/api/complaints/{tracking_id}/audio": {
       "get": {
         "tags": [
@@ -655,6 +703,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/SelfVerification"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "smart_follow_up": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SmartFollowUp"
               },
               {
                 "type": "null"
@@ -1021,6 +1079,80 @@
         ],
         "title": "EvidenceItem"
       },
+      "FollowUpClarification": {
+        "properties": {
+          "selected_option": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Selected Option"
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Urgency"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "selected_option",
+          "urgency"
+        ],
+        "title": "FollowUpClarification"
+      },
+      "FollowUpOption": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "urgency_impact": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Urgency Impact"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "priority_weight": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Priority Weight"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "label",
+          "urgency_impact",
+          "description",
+          "priority_weight"
+        ],
+        "title": "FollowUpOption"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1206,6 +1338,55 @@
           "verification_confidence"
         ],
         "title": "SelfVerification"
+      },
+      "SmartFollowUp": {
+        "properties": {
+          "needed": {
+            "type": "boolean",
+            "title": "Needed"
+          },
+          "question": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "category_context": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Category Context"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/FollowUpOption"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 2,
+            "title": "Options"
+          },
+          "answered_option": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answered Option"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "needed",
+          "question",
+          "category_context",
+          "options"
+        ],
+        "title": "SmartFollowUp"
       },
       "TextSubmission": {
         "properties": {

@@ -5,8 +5,10 @@ import { audioUrl } from "./api";
 import { ConfidenceMeter } from "./ConfidenceMeter";
 import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
+import { ExplainabilityPanel } from "./ExplainabilityPanel";
 import { OfficerSummaryCard } from "./OfficerSummaryCard";
 import { SelfVerificationCard } from "./SelfVerificationCard";
+import { SmartFollowUpCard } from "./SmartFollowUpCard";
 import { formalComplaint } from "./formalComplaint";
 import { statusLabels, type Complaint } from "./types";
 
@@ -14,10 +16,12 @@ export function ComplaintDetail({
   complaint,
   showOriginal = false,
   onSelectAction,
+  onComplaintUpdated,
 }: {
   complaint: Complaint;
   showOriginal?: boolean;
   onSelectAction?: (actionText: string) => void;
+  onComplaintUpdated?: (updated: Complaint) => void;
 }) {
   const { analysis } = complaint;
   const approved = !!complaint.assigned_department;
@@ -99,6 +103,12 @@ export function ComplaintDetail({
       )}
       {complaint.review_reason && complaint.requires_review && (
         <div className="notice">{complaint.review_reason}</div>
+      )}
+      {analysis?.smart_follow_up && (
+        <SmartFollowUpCard
+          complaint={complaint}
+          onComplaintUpdated={onComplaintUpdated}
+        />
       )}
       {analysis && (
         <OfficerSummaryCard
@@ -229,31 +239,17 @@ export function ComplaintDetail({
         </div>
       )}
       {analysis && (
-        <details className="border-t border-stone-100 pt-5">
-          <summary className="flex cursor-pointer items-center gap-2 font-semibold">
-            <ShieldCheck size={17} className="text-emerald-700" />
-            Why this department?
-          </summary>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {analysis.keywords.map((word, i) => (
-              <span className="keyword" key={`${word}-${i}`}>
-                {word}
-              </span>
-            ))}
-          </div>
-          <p className="mt-3 text-sm text-stone-600">
-            {analysis.detected_meaning}
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-stone-600">
-            {analysis.explanation}
-          </p>
+        <div className="border-t border-stone-100 pt-5">
+          <ExplainabilityPanel complaint={complaint} defaultOpen={true} />
           {analysis.secondary_departments.length > 0 && (
-            <p className="mt-3 text-sm">
-              AI secondary recommendations:{" "}
-              {analysis.secondary_departments.join(", ")}
+            <p className="mt-3 text-xs text-stone-500">
+              Supporting collaborating departments:{" "}
+              <span className="font-semibold text-stone-700">
+                {analysis.secondary_departments.join(", ")}
+              </span>
             </p>
           )}
-        </details>
+        </div>
       )}
       {showOriginal && (
         <div className="border-t border-stone-100 pt-5">

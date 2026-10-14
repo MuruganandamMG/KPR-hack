@@ -6,7 +6,15 @@ Maintain a clear, modular frontend and backend that can grow through isolated fe
 
 The project helps municipal grievance systems understand citizen complaints submitted as text or voice in regional dialects, informal vocabulary, and misspelled language. It should normalize complaints, identify civic intent, department, and urgency, preserve original context, expose routing explanations, confidence, and tracking IDs, and evaluate routing accuracy, dialect robustness, and initial response time.
 
-Application code, stack, database, and deployment requirements are not defined yet. Select them from the requirements during project planning. Do not scaffold an application just because this file suggests a layout.
+The stack is fixed below. Application code and deployment requirements are not defined yet. Do not scaffold an application just because this file suggests a layout.
+
+## Required technology stack
+
+- Frontend: React + Vite + Tailwind CSS.
+- Backend: Python + FastAPI.
+- AI: Gemini, accessed through the backend. Keep credentials in server-side configuration and AI integration behind a dedicated interface.
+- Database: SQLite, accessed through backend data-access modules.
+- Use this stack for new features. Do not replace or add alternative frameworks, AI providers, or databases unless the user requests a stack change.
 
 ## Working rules
 
@@ -36,7 +44,7 @@ frontend/
     features/<feature-name>/   # Feature UI, state, API operations, and tests
     shared/                   # UI and utilities used by multiple features
 backend/
-  src/
+  app/
     features/<feature-name>/   # Handlers, business logic, data access, and tests
     shared/                   # Common server infrastructure and utilities
 contracts/                    # Cross-boundary schemas or API specifications

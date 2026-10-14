@@ -6,7 +6,7 @@ import httpx
 from app.shared.config import Settings
 from pydantic import ValidationError
 
-from .schemas import Analysis
+from .schemas import Analysis, FollowUpOption, SmartFollowUp
 
 
 class InferenceError(Exception):
@@ -67,9 +67,181 @@ area (ward, street or locality, or 'Ward / Locality Unspecified'), duration, pri
 and a concise 1-sentence suggested_action for municipal triage. Perform an internal self_verification
 critic pass auditing whether the assigned department and urgency accurately represent the raw citizen
 complaint (status: 'Verified', 'Disputed', or 'Flagged for Review'; critique: concise audit evaluation;
-agreement: boolean; verification_confidence: float). Critical urgency requires reported immediate
+agreement: boolean; verification_confidence: float). Formulate smart_follow_up: if the grievance is brief,
+vague, or missing critical scope or duration (such as 'Water problem', 'No water', 'Current cut', 'Road bad'),
+set needed=true, craft a targeted question (e.g., 'Does the issue affect:'), explain category_context,
+and provide 2 to 3 structured options (e.g., 'Your house only' -> Low/Medium, 'Entire street' -> High,
+'Entire village / neighborhood' -> Critical) each with label, urgency_impact, description, and priority_weight.
+If clear scope/duration is already reported, set needed=false and standard options.
+Critical urgency requires reported immediate
 danger to life or safety; do not infer one without evidence. Repeated inconvenience alone is not evidence
 of imminent danger. These are recommendations awaiting officer approval, never a claim of actual dispatch."""
+
+
+def build_smart_follow_up(category: str, transcript: str) -> SmartFollowUp:
+    is_brief = len(transcript.strip()) < 60
+    has_scope = any(
+        w in transcript.lower()
+        for w in ["entire", "village", "street", "whole", "house", "ward", "all house", "colony"]
+    )
+    needed = is_brief or not has_scope
+
+    if category == "Water Supply":
+        return SmartFollowUp(
+            needed=needed,
+            question="Does the water issue affect:",
+            category_context="Geographic scope determines whether an individual valve inspection or an emergency municipal tanker is required.",
+            options=[
+                FollowUpOption(
+                    label="Your house only",
+                    urgency_impact="Medium",
+                    description="Localized domestic connection or private meter issue",
+                    priority_weight="Normal Priority",
+                ),
+                FollowUpOption(
+                    label="Entire street",
+                    urgency_impact="High",
+                    description="Main distribution pipeline or valve fault affecting multiple homes",
+                    priority_weight="High Priority",
+                ),
+                FollowUpOption(
+                    label="Entire village / neighborhood",
+                    urgency_impact="Critical",
+                    description="Feeder main outage or overhead reservoir shutdown affecting hundreds",
+                    priority_weight="Emergency Priority",
+                ),
+            ],
+        )
+    elif category == "Electricity":
+        return SmartFollowUp(
+            needed=needed,
+            question="What is the extent of the electrical issue:",
+            category_context="Helps electrical engineers dispatch internal service crews versus high-tension substation units.",
+            options=[
+                FollowUpOption(
+                    label="Individual house outage or fuse trip",
+                    urgency_impact="Medium",
+                    description="Domestic service connection issue",
+                    priority_weight="Normal Priority",
+                ),
+                FollowUpOption(
+                    label="Entire street / streetlight line",
+                    urgency_impact="High",
+                    description="Branch feeder or public streetlighting phase outage",
+                    priority_weight="High Priority",
+                ),
+                FollowUpOption(
+                    label="Live wire on ground or transformer fire",
+                    urgency_impact="Critical",
+                    description="Immediate electrical safety hazard risking life",
+                    priority_weight="Emergency Priority",
+                ),
+            ],
+        )
+    elif category == "Roads":
+        return SmartFollowUp(
+            needed=needed,
+            question="What is the severity of the road condition:",
+            category_context="Helps public works schedule patch maintenance versus immediate road closure and resurfacing.",
+            options=[
+                FollowUpOption(
+                    label="Isolated pothole",
+                    urgency_impact="Low",
+                    description="Single surface defect causing minor vehicle slowdown",
+                    priority_weight="Normal Priority",
+                ),
+                FollowUpOption(
+                    label="Multiple deep craters across street",
+                    urgency_impact="High",
+                    description="Damaging vehicles and obstructing regular transit routes",
+                    priority_weight="High Priority",
+                ),
+                FollowUpOption(
+                    label="Road completely caved-in or washed out",
+                    urgency_impact="Critical",
+                    description="Severely hazardous road collapse requiring immediate barricading",
+                    priority_weight="Emergency Priority",
+                ),
+            ],
+        )
+    elif category == "Sanitation":
+        return SmartFollowUp(
+            needed=needed,
+            question="What is the scale of waste accumulation:",
+            category_context="Helps the sanitation department assign either routine bin clearing or heavy compactor equipment.",
+            options=[
+                FollowUpOption(
+                    label="Single overflowing dustbin",
+                    urgency_impact="Low",
+                    description="Daily collection backlog at one domestic collection point",
+                    priority_weight="Normal Priority",
+                ),
+                FollowUpOption(
+                    label="Street corner garbage pileup",
+                    urgency_impact="High",
+                    description="Accumulated street waste attracting stray animals and blocking walkers",
+                    priority_weight="High Priority",
+                ),
+                FollowUpOption(
+                    label="Massive illegal dumping site / carcass",
+                    urgency_impact="Critical",
+                    description="Major biohazard requiring immediate hazardous sanitation dispatch",
+                    priority_weight="Emergency Priority",
+                ),
+            ],
+        )
+    elif category == "Drainage":
+        return SmartFollowUp(
+            needed=needed,
+            question="What is the level of drainage or sewage overflow:",
+            category_context="Determines whether desilting or high-pressure suction super-sucker vehicles are deployed.",
+            options=[
+                FollowUpOption(
+                    label="Slow residential water runoff",
+                    urgency_impact="Medium",
+                    description="Local silt blockage without outdoor flooding",
+                    priority_weight="Normal Priority",
+                ),
+                FollowUpOption(
+                    label="Sewage overflowing onto public street",
+                    urgency_impact="High",
+                    description="Blackwater stagnation and foul odor impeding pedestrians",
+                    priority_weight="High Priority",
+                ),
+                FollowUpOption(
+                    label="Sewage entering residences or water bodies",
+                    urgency_impact="Critical",
+                    description="Direct contamination threatening family health",
+                    priority_weight="Emergency Priority",
+                ),
+            ],
+        )
+    else:
+        return SmartFollowUp(
+            needed=needed,
+            question="What is the operational scope of this grievance:",
+            category_context="Clarifying impact assists zonal officers in routing to the correct administrative authority.",
+            options=[
+                FollowUpOption(
+                    label="Individual citizen inquiry or request",
+                    urgency_impact="Low",
+                    description="Personal administrative or certificate query",
+                    priority_weight="Normal Priority",
+                ),
+                FollowUpOption(
+                    label="Neighborhood or community concern",
+                    urgency_impact="Medium",
+                    description="Shared residential facility or amenity issue",
+                    priority_weight="Medium Priority",
+                ),
+                FollowUpOption(
+                    label="Urgent public or safety disruption",
+                    urgency_impact="High",
+                    description="Multi-ward disruption requiring administrative intervention",
+                    priority_weight="High Priority",
+                ),
+            ],
+        )
 
 
 class GeminiGateway:
@@ -118,7 +290,16 @@ class GeminiGateway:
                     if "text" in p and not p.get("thought")
                 )
                 # Validate all provider-controlled fields before returning an actionable result.
-                return Analysis.model_validate_json(output)
+                analysis = Analysis.model_validate_json(output)
+                if analysis.smart_follow_up is None:
+                    analysis = analysis.model_copy(
+                        update={
+                            "smart_follow_up": build_smart_follow_up(
+                                analysis.category, analysis.transcript
+                            )
+                        }
+                    )
+                return analysis
             except httpx.HTTPStatusError:
                 break  # Credentials and invalid requests cannot be fixed by retrying.
             except (

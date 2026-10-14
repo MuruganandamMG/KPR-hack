@@ -59,6 +59,23 @@ class SelfVerification(BaseModel):
     verification_confidence: float = Field(ge=0, le=1, allow_inf_nan=False)
 
 
+class FollowUpOption(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    label: Nonempty
+    urgency_impact: Urgency
+    description: Nonempty
+    priority_weight: Nonempty
+
+
+class SmartFollowUp(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    needed: bool
+    question: Nonempty
+    category_context: Nonempty
+    options: list[FollowUpOption] = Field(min_length=2, max_length=5)
+    answered_option: str | None = None
+
+
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     transcript: Nonempty
@@ -90,6 +107,7 @@ class Analysis(BaseModel):
     confidence_breakdown: ConfidenceBreakdown | None = None
     officer_summary: OfficerSummary | None = None
     self_verification: SelfVerification | None = None
+    smart_follow_up: SmartFollowUp | None = None
 
     @model_validator(mode="after")
     def unique_departments(self):

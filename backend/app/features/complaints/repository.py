@@ -261,6 +261,46 @@ def update_complaint(engine, tracking_id, decision):
         return read_complaint(db, tracking_id)
 
 
+def clarify_complaint(engine, tracking_id, clarification):
+    with engine.begin() as db:
+        record = read_complaint(db, tracking_id)
+        if not record.analysis:
+            raise HTTPException(422, "Complaint has no active analysis to clarify.")
+
+        updated_analysis = record.analysis.model_copy(deep=True)
+        updated_analysis.urgency = clarification.urgency
+        if updated_analysis.smart_follow_up:
+            updated_analysis.smart_follow_up.answered_option = clarification.selected_option
+        if updated_analysis.officer_summary:
+            updated_analysis.officer_summary.priority = clarification.urgency
+
+        note = (
+            f"Citizen Follow-Up Clarification: Confirmed scope as '{clarification.selected_option}'. "
+            f"Urgency dynamically adjusted to {clarification.urgency}."
+        )
+        if clarification.note:
+            note += f" Note: {clarification.note}"
+
+        db.execute(
+            text("""UPDATE complaints SET analysis_json=:analysis,
+            updated_at=:at,version=version+1 WHERE tracking_id=:id"""),
+            {
+                "id": tracking_id,
+                "analysis": updated_analysis.model_dump_json(),
+                "at": now(),
+            },
+        )
+        add_event(
+            db,
+            tracking_id,
+            record.status,
+            note,
+            record.assigned_department,
+            record.assigned_secondary_departments,
+        )
+        return read_complaint(db, tracking_id)
+
+
 def get_audio(engine, tracking_id):
     with engine.connect() as db:
         row = db.execute(

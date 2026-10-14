@@ -9,11 +9,13 @@ export function AnalysisPanel({
   pending,
   onTrack,
   mode,
+  onComplaintUpdated,
 }: {
   complaint: Complaint | null;
   pending: boolean;
   onTrack?: (id: string) => void;
   mode?: "text" | "voice";
+  onComplaintUpdated?: (updated: Complaint) => void;
 }) {
   return (
     <section
@@ -39,7 +41,10 @@ export function AnalysisPanel({
         <ThinkingTimeline mode={mode} />
       ) : complaint ? (
         <>
-          <ComplaintDetail complaint={complaint} />
+          <ComplaintDetail
+            complaint={complaint}
+            onComplaintUpdated={onComplaintUpdated}
+          />
           {onTrack && (
             <Button
               className="mt-6 w-full"

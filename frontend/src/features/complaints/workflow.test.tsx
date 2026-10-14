@@ -18,6 +18,7 @@ import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
 import { OfficerSummaryCard } from "./OfficerSummaryCard";
 import { SelfVerificationCard } from "./SelfVerificationCard";
+import { SmartFollowUpCard } from "./SmartFollowUpCard";
 import { ThinkingTimeline } from "./ThinkingTimeline";
 import type { Complaint } from "./types";
 
@@ -50,6 +51,33 @@ const complaint = {
     keywords: ["road", "mosama"],
     detected_meaning: "A damaged road",
     explanation: "Road damage belongs to Public Works.",
+    smart_follow_up: {
+      needed: true,
+      question: "Does the issue affect:",
+      category_context:
+        "Geographic scope determines whether an individual valve inspection or municipal tanker is required.",
+      options: [
+        {
+          label: "Your house only",
+          urgency_impact: "Medium" as const,
+          description: "Domestic connection issue",
+          priority_weight: "Normal Priority",
+        },
+        {
+          label: "Entire street",
+          urgency_impact: "High" as const,
+          description: "Distribution line issue",
+          priority_weight: "High Priority",
+        },
+        {
+          label: "Entire village",
+          urgency_impact: "Critical" as const,
+          description: "Widespread supply outage",
+          priority_weight: "Emergency Priority",
+        },
+      ],
+      answered_option: null,
+    },
   },
   events: [
     {
@@ -794,4 +822,85 @@ it("renders ThinkingTimeline in AnalysisPanel when pending is true", () => {
   render(<AnalysisPanel complaint={null} pending={true} mode="voice" />);
   expect(screen.getByLabelText("AI Thinking Timeline")).toBeInTheDocument();
   expect(screen.getByText("Receiving Voice Stream...")).toBeInTheDocument();
+});
+
+it("renders SmartFollowUpCard with question, options and permits priority clarification", async () => {
+  const user = userEvent.setup();
+  const mockUpdated = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      urgency: "Critical" as const,
+      smart_follow_up: {
+        ...complaint.analysis.smart_follow_up!,
+        answered_option: "Entire village",
+      },
+    },
+  };
+
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => mockUpdated,
+    }),
+  );
+
+  const onUpdate = vi.fn();
+  render(
+    <SmartFollowUpCard
+      complaint={complaint as unknown as Complaint}
+      onComplaintUpdated={onUpdate}
+    />,
+  );
+
+  expect(
+    screen.getByText("AI Smart Follow-up Clarification"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Does the issue affect:")).toBeInTheDocument();
+  expect(screen.getByText("Your house only")).toBeInTheDocument();
+  expect(screen.getByText("Entire street")).toBeInTheDocument();
+  expect(screen.getByText("Entire village")).toBeInTheDocument();
+
+  // Select Entire village option
+  const villageOption = screen.getByDisplayValue("Entire village");
+  await user.click(villageOption);
+
+  // Click confirm button
+  const confirmBtn = screen.getByRole("button", {
+    name: /Confirm & Update Priority/i,
+  });
+  await user.click(confirmBtn);
+
+  await waitFor(() => {
+    expect(onUpdate).toHaveBeenCalledWith(mockUpdated);
+  });
+});
+
+it("renders answered state when smart follow-up has already been clarified", () => {
+  const answeredComplaint = {
+    ...complaint,
+    analysis: {
+      ...complaint.analysis,
+      urgency: "Critical" as const,
+      smart_follow_up: {
+        ...complaint.analysis.smart_follow_up!,
+        answered_option: "Entire village",
+      },
+    },
+  };
+
+  render(
+    <SmartFollowUpCard complaint={answeredComplaint as unknown as Complaint} />,
+  );
+
+  expect(
+    screen.getByText("AI Smart Clarification Confirmed"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Entire village")).toBeInTheDocument();
+  expect(screen.getByText("Critical Priority")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: /Change Answer/i }),
+  ).toBeInTheDocument();
 });

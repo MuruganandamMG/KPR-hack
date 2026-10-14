@@ -7,6 +7,7 @@ import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
 import { OfficerSummaryCard } from "./OfficerSummaryCard";
 import { SelfVerificationCard } from "./SelfVerificationCard";
+import { SmartFollowUpCard } from "./SmartFollowUpCard";
 import { formalComplaint } from "./formalComplaint";
 import { statusLabels, type Complaint } from "./types";
 
@@ -14,10 +15,12 @@ export function ComplaintDetail({
   complaint,
   showOriginal = false,
   onSelectAction,
+  onComplaintUpdated,
 }: {
   complaint: Complaint;
   showOriginal?: boolean;
   onSelectAction?: (actionText: string) => void;
+  onComplaintUpdated?: (updated: Complaint) => void;
 }) {
   const { analysis } = complaint;
   const approved = !!complaint.assigned_department;
@@ -99,6 +102,12 @@ export function ComplaintDetail({
       )}
       {complaint.review_reason && complaint.requires_review && (
         <div className="notice">{complaint.review_reason}</div>
+      )}
+      {analysis?.smart_follow_up && (
+        <SmartFollowUpCard
+          complaint={complaint}
+          onComplaintUpdated={onComplaintUpdated}
+        />
       )}
       {analysis && (
         <OfficerSummaryCard

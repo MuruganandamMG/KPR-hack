@@ -2,7 +2,7 @@ import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
-from app.features.civic_intelligence.gateway import InferenceError
+from app.features.civic_intelligence.gateway import InferenceError, build_smart_follow_up
 from app.features.civic_intelligence.schemas import Analysis
 from app.main import create_app
 from app.shared.config import Settings
@@ -56,13 +56,47 @@ def prediction(**changes):
             "agreement": True,
             "verification_confidence": 0.97,
         },
+        smart_follow_up={
+            "needed": True,
+            "question": "Does the issue affect:",
+            "category_context": "Geographic scope determines whether an individual valve inspection or municipal tanker is required.",
+            "options": [
+                {
+                    "label": "Your house only",
+                    "urgency_impact": "Medium",
+                    "description": "Domestic connection issue",
+                    "priority_weight": "Normal Priority",
+                },
+                {
+                    "label": "Entire street",
+                    "urgency_impact": "High",
+                    "description": "Distribution line issue",
+                    "priority_weight": "High Priority",
+                },
+                {
+                    "label": "Entire village / neighborhood",
+                    "urgency_impact": "Critical",
+                    "description": "Widespread supply outage",
+                    "priority_weight": "Emergency Priority",
+                },
+            ],
+            "answered_option": None,
+        },
     )
     return Analysis.model_validate(data | changes)
 
 
 class FakeGateway:
     def analyze(self, *, text=None, audio=None):
-        return prediction(transcript=text or "Road romba mosama.")
+        category = "Water Supply" if text and "water" in text.lower() else "Roads"
+        dept = "Water Supply" if category == "Water Supply" else "Public Works"
+        transcript = text or "Road romba mosama."
+        return prediction(
+            transcript=transcript,
+            category=category,
+            primary_department=dept,
+            smart_follow_up=build_smart_follow_up(category, transcript),
+        )
 
 
 @pytest.fixture
@@ -256,3 +290,28 @@ def test_simultaneous_officer_decisions_cannot_overwrite_each_other(client):
     assert sorted(r.status_code for r in responses) == [200, 409]
     record = client.get(url).json()
     assert len([event for event in record["events"] if event["status"] == "routed"]) == 1
+
+
+def test_smart_follow_up_clarification_updates_urgency_and_event(client):
+    record = submit(client, text="Water problem.").json()
+    tracking_id = record["tracking_id"]
+    assert record["analysis"]["smart_follow_up"] is not None
+    assert record["analysis"]["smart_follow_up"]["needed"] is True
+
+    # Submit clarification answering the smart follow-up question
+    clarify_res = client.post(
+        f"/api/complaints/{tracking_id}/clarify",
+        json={
+            "selected_option": "Entire village / neighborhood",
+            "urgency": "Critical",
+            "note": "Affecting 400 households across Ward 18",
+        },
+    )
+    assert clarify_res.status_code == 200
+    updated = clarify_res.json()
+    assert updated["analysis"]["urgency"] == "Critical"
+    assert (
+        updated["analysis"]["smart_follow_up"]["answered_option"] == "Entire village / neighborhood"
+    )
+    assert updated["analysis"]["officer_summary"]["priority"] == "Critical"
+    assert any("Citizen Follow-Up Clarification" in e["note"] for e in updated["events"])

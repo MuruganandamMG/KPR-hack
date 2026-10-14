@@ -126,7 +126,13 @@ export function SubmitComplaint({
             New complaint
           </Button>
         )}
-        <AnalysisPanel complaint={record} pending={busy} onTrack={onTrack} />
+        <AnalysisPanel
+          complaint={record}
+          pending={busy}
+          onTrack={onTrack}
+          mode={mode}
+          onComplaintUpdated={setRecord}
+        />
       </div>
     );
   }

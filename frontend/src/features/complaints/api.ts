@@ -1,5 +1,12 @@
 import { request } from "../../shared/request";
-import type { Complaint, ComplaintPage, Decision, Meta, Status } from "./types";
+import type {
+  Complaint,
+  ComplaintPage,
+  Decision,
+  FollowUpClarification,
+  Meta,
+  Status,
+} from "./types";
 
 export const getMeta = (signal?: AbortSignal) =>
   request<Meta>("/meta", { signal });
@@ -52,6 +59,15 @@ export const updateComplaint = (id: string, decision: Decision) =>
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(decision),
+  });
+export const clarifyComplaint = (
+  id: string,
+  clarification: FollowUpClarification,
+) =>
+  request<Complaint>(`/complaints/${encodeURIComponent(id)}/clarify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(clarification),
   });
 export const audioUrl = (id: string) =>
   `/api/complaints/${encodeURIComponent(id)}/audio`;

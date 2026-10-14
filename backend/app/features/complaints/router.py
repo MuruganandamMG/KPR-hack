@@ -1,6 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, File, Header, Query, Request, Response, UploadFile
+from app.features.civic_intelligence.schemas import Category, Department
+from fastapi import APIRouter, File, Header, HTTPException, Query, Request, Response, UploadFile
 from starlette.concurrency import run_in_threadpool
 
 from .audio import MAX_AUDIO_BYTES, audio_mime, normalize_audio
@@ -40,8 +41,6 @@ def submit_text(body: TextSubmission, request: Request, idempotency_key: Submiss
 async def submit_voice(
     request: Request, idempotency_key: SubmissionKey, audio: UploadFile = File(...)
 ):
-    from fastapi import HTTPException
-
     try:
         data = await audio.read(MAX_AUDIO_BYTES + 1)
         if len(data) > MAX_AUDIO_BYTES:
@@ -67,11 +66,23 @@ def queue(
     request: Request,
     status: Status | None = None,
     search: str = Query(default="", max_length=200),
+    department: Department | None = None,
+    department_role: Literal["primary", "secondary"] | None = None,
+    category: Category | None = None,
     limit: int = Query(default=25, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ):
+    if department_role and not department:
+        raise HTTPException(422, "Select a department before filtering its routing role.")
     return list_complaints(
-        request.app.state.engine, status=status, search=search, limit=limit, offset=offset
+        request.app.state.engine,
+        status=status,
+        search=search,
+        department=department,
+        department_role=department_role,
+        category=category,
+        limit=limit,
+        offset=offset,
     )
 
 

@@ -1,16 +1,5 @@
-import {
-  AlertCircle,
-  ArrowDown,
-  ArrowUp,
-  BookOpen,
-  CheckCircle2,
-  FileText,
-  Lightbulb,
-  Mic,
-  ShieldAlert,
-  Zap,
-} from "lucide-react";
-import type { Complaint, EvidenceItem } from "./types";
+import { ArrowUp, BookOpen, FileText, Lightbulb, Mic, Zap } from "lucide-react";
+import type { Complaint } from "./types";
 
 export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
   const { analysis } = complaint;
@@ -24,38 +13,8 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
     analysis.transcript ||
     "Original citizen input transcript";
 
-  // Build items from backend evidence_highlights or derive from keywords & detected meaning
-  let items: EvidenceItem[] =
-    analysis.evidence_highlights && analysis.evidence_highlights.length > 0
-      ? analysis.evidence_highlights
-      : [];
-
-  if (items.length === 0 && analysis.keywords && analysis.keywords.length > 0) {
-    items = analysis.keywords.slice(0, 4).map((kw) => {
-      const isUrgent =
-        kw.toLowerCase().includes("naala") ||
-        kw.toLowerCase().includes("day") ||
-        kw.toLowerCase().includes("mosama") ||
-        kw.toLowerCase().includes("urgent") ||
-        analysis.urgency === "High" ||
-        analysis.urgency === "Critical";
-
-      return {
-        phrase: kw,
-        translation:
-          kw.toLowerCase() === "mosama"
-            ? "severely damaged / poor condition"
-            : kw.toLowerCase() === "thanni"
-              ? "water supply"
-              : kw.toLowerCase() === "road"
-                ? "roadway infrastructure"
-                : `${kw} (translated)`,
-        significance: isUrgent
-          ? `Direct indicator for ${analysis.urgency} urgency`
-          : `Civic keyword linked to ${analysis.primary_department}`,
-      };
-    });
-  }
+  // Only returned translations are evidence; keywords cannot supply missing translations.
+  const items = analysis.evidence_highlights || [];
 
   const urgencyPillStyles: Record<string, string> = {
     Low: "bg-slate-100 text-slate-800 border-slate-300",
@@ -63,15 +22,6 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
     High: "bg-orange-100 text-orange-950 border-orange-300",
     Critical: "bg-red-100 text-red-950 border-red-300",
   };
-
-  const urgencyBridgeExplanation =
-    analysis.urgency === "Critical"
-      ? "Direct threat to life, public safety, or emergency infrastructure reported"
-      : analysis.urgency === "High"
-        ? "Essential civic utility unavailable or persistent hazard requiring expedited resolution"
-        : analysis.urgency === "Medium"
-          ? "Noticeable disruption requiring scheduled operational maintenance"
-          : "Routine municipal request with standard turnaround window";
 
   return (
     <section
@@ -88,7 +38,7 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
               Evidence Highlighting & Translation
             </h3>
             <p className="text-xs text-stone-500">
-              Bilingual phrase mapping with observable civic proof
+              Translation evidence returned with the analysis
             </p>
           </div>
         </div>
@@ -109,7 +59,7 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
             Citizen says (Verbatim Dialect Input)
           </span>
           <span className="italic">
-            {analysis.language} · {analysis.dialect || "Colloquial"}
+            {analysis.language} · {analysis.dialect || "Dialect not identified"}
           </span>
         </div>
         <p className="mt-2 text-base font-serif italic text-stone-800">
@@ -118,7 +68,7 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
       </div>
 
       {/* Highlighted Phrase Cards with upward arrows */}
-      {items.length > 0 && (
+      {items.length > 0 ? (
         <div className="mb-5">
           <p className="mb-2.5 text-xs font-semibold tracking-wider text-stone-500 uppercase">
             Phrase-Level Translation & Civic Interpretation
@@ -135,7 +85,7 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
                       {item.phrase}
                     </span>
                     <span className="text-[10px] font-medium text-stone-400">
-                      dialect phrase
+                      source phrase
                     </span>
                   </div>
 
@@ -159,6 +109,11 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
             ))}
           </div>
         </div>
+      ) : (
+        <p className="mb-4 text-sm text-stone-500">
+          Phrase translations were not returned. Refer to the formal complaint
+          and original evidence.
+        </p>
       )}
 
       {/* Reasoning Bridge: Why Urgency & Department were determined */}
@@ -172,7 +127,7 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
               Reasoning Bridge · Why Urgency is {analysis.urgency}
             </h4>
             <p className="mt-1 text-sm leading-relaxed text-stone-700">
-              {urgencyBridgeExplanation}
+              {analysis.explanation}
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">

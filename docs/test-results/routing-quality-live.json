@@ -1,0 +1,1179 @@
+{
+  "date": "2026-10-15",
+  "model": "gemini-3.5-flash-lite",
+  "label_status": "Synthetic seed expectations; not independently human-labeled",
+  "cases": [
+    {
+      "case": 1,
+      "text": "The road is severely damaged and needs repair.",
+      "expected_department": "Public Works",
+      "group": "formal",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-27ef2b3fbf5c48feb8e1c9584114d082",
+        "input_type": "text",
+        "original_text": "The road is severely damaged and needs repair.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:31.779986+00:00",
+        "updated_at": "2026-10-14T18:36:33.945540+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "The road is severely damaged and needs repair.",
+          "normalized_complaint": "The road is severely damaged and requires immediate repair.",
+          "language": "English",
+          "dialect": "",
+          "category": "Roads",
+          "intent": "Request road repair due to severe damage.",
+          "primary_department": "Public Works",
+          "secondary_departments": [],
+          "urgency": "Medium",
+          "confidence": 1.0,
+          "keywords": [
+            "road",
+            "damaged",
+            "repair"
+          ],
+          "detected_meaning": "The citizen is reporting severe damage to the road and requesting infrastructural repair.",
+          "explanation": "The dominant issue is road damage, pointing to Public Works as the primary department. Urgency is Medium due to severe road degradation causing potential transit hazards. No secondary departments are needed as no other distinct civic infrastructure issues are mentioned.",
+          "evidence_highlights": [
+            {
+              "phrase": "The road is severely damaged and needs repair",
+              "translation": "The road is severely damaged and needs repair",
+              "significance": "Directly establishes the category as Roads and the required action of repair."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2156,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:31.784498+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:33.946539+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true
+    },
+    {
+      "case": 2,
+      "text": "Road romba mosama. Enga theru la periya potholes irukku.",
+      "expected_department": "Public Works",
+      "group": "mixed Tamil-English",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-f41516f864c248e2a2943925e7b4edbd",
+        "input_type": "text",
+        "original_text": "Road romba mosama. Enga theru la periya potholes irukku.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:33.951540+00:00",
+        "updated_at": "2026-10-14T18:36:36.211065+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "Road romba mosama. Enga theru la periya potholes irukku.",
+          "normalized_complaint": "The road condition is very poor, and there are large potholes in our street requiring urgent repair.",
+          "language": "Tamil",
+          "dialect": "",
+          "category": "Roads",
+          "intent": "Request for road repair and filling of large potholes",
+          "primary_department": "Public Works",
+          "secondary_departments": [],
+          "urgency": "Medium",
+          "confidence": 0.99,
+          "keywords": [
+            "Road",
+            "mosam",
+            "theru",
+            "potholes",
+            "periya"
+          ],
+          "detected_meaning": "The road is very bad. There are large potholes in our street.",
+          "explanation": "The primary issue is damaged infrastructure with large potholes on the street, directly falling under Roads and owned by Public Works. Urgency is medium due to daily travel inconvenience without immediate threat to life. No secondary departments are required as only road repair is reported.",
+          "evidence_highlights": [
+            {
+              "phrase": "Road romba mosama",
+              "translation": "Road is very bad",
+              "significance": "Indicates the poor condition of the road infrastructure."
+            },
+            {
+              "phrase": "periya potholes irukku",
+              "translation": "There are big potholes",
+              "significance": "Specifies the exact nature of the road damage requiring Public Works intervention."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2258,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:33.951540+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:36.211065+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true
+    },
+    {
+      "case": 3,
+      "text": "Enga area la moonu naala thanni varala.",
+      "expected_department": "Water Supply",
+      "group": "colloquial Tamil",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-7da0445ca0e24c6591b1267127241ecc",
+        "input_type": "text",
+        "original_text": "Enga area la moonu naala thanni varala.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:36.216004+00:00",
+        "updated_at": "2026-10-14T18:36:38.238012+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "Enga area la moonu naala thanni varala.",
+          "normalized_complaint": "Water supply has not been available in our area for the past three days.",
+          "language": "Tamil",
+          "dialect": "Colloquial",
+          "category": "Water Supply",
+          "intent": "Report water supply disruption",
+          "primary_department": "Water Supply",
+          "secondary_departments": [],
+          "urgency": "Medium",
+          "confidence": 0.98,
+          "keywords": [
+            "thanni",
+            "varala",
+            "moonu naala",
+            "area"
+          ],
+          "detected_meaning": "Water has not been coming to our area for three days.",
+          "explanation": "The primary issue is a lack of drinking water supply for the past three days, which places it under Water Supply with Medium urgency due to the duration of the outage.",
+          "evidence_highlights": [
+            {
+              "phrase": "moonu naala thanni varala",
+              "translation": "water has not been coming for three days",
+              "significance": "indicates the duration and nature of the water supply disruption"
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2019,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:36.217009+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:38.238012+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true
+    },
+    {
+      "case": 4,
+      "text": "हमारे मोहल्ले में तीन दिन से पानी नहीं आ रहा है।",
+      "expected_department": "Water Supply",
+      "group": "Hindi",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-a5710e778e6a446ca320c37e285c0eda",
+        "input_type": "text",
+        "original_text": "हमारे मोहल्ले में तीन दिन से पानी नहीं आ रहा है।",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:38.244486+00:00",
+        "updated_at": "2026-10-14T18:36:40.360370+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "हमारे मोहल्ले में तीन दिन से पानी नहीं आ रहा है।",
+          "normalized_complaint": "Water supply has not been available in our locality for the past three days.",
+          "language": "Hindi",
+          "dialect": "",
+          "category": "Water Supply",
+          "intent": "Report water supply disruption",
+          "primary_department": "Water Supply",
+          "secondary_departments": [],
+          "urgency": "Medium",
+          "confidence": 1.0,
+          "keywords": [
+            "पानी नहीं आ रहा है",
+            "तीन दिन से",
+            "मोहल्ले"
+          ],
+          "detected_meaning": "The resident is complaining about a complete lack of water supply in their neighborhood for the last three days.",
+          "explanation": "The complaint is categorized under Water Supply due to the total absence of water for three days, making Water Supply the primary department. Urgency is Medium as prolonged water outage causes significant inconvenience but no immediate danger to life. No secondary departments are required.",
+          "evidence_highlights": [
+            {
+              "phrase": "पानी नहीं आ रहा है",
+              "translation": "water is not coming",
+              "significance": "indicates the core issue of water supply disruption"
+            },
+            {
+              "phrase": "तीन दिन से",
+              "translation": "for three days",
+              "significance": "establishes the duration of the outage"
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2115,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:38.244486+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:40.361352+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true
+    },
+    {
+      "case": 5,
+      "text": "Street la garbage edukkave illa, romba smell varudhu.",
+      "expected_department": "Sanitation",
+      "group": "mixed Tamil-English",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-4ba82a7645ae4ae786f8648fb8bdcd6b",
+        "input_type": "text",
+        "original_text": "Street la garbage edukkave illa, romba smell varudhu.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:40.365958+00:00",
+        "updated_at": "2026-10-14T18:36:42.529420+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "Street la garbage edukkave illa, romba smell varudhu.",
+          "normalized_complaint": "Garbage on the street has not been collected at all, resulting in a severe foul odor.",
+          "language": "Tamil",
+          "dialect": "Colloquial",
+          "category": "Sanitation",
+          "intent": "Report uncollected garbage and foul odor on the street requiring waste removal.",
+          "primary_department": "Sanitation",
+          "secondary_departments": [],
+          "urgency": "Medium",
+          "confidence": 0.98,
+          "keywords": [
+            "garbage",
+            "smell",
+            "street",
+            "edukkave illa"
+          ],
+          "detected_meaning": "Garbage has not been picked up from the street and is causing a very bad smell.",
+          "explanation": "The complaint is categorized under Sanitation because it reports uncollected garbage and foul odor on the street. Urgency is Medium due to ongoing sanitation issues causing discomfort, and Sanitation is the primary and only required department for waste removal.",
+          "evidence_highlights": [
+            {
+              "phrase": "garbage edukkave illa",
+              "translation": "garbage is not being picked up at all",
+              "significance": "Directly indicates the failure of municipal waste collection services."
+            },
+            {
+              "phrase": "romba smell varudhu",
+              "translation": "a lot of smell is coming",
+              "significance": "Demonstrates the environmental and nuisance impact of the uncollected garbage."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2161,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:40.365958+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:42.529420+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true
+    },
+    {
+      "case": 6,
+      "text": "The drane is blokd and sewag is floding the street.",
+      "expected_department": "Drainage",
+      "group": "misspelled English",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-6e7029d59df141798f06edc8b85a3b9c",
+        "input_type": "text",
+        "original_text": "The drane is blokd and sewag is floding the street.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:42.536006+00:00",
+        "updated_at": "2026-10-14T18:36:44.781695+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "The drane is blokd and sewag is floding the street.",
+          "normalized_complaint": "The drain is blocked, and sewage is flooding the street.",
+          "language": "English",
+          "dialect": "",
+          "category": "Drainage",
+          "intent": "Report a blocked drain and sewage flooding on the street",
+          "primary_department": "Drainage",
+          "secondary_departments": [],
+          "urgency": "High",
+          "confidence": 0.95,
+          "keywords": [
+            "drain",
+            "blocked",
+            "sewage",
+            "flooding",
+            "street"
+          ],
+          "detected_meaning": "The complainant is reporting a blocked drain causing sewage to overflow and flood the street.",
+          "explanation": "Category is Drainage because the report explicitly mentions a blocked drain and sewage overflow. Urgency is High due to the public health and environmental hazard posed by sewage flooding the street. Primary department is Drainage with no secondary departments required as no other distinct infrastructure issues were reported.",
+          "evidence_highlights": [
+            {
+              "phrase": "The drane is blokd and sewag is floding the street",
+              "translation": "The drain is blocked and sewage is flooding the street",
+              "significance": "Directly establishes the primary issue of drainage blockage and sewage overflow onto public space."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2244,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:42.536006+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:44.781695+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true
+    },
+    {
+      "case": 7,
+      "text": "A live electric wire is lying on the road near children.",
+      "expected_department": "Electricity",
+      "group": "formal",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-6527eba06f5b48f5acadb1d9de62fbee",
+        "input_type": "text",
+        "original_text": "A live electric wire is lying on the road near children.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:44.787279+00:00",
+        "updated_at": "2026-10-14T18:36:46.879095+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "A live electric wire is lying on the road near children.",
+          "normalized_complaint": "A live electric wire is lying exposed on the road near children, creating an immediate safety hazard.",
+          "language": "English",
+          "dialect": "",
+          "category": "Electricity",
+          "intent": "Report a dangerous live electric wire on the road posing a risk to children",
+          "primary_department": "Electricity",
+          "secondary_departments": [],
+          "urgency": "Critical",
+          "confidence": 1.0,
+          "keywords": [
+            "live electric wire",
+            "road",
+            "children",
+            "danger"
+          ],
+          "detected_meaning": "An exposed live electrical wire on a public road presents an immediate danger to children and pedestrians.",
+          "explanation": "Category is Electricity due to the live electric wire. Urgency is Critical because a live wire near children poses an immediate danger to life and safety. Primary ownership is Electricity for securing and repairing the wire.",
+          "evidence_highlights": [
+            {
+              "phrase": "A live electric wire is lying on the road near children",
+              "translation": "A live electric wire is lying on the road near children",
+              "significance": "Directly indicates the critical hazard of an exposed electrical wire endangering children."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2091,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:44.787279+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:46.879095+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true
+    },
+    {
+      "case": 8,
+      "text": "আমাদের রাস্তায় অনেক বড় গর্ত হয়েছে।",
+      "expected_department": "Public Works",
+      "group": "Bengali",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-fce55583ab0a4151893671202cc35e4e",
+        "input_type": "text",
+        "original_text": "আমাদের রাস্তায় অনেক বড় গর্ত হয়েছে।",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:46.883650+00:00",
+        "updated_at": "2026-10-14T18:36:48.846766+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "আমাদের রাস্তায় অনেক বড় গর্ত হয়েছে।",
+          "normalized_complaint": "There are multiple very large potholes on our street, requiring urgent repair.",
+          "language": "Bengali",
+          "dialect": "",
+          "category": "Roads",
+          "intent": "Request for road repair due to large potholes",
+          "primary_department": "Public Works",
+          "secondary_departments": [],
+          "urgency": "Medium",
+          "confidence": 0.95,
+          "keywords": [
+            "রাস্তায়",
+            "গর্ত",
+            "potholes",
+            "street"
+          ],
+          "detected_meaning": "The complainant states that there are large potholes on their street and requests road repair.",
+          "explanation": "Category is Roads because the complaint explicitly reports large potholes on the street. Primary department is Public Works, which is responsible for road infrastructure and pothole repairs. Urgency is Medium as the road damage poses a localized hazard to commuters over time but does not constitute an immediate life-threatening emergency.",
+          "evidence_highlights": [
+            {
+              "phrase": "আমাদের রাস্তায় অনেক বড় গর্ত হয়েছে।",
+              "translation": "There are many big potholes on our street.",
+              "significance": "Directly identifies the location (street) and the core civic issue (large potholes)."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 1961,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:46.883650+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:48.846766+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true
+    },
+    {
+      "case": 9,
+      "text": "The drain near Gandhi School has been blocked for three days. Sewage and uncollected rubbish cover the street, and the road surface is broken. Please clear the drain, remove the waste, and repair the road.",
+      "expected_department": "Drainage",
+      "expected_secondary_departments": [
+        "Sanitation",
+        "Public Works"
+      ],
+      "group": "multiple departments",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-8a1abb7c281c4b50a51829ebb5d526f1",
+        "input_type": "text",
+        "original_text": "The drain near Gandhi School has been blocked for three days. Sewage and uncollected rubbish cover the street, and the road surface is broken. Please clear the drain, remove the waste, and repair the road.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:48.851766+00:00",
+        "updated_at": "2026-10-14T18:36:51.404919+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "The drain near Gandhi School has been blocked for three days. Sewage and uncollected rubbish cover the street, and the road surface is broken. Please clear the drain, remove the waste, and repair the road.",
+          "normalized_complaint": "The drainage system near Gandhi School has been blocked for three days, causing sewage overflow. Uncollected rubbish covers the street, and the road surface is broken. Requesting immediate clearance of the drain, removal of accumulated waste, and repair of the damaged road surface.",
+          "language": "English",
+          "dialect": "",
+          "category": "Drainage",
+          "intent": "Request for clearing a blocked drain, removing waste, and repairing the road near Gandhi School.",
+          "primary_department": "Drainage",
+          "secondary_departments": [
+            "Sanitation",
+            "Public Works"
+          ],
+          "urgency": "Medium",
+          "confidence": 1.0,
+          "keywords": [
+            "drain",
+            "Gandhi School",
+            "blocked",
+            "sewage",
+            "rubbish",
+            "road surface broken",
+            "repair"
+          ],
+          "detected_meaning": "The complainant is reporting a blocked drain causing sewage overflow, uncollected rubbish, and a broken road surface near Gandhi School, and is requesting drainage clearance, waste removal, and road repairs.",
+          "explanation": "Category is Drainage because the primary reported issue is a blocked drain with sewage overflow. Sanitation is a secondary department required for removing uncollected rubbish from the street. Public Works is a secondary department required for repairing the broken road surface. Urgency is Medium due to sewage overflow and accumulated rubbish present for three days without immediate threat to life.",
+          "evidence_highlights": [
+            {
+              "phrase": "The drain near Gandhi School has been blocked for three days.",
+              "translation": "The drain near Gandhi School has been blocked for three days.",
+              "significance": "Establishes the primary drainage issue, location, and duration."
+            },
+            {
+              "phrase": "Sewage and uncollected rubbish cover the street",
+              "translation": "Sewage and uncollected rubbish cover the street",
+              "significance": "Indicates the need for sanitation intervention to clear waste."
+            },
+            {
+              "phrase": "the road surface is broken",
+              "translation": "the road surface is broken",
+              "significance": "Indicates the need for public works intervention for road repairs."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2552,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:48.851766+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:51.404919+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true,
+      "secondary_matches_seed": true,
+      "routing_status": 200,
+      "approved_result": {
+        "tracking_id": "GRV-2026-8a1abb7c281c4b50a51829ebb5d526f1",
+        "input_type": "text",
+        "original_text": "The drain near Gandhi School has been blocked for three days. Sewage and uncollected rubbish cover the street, and the road surface is broken. Please clear the drain, remove the waste, and repair the road.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:48.851766+00:00",
+        "updated_at": "2026-10-14T18:36:51.409835+00:00",
+        "status": "routed",
+        "analysis": {
+          "transcript": "The drain near Gandhi School has been blocked for three days. Sewage and uncollected rubbish cover the street, and the road surface is broken. Please clear the drain, remove the waste, and repair the road.",
+          "normalized_complaint": "The drainage system near Gandhi School has been blocked for three days, causing sewage overflow. Uncollected rubbish covers the street, and the road surface is broken. Requesting immediate clearance of the drain, removal of accumulated waste, and repair of the damaged road surface.",
+          "language": "English",
+          "dialect": "",
+          "category": "Drainage",
+          "intent": "Request for clearing a blocked drain, removing waste, and repairing the road near Gandhi School.",
+          "primary_department": "Drainage",
+          "secondary_departments": [
+            "Sanitation",
+            "Public Works"
+          ],
+          "urgency": "Medium",
+          "confidence": 1.0,
+          "keywords": [
+            "drain",
+            "Gandhi School",
+            "blocked",
+            "sewage",
+            "rubbish",
+            "road surface broken",
+            "repair"
+          ],
+          "detected_meaning": "The complainant is reporting a blocked drain causing sewage overflow, uncollected rubbish, and a broken road surface near Gandhi School, and is requesting drainage clearance, waste removal, and road repairs.",
+          "explanation": "Category is Drainage because the primary reported issue is a blocked drain with sewage overflow. Sanitation is a secondary department required for removing uncollected rubbish from the street. Public Works is a secondary department required for repairing the broken road surface. Urgency is Medium due to sewage overflow and accumulated rubbish present for three days without immediate threat to life.",
+          "evidence_highlights": [
+            {
+              "phrase": "The drain near Gandhi School has been blocked for three days.",
+              "translation": "The drain near Gandhi School has been blocked for three days.",
+              "significance": "Establishes the primary drainage issue, location, and duration."
+            },
+            {
+              "phrase": "Sewage and uncollected rubbish cover the street",
+              "translation": "Sewage and uncollected rubbish cover the street",
+              "significance": "Indicates the need for sanitation intervention to clear waste."
+            },
+            {
+              "phrase": "the road surface is broken",
+              "translation": "the road surface is broken",
+              "significance": "Indicates the need for public works intervention for road repairs."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": "Drainage",
+        "assigned_secondary_departments": [
+          "Sanitation",
+          "Public Works"
+        ],
+        "version": 3,
+        "analysis_ms": 2552,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:48.851766+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:51.404919+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:51.409835+00:00",
+            "status": "routed",
+            "department": "Drainage",
+            "secondary_departments": [
+              "Sanitation",
+              "Public Works"
+            ],
+            "note": "Synthetic verification: approved all recommended responsibilities."
+          }
+        ]
+      }
+    },
+    {
+      "case": 10,
+      "text": "Enga theru la kudineer pipe odanju rendu naala thanni leak aagudhu. Andha idathula road um odanju periya pothole irukku. Pipe um road um sari pannunga.",
+      "expected_department": "Water Supply",
+      "expected_secondary_departments": [
+        "Public Works"
+      ],
+      "group": "mixed Tamil-English multiple departments",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-86224945d5c74988b91141f4a4505f91",
+        "input_type": "text",
+        "original_text": "Enga theru la kudineer pipe odanju rendu naala thanni leak aagudhu. Andha idathula road um odanju periya pothole irukku. Pipe um road um sari pannunga.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:51.413346+00:00",
+        "updated_at": "2026-10-14T18:36:53.908669+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "Enga theru la kudineer pipe odanju rendu naala thanni leak aagudhu. Andha idathula road um odanju periya pothole irukku. Pipe um road um sari pannunga.",
+          "normalized_complaint": "In our street, the drinking water pipe has broken and water has been leaking for two days. At that location, the road is also damaged and there is a large pothole. Please repair both the pipe and the road.",
+          "language": "Tamil",
+          "dialect": "",
+          "category": "Water Supply",
+          "intent": "Request for repair of a broken drinking water pipe leaking for two days and the resulting large pothole on the road.",
+          "primary_department": "Water Supply",
+          "secondary_departments": [
+            "Public Works"
+          ],
+          "urgency": "Medium",
+          "confidence": 0.98,
+          "keywords": [
+            "kudineer pipe",
+            "water leak",
+            "road odanju",
+            "pothole",
+            "pipe repair"
+          ],
+          "detected_meaning": "The citizen reports a broken drinking water pipe causing a leak for two days, which has also caused road damage and a large pothole, and requests repairs for both.",
+          "explanation": "The primary issue is the broken drinking water pipe causing leaks, placing it under Water Supply. The secondary department is Public Works because the leak has caused road damage and a large pothole that requires road restoration work. Urgency is Medium due to continuous water leakage and road damage over two days without immediate life danger.",
+          "evidence_highlights": [
+            {
+              "phrase": "kudineer pipe odanju rendu naala thanni leak aagudhu",
+              "translation": "drinking water pipe is broken and water has been leaking for two days",
+              "significance": "Establishes the primary water supply issue, duration, and ongoing leak."
+            },
+            {
+              "phrase": "Andha idathula road um odanju periya pothole irukku",
+              "translation": "At that location, the road is also broken and there is a big pothole",
+              "significance": "Establishes the secondary road infrastructure issue resulting from the pipe leak."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2495,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:51.413346+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:53.909668+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true,
+      "secondary_matches_seed": true,
+      "routing_status": 200,
+      "approved_result": {
+        "tracking_id": "GRV-2026-86224945d5c74988b91141f4a4505f91",
+        "input_type": "text",
+        "original_text": "Enga theru la kudineer pipe odanju rendu naala thanni leak aagudhu. Andha idathula road um odanju periya pothole irukku. Pipe um road um sari pannunga.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:51.413346+00:00",
+        "updated_at": "2026-10-14T18:36:53.913669+00:00",
+        "status": "routed",
+        "analysis": {
+          "transcript": "Enga theru la kudineer pipe odanju rendu naala thanni leak aagudhu. Andha idathula road um odanju periya pothole irukku. Pipe um road um sari pannunga.",
+          "normalized_complaint": "In our street, the drinking water pipe has broken and water has been leaking for two days. At that location, the road is also damaged and there is a large pothole. Please repair both the pipe and the road.",
+          "language": "Tamil",
+          "dialect": "",
+          "category": "Water Supply",
+          "intent": "Request for repair of a broken drinking water pipe leaking for two days and the resulting large pothole on the road.",
+          "primary_department": "Water Supply",
+          "secondary_departments": [
+            "Public Works"
+          ],
+          "urgency": "Medium",
+          "confidence": 0.98,
+          "keywords": [
+            "kudineer pipe",
+            "water leak",
+            "road odanju",
+            "pothole",
+            "pipe repair"
+          ],
+          "detected_meaning": "The citizen reports a broken drinking water pipe causing a leak for two days, which has also caused road damage and a large pothole, and requests repairs for both.",
+          "explanation": "The primary issue is the broken drinking water pipe causing leaks, placing it under Water Supply. The secondary department is Public Works because the leak has caused road damage and a large pothole that requires road restoration work. Urgency is Medium due to continuous water leakage and road damage over two days without immediate life danger.",
+          "evidence_highlights": [
+            {
+              "phrase": "kudineer pipe odanju rendu naala thanni leak aagudhu",
+              "translation": "drinking water pipe is broken and water has been leaking for two days",
+              "significance": "Establishes the primary water supply issue, duration, and ongoing leak."
+            },
+            {
+              "phrase": "Andha idathula road um odanju periya pothole irukku",
+              "translation": "At that location, the road is also broken and there is a big pothole",
+              "significance": "Establishes the secondary road infrastructure issue resulting from the pipe leak."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": "Water Supply",
+        "assigned_secondary_departments": [
+          "Public Works"
+        ],
+        "version": 3,
+        "analysis_ms": 2495,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:51.413346+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:53.909668+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:53.913669+00:00",
+            "status": "routed",
+            "department": "Water Supply",
+            "secondary_departments": [
+              "Public Works"
+            ],
+            "note": "Synthetic verification: approved all recommended responsibilities."
+          }
+        ]
+      }
+    },
+    {
+      "case": 11,
+      "text": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+      "expected_department": "Sanitation",
+      "expected_secondary_departments": [],
+      "group": "negation and unnecessary departments",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-9476353de021479b9f2611701eb51e1d",
+        "input_type": "text",
+        "original_text": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:53.916455+00:00",
+        "updated_at": "2026-10-14T18:36:56.206818+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+          "normalized_complaint": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+          "language": "English",
+          "dialect": "",
+          "category": "Sanitation",
+          "intent": "Report uncollected garbage on a specific road for multiple days",
+          "primary_department": "Sanitation",
+          "secondary_departments": [],
+          "urgency": "Medium",
+          "confidence": 1.0,
+          "keywords": [
+            "garbage",
+            "collected",
+            "Temple Road",
+            "four days",
+            "not damaged",
+            "not blocked"
+          ],
+          "detected_meaning": "The user is reporting that municipal waste collection has been missed on Temple Road for the past four days, while explicitly noting that there are no road damage or drainage issues.",
+          "explanation": "Category is Sanitation because the primary issue is uncollected garbage. Primary department is Sanitation for waste removal. Urgency is Medium due to four days of accumulated waste without immediate danger. No secondary departments are needed as road and drainage issues are explicitly negated.",
+          "evidence_highlights": [
+            {
+              "phrase": "Garbage has not been collected on Temple Road for four days",
+              "translation": "Garbage has not been collected on Temple Road for four days",
+              "significance": "Establishes the core sanitation complaint, location, and duration of the uncollected waste."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2289,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:53.916455+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:56.206818+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true,
+      "secondary_matches_seed": true,
+      "routing_status": 200,
+      "approved_result": {
+        "tracking_id": "GRV-2026-9476353de021479b9f2611701eb51e1d",
+        "input_type": "text",
+        "original_text": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:53.916455+00:00",
+        "updated_at": "2026-10-14T18:36:56.211840+00:00",
+        "status": "routed",
+        "analysis": {
+          "transcript": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+          "normalized_complaint": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+          "language": "English",
+          "dialect": "",
+          "category": "Sanitation",
+          "intent": "Report uncollected garbage on a specific road for multiple days",
+          "primary_department": "Sanitation",
+          "secondary_departments": [],
+          "urgency": "Medium",
+          "confidence": 1.0,
+          "keywords": [
+            "garbage",
+            "collected",
+            "Temple Road",
+            "four days",
+            "not damaged",
+            "not blocked"
+          ],
+          "detected_meaning": "The user is reporting that municipal waste collection has been missed on Temple Road for the past four days, while explicitly noting that there are no road damage or drainage issues.",
+          "explanation": "Category is Sanitation because the primary issue is uncollected garbage. Primary department is Sanitation for waste removal. Urgency is Medium due to four days of accumulated waste without immediate danger. No secondary departments are needed as road and drainage issues are explicitly negated.",
+          "evidence_highlights": [
+            {
+              "phrase": "Garbage has not been collected on Temple Road for four days",
+              "translation": "Garbage has not been collected on Temple Road for four days",
+              "significance": "Establishes the core sanitation complaint, location, and duration of the uncollected waste."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "",
+        "assigned_department": "Sanitation",
+        "assigned_secondary_departments": [],
+        "version": 3,
+        "analysis_ms": 2289,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:53.916455+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:56.206818+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "AI recommendation validated. Awaiting officer routing approval."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:56.211840+00:00",
+            "status": "routed",
+            "department": "Sanitation",
+            "secondary_departments": [],
+            "note": "Synthetic verification: approved all recommended responsibilities."
+          }
+        ]
+      }
+    },
+    {
+      "case": 12,
+      "text": "Something is wrong in our area, but I cannot tell what it is.",
+      "expected_department": "General Administration",
+      "expected_secondary_departments": [],
+      "group": "ambiguous",
+      "http_status": 201,
+      "result": {
+        "tracking_id": "GRV-2026-973c141ec0f542e096386cb5cbcc071d",
+        "input_type": "text",
+        "original_text": "Something is wrong in our area, but I cannot tell what it is.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:56.214903+00:00",
+        "updated_at": "2026-10-14T18:36:58.438820+00:00",
+        "status": "awaiting_review",
+        "analysis": {
+          "transcript": "Something is wrong in our area, but I cannot tell what it is.",
+          "normalized_complaint": "The citizen reports that an unspecified issue exists in their area, but the exact nature of the problem is unknown.",
+          "language": "English",
+          "dialect": "",
+          "category": "Other",
+          "intent": "Report an unspecified problem",
+          "primary_department": "General Administration",
+          "secondary_departments": [],
+          "urgency": "Low",
+          "confidence": 0.5,
+          "keywords": [
+            "wrong",
+            "area",
+            "unknown"
+          ],
+          "detected_meaning": "The complainant is experiencing a vague feeling or notice that something is amiss in their locality, but lacks specific details.",
+          "explanation": "The category is Other and primary department is General Administration because the input is too vague and does not point to a specific civic issue. Urgency is Low as there is no immediate danger or clear problem reported. Confidence is 0.5 due to high ambiguity.",
+          "evidence_highlights": [
+            {
+              "phrase": "Something is wrong in our area, but I cannot tell what it is.",
+              "translation": "Something is wrong in our area, but I cannot tell what it is.",
+              "significance": "Indicates a lack of specific civic details or actionable problems."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": true,
+        "review_reason": "Confidence is below the officer review threshold. The civic category is ambiguous.",
+        "assigned_department": null,
+        "assigned_secondary_departments": [],
+        "version": 2,
+        "analysis_ms": 2223,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:56.214903+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:58.438820+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Confidence is below the officer review threshold. The civic category is ambiguous."
+          }
+        ]
+      },
+      "retrieval_preserved": true,
+      "primary_matches_seed": true,
+      "secondary_matches_seed": true,
+      "routing_status": 200,
+      "approved_result": {
+        "tracking_id": "GRV-2026-973c141ec0f542e096386cb5cbcc071d",
+        "input_type": "text",
+        "original_text": "Something is wrong in our area, but I cannot tell what it is.",
+        "audio_mime": null,
+        "created_at": "2026-10-14T18:36:56.214903+00:00",
+        "updated_at": "2026-10-14T18:36:58.443818+00:00",
+        "status": "routed",
+        "analysis": {
+          "transcript": "Something is wrong in our area, but I cannot tell what it is.",
+          "normalized_complaint": "The citizen reports that an unspecified issue exists in their area, but the exact nature of the problem is unknown.",
+          "language": "English",
+          "dialect": "",
+          "category": "Other",
+          "intent": "Report an unspecified problem",
+          "primary_department": "General Administration",
+          "secondary_departments": [],
+          "urgency": "Low",
+          "confidence": 0.5,
+          "keywords": [
+            "wrong",
+            "area",
+            "unknown"
+          ],
+          "detected_meaning": "The complainant is experiencing a vague feeling or notice that something is amiss in their locality, but lacks specific details.",
+          "explanation": "The category is Other and primary department is General Administration because the input is too vague and does not point to a specific civic issue. Urgency is Low as there is no immediate danger or clear problem reported. Confidence is 0.5 due to high ambiguity.",
+          "evidence_highlights": [
+            {
+              "phrase": "Something is wrong in our area, but I cannot tell what it is.",
+              "translation": "Something is wrong in our area, but I cannot tell what it is.",
+              "significance": "Indicates a lack of specific civic details or actionable problems."
+            }
+          ]
+        },
+        "analysis_error": null,
+        "requires_review": false,
+        "review_reason": "Confidence is below the officer review threshold. The civic category is ambiguous.",
+        "assigned_department": "General Administration",
+        "assigned_secondary_departments": [],
+        "version": 3,
+        "analysis_ms": 2223,
+        "events": [
+          {
+            "timestamp": "2026-10-14T18:36:56.214903+00:00",
+            "status": "received",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Complaint received. Original evidence preserved."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:58.438820+00:00",
+            "status": "awaiting_review",
+            "department": null,
+            "secondary_departments": [],
+            "note": "Confidence is below the officer review threshold. The civic category is ambiguous."
+          },
+          {
+            "timestamp": "2026-10-14T18:36:58.443818+00:00",
+            "status": "routed",
+            "department": "General Administration",
+            "secondary_departments": [],
+            "note": "Synthetic verification: approved all recommended responsibilities."
+          }
+        ]
+      }
+    }
+  ]
+}

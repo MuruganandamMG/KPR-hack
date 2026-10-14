@@ -6,6 +6,7 @@ import { ConfidenceMeter } from "./ConfidenceMeter";
 import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
 import { OfficerSummaryCard } from "./OfficerSummaryCard";
+import { formalComplaint } from "./formalComplaint";
 import { statusLabels, type Complaint } from "./types";
 
 export function ComplaintDetail({
@@ -18,12 +19,29 @@ export function ComplaintDetail({
   onSelectAction?: (actionText: string) => void;
 }) {
   const { analysis } = complaint;
+  const approved = !!complaint.assigned_department;
+  const secondary = approved
+    ? complaint.assigned_secondary_departments || []
+    : analysis?.secondary_departments || [];
   const awaitingOfficer = [
     "received",
     "awaiting_review",
     "analysis_failed",
   ].includes(complaint.status);
   const [copyMessage, setCopyMessage] = useState("");
+  const [formalCopyMessage, setFormalCopyMessage] = useState("");
+  async function copyFormalComplaint() {
+    const text = formalComplaint(complaint);
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setFormalCopyMessage("Formal complaint copied.");
+    } catch {
+      setFormalCopyMessage(
+        "Copy is unavailable. Select and copy the formal complaint below.",
+      );
+    }
+  }
   async function copyId() {
     try {
       await navigator.clipboard.writeText(complaint.tracking_id);
@@ -87,8 +105,44 @@ export function ComplaintDetail({
           onSelectAction={onSelectAction}
         />
       )}
+      <section
+        aria-label="Department routing"
+        className="rounded-2xl border border-stone-200 p-5"
+      >
+        <h3 className="font-semibold">Department routing</h3>
+        <p className="mt-1 text-xs text-stone-500">
+          {approved
+            ? "Officer-approved assignments"
+            : "Recommendations awaiting officer approval"}
+        </p>
+        <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-stone-500">
+              Primary department ({approved ? "assigned" : "recommended"})
+            </dt>
+            <dd className="mt-1 font-semibold text-emerald-900">
+              {complaint.assigned_department ||
+                analysis?.primary_department ||
+                "Manual classification needed"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-stone-500">
+              Secondary departments ({approved ? "assigned" : "recommended"})
+            </dt>
+            <dd className="mt-1 font-semibold">
+              {secondary.join(", ") ||
+                (approved
+                  ? "None assigned"
+                  : analysis
+                    ? "None recommended"
+                    : "Awaiting manual classification")}
+            </dd>
+          </div>
+        </dl>
+      </section>
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
-        <p className="eyebrow text-emerald-800">What we understood</p>
+        <p className="eyebrow text-emerald-800">Formal complaint for staff</p>
         <p className="mt-3 text-lg leading-relaxed text-stone-800">
           {analysis?.normalized_complaint ||
             (awaitingOfficer
@@ -106,16 +160,31 @@ export function ComplaintDetail({
             )}
           </div>
         )}
+        {analysis && (
+          <Button
+            className="mt-4"
+            size="sm"
+            variant="outline"
+            onClick={copyFormalComplaint}
+          >
+            <Copy size={14} /> Copy formal complaint
+          </Button>
+        )}
+        {formalCopyMessage && (
+          <p role="status" className="mt-2 text-sm text-stone-600">
+            {formalCopyMessage}
+          </p>
+        )}
       </div>
       <dl className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <dt className="text-stone-500">Assigned department</dt>
+          <dt className="text-stone-500">Routing approval</dt>
           <dd className="mt-1 font-semibold">
-            {complaint.assigned_department || "Awaiting officer approval"}
+            {approved ? "Approved by officer" : "Awaiting officer approval"}
           </dd>
         </div>
         <div>
-          <dt className="text-stone-500">AI recommendation</dt>
+          <dt className="text-stone-500">AI primary recommendation</dt>
           <dd className="mt-1 font-semibold">
             {analysis?.primary_department || "Manual classification"}
           </dd>
@@ -174,7 +243,7 @@ export function ComplaintDetail({
           </p>
           {analysis.secondary_departments.length > 0 && (
             <p className="mt-3 text-sm">
-              Additional departments:{" "}
+              AI secondary recommendations:{" "}
               {analysis.secondary_departments.join(", ")}
             </p>
           )}
@@ -217,7 +286,14 @@ export function ComplaintDetail({
                 </p>
                 <p className="mt-1 text-sm text-stone-600">{event.note}</p>
                 {event.department && (
-                  <p className="text-xs text-emerald-700">{event.department}</p>
+                  <p className="text-xs text-emerald-700">
+                    Primary: {event.department}
+                  </p>
+                )}
+                {event.secondary_departments?.length > 0 && (
+                  <p className="text-xs text-emerald-700">
+                    Secondary: {event.secondary_departments.join(", ")}
+                  </p>
                 )}
               </div>
             </li>

@@ -254,7 +254,7 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
                   {isLast && analysis.secondary_departments.length > 0 && (
                     <p className="mt-2 border-t border-stone-100 pt-2 text-xs text-stone-500">
                       <span className="font-medium text-stone-700">
-                        Cross-departmental tags:
+                        Secondary department recommendations:
                       </span>{" "}
                       {analysis.secondary_departments.join(", ")}
                     </p>

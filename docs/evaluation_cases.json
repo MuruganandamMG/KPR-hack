@@ -6,5 +6,9 @@
   {"text":"Street la garbage edukkave illa, romba smell varudhu.","expected_department":"Sanitation","group":"mixed Tamil-English"},
   {"text":"The drane is blokd and sewag is floding the street.","expected_department":"Drainage","group":"misspelled English"},
   {"text":"A live electric wire is lying on the road near children.","expected_department":"Electricity","group":"formal"},
-  {"text":"আমাদের রাস্তায় অনেক বড় গর্ত হয়েছে।","expected_department":"Public Works","group":"Bengali"}
+  {"text":"আমাদের রাস্তায় অনেক বড় গর্ত হয়েছে।","expected_department":"Public Works","group":"Bengali"},
+  {"text":"The drain near Gandhi School has been blocked for three days. Sewage and uncollected rubbish cover the street, and the road surface is broken. Please clear the drain, remove the waste, and repair the road.","expected_department":"Drainage","expected_secondary_departments":["Sanitation","Public Works"],"group":"multiple departments"},
+  {"text":"Enga theru la kudineer pipe odanju rendu naala thanni leak aagudhu. Andha idathula road um odanju periya pothole irukku. Pipe um road um sari pannunga.","expected_department":"Water Supply","expected_secondary_departments":["Public Works"],"group":"mixed Tamil-English multiple departments"},
+  {"text":"Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.","expected_department":"Sanitation","expected_secondary_departments":[],"group":"negation and unnecessary departments"},
+  {"text":"Something is wrong in our area, but I cannot tell what it is.","expected_department":"General Administration","expected_secondary_departments":[],"group":"ambiguous"}
 ]

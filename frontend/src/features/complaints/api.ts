@@ -23,7 +23,14 @@ export const trackComplaint = (id: string, signal?: AbortSignal) =>
     signal,
   });
 export const listComplaints = (
-  options: { status?: Status | ""; search?: string; offset?: number },
+  options: {
+    status?: Status | "";
+    search?: string;
+    offset?: number;
+    department?: string;
+    department_role?: "" | "primary" | "secondary";
+    category?: string;
+  },
   signal?: AbortSignal,
 ) => {
   const query = new URLSearchParams({
@@ -32,6 +39,12 @@ export const listComplaints = (
   });
   if (options.status) query.set("status", options.status);
   if (options.search) query.set("search", options.search);
+  if (options.department) {
+    query.set("department", options.department);
+    if (options.department_role)
+      query.set("department_role", options.department_role);
+  }
+  if (options.category) query.set("category", options.category);
   return request<ComplaintPage>(`/complaints?${query}`, { signal });
 };
 export const updateComplaint = (id: string, decision: Decision) =>

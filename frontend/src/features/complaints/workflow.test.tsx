@@ -27,6 +27,7 @@ const complaint = {
   status: "awaiting_review",
   version: 2,
   assigned_department: null,
+  assigned_secondary_departments: [],
   requires_review: false,
   review_reason: "",
   analysis_error: null,
@@ -52,6 +53,7 @@ const complaint = {
       timestamp: "2026-10-14T10:00:00Z",
       status: "awaiting_review",
       department: null,
+      secondary_departments: [],
       note: "Awaiting officer review.",
     },
   ],
@@ -469,6 +471,7 @@ it("approves routing with version and department then updates the queue", async 
     version: 2,
     status: "routed",
     department: "Public Works",
+    secondary_departments: [],
     note: "Reviewed and approved road repair.",
   });
 });

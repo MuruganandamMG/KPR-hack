@@ -1,0 +1,215 @@
+[
+  {
+    "case": 1,
+    "text": "The road is severely damaged and needs repair.",
+    "analysis": {
+      "transcript": "The road is severely damaged and needs repair.",
+      "normalized_complaint": "The road is severely damaged and requires repair.",
+      "language": "English",
+      "dialect": "",
+      "category": "Roads",
+      "intent": "Request road repair",
+      "primary_department": "Public Works",
+      "secondary_departments": [],
+      "urgency": "Medium",
+      "confidence": 1.0,
+      "keywords": [
+        "road",
+        "damaged",
+        "repair"
+      ],
+      "detected_meaning": "The citizen is reporting severe road damage and requesting municipal repairs.",
+      "explanation": "The dominant issue is road infrastructure damage, placing primary responsibility on Public Works under the Roads category. Urgency is medium due to reported severe damage without immediate danger to life. No secondary departments are required as no other municipal utilities are mentioned.",
+      "evidence_highlights": [
+        {
+          "phrase": "The road is severely damaged and needs repair.",
+          "translation": "The road is severely damaged and needs repair.",
+          "significance": "Directly indicates the location, issue, and requested action regarding road infrastructure."
+        }
+      ]
+    }
+  },
+  {
+    "case": 2,
+    "text": "Road romba mosama. Enga theru la periya potholes irukku.",
+    "analysis": {
+      "transcript": "Road romba mosama. Enga theru la periya potholes irukku.",
+      "normalized_complaint": "The road is in very poor condition, and there are large potholes in our street.",
+      "language": "Tamil and English",
+      "dialect": "",
+      "category": "Roads",
+      "intent": "Report road damage and potholes for repair",
+      "primary_department": "Public Works",
+      "secondary_departments": [],
+      "urgency": "Medium",
+      "confidence": 0.95,
+      "keywords": [
+        "Road",
+        "potholes",
+        "theru"
+      ],
+      "detected_meaning": "The citizen is reporting that the road is very bad and there are large potholes on their street.",
+      "explanation": "Category is Roads because the complaint explicitly reports poor road conditions and large potholes. Primary department is Public Works as they are responsible for road infrastructure repair. Urgency is Medium due to standard road degradation without reported immediate danger. No secondary departments are needed as only road repair is requested.",
+      "evidence_highlights": [
+        {
+          "phrase": "Road romba mosama. Enga theru la periya potholes irukku.",
+          "translation": "The road is very bad. There are big potholes in our street.",
+          "significance": "Directly identifies the location type and the specific infrastructural defects (poor road condition and large potholes)."
+        }
+      ]
+    }
+  },
+  {
+    "case": 9,
+    "text": "The drain near Gandhi School has been blocked for three days. Sewage and uncollected rubbish cover the street, and the road surface is broken. Please clear the drain, remove the waste, and repair the road.",
+    "analysis": {
+      "transcript": "The drain near Gandhi School has been blocked for three days. Sewage and uncollected rubbish cover the street, and the road surface is broken. Please clear the drain, remove the waste, and repair the road.",
+      "normalized_complaint": "The drain located near Gandhi School has been blocked for three days. Sewage and uncollected waste cover the street, and the road surface is broken. Request to clear the drain, remove the waste, and repair the road.",
+      "language": "English",
+      "dialect": "",
+      "category": "Drainage",
+      "intent": "Request for drain clearance, waste removal, and road repair",
+      "primary_department": "Drainage",
+      "secondary_departments": [
+        "Sanitation",
+        "Public Works"
+      ],
+      "urgency": "Medium",
+      "confidence": 1.0,
+      "keywords": [
+        "drain",
+        "Gandhi School",
+        "blocked",
+        "sewage",
+        "rubbish",
+        "street",
+        "road",
+        "broken"
+      ],
+      "detected_meaning": "The citizen is reporting a blocked drain near Gandhi School causing sewage overflow, along with uncollected garbage on the street and a broken road surface, requesting clearance, waste removal, and road repair.",
+      "explanation": "Drainage is the primary department because the dominant issue is the blocked drain and sewage overflow. Sanitation is a secondary department required for removing the uncollected rubbish covering the street. Public Works is a secondary department required for repairing the broken road surface. Urgency is Medium due to the three-day duration of the blockage and associated environmental contamination without reported immediate threat to life.",
+      "evidence_highlights": [
+        {
+          "phrase": "The drain near Gandhi School has been blocked for three days",
+          "translation": "The drain near Gandhi School has been blocked for three days",
+          "significance": "Establishes the primary drainage issue and its duration near the specified landmark."
+        },
+        {
+          "phrase": "Sewage and uncollected rubbish cover the street",
+          "translation": "Sewage and uncollected rubbish cover the street",
+          "significance": "Indicates the presence of sewage and waste requiring sanitation intervention."
+        },
+        {
+          "phrase": "the road surface is broken",
+          "translation": "the road surface is broken",
+          "significance": "Indicates physical infrastructure damage requiring public works intervention."
+        }
+      ]
+    }
+  },
+  {
+    "case": 10,
+    "text": "Enga theru la kudineer pipe odanju rendu naala thanni leak aagudhu. Andha idathula road um odanju periya pothole irukku. Pipe um road um sari pannunga.",
+    "analysis": {
+      "transcript": "Enga theru la kudineer pipe odanju rendu naala thanni leak aagudhu. Andha idathula road um odanju periya pothole irukku. Pipe um road um sari pannunga.",
+      "normalized_complaint": "In our street, the drinking water pipe is broken and water has been leaking for two days. At that location, the road is also broken and there is a large pothole. Please repair both the pipe and the road.",
+      "language": "Tamil and English",
+      "dialect": "",
+      "category": "Water Supply",
+      "intent": "Request for repair of a broken drinking water pipe leaking for two days and the resulting large pothole on the road.",
+      "primary_department": "Water Supply",
+      "secondary_departments": [
+        "Public Works"
+      ],
+      "urgency": "Medium",
+      "confidence": 1.0,
+      "keywords": [
+        "kudineer pipe",
+        "water leak",
+        "road odanju",
+        "pothole",
+        "pipe sari pannunga"
+      ],
+      "detected_meaning": "The citizen reports a broken drinking water pipe leaking for two days on their street, which has caused a large pothole on the road, and requests the repair of both the water pipe and the road.",
+      "explanation": "Category is Water Supply because the dominant issue is a broken drinking water pipe leak. Urgency is Medium due to ongoing water wastage and road damage over two days without immediate life hazard. Primary department is Water Supply for repairing the leaking drinking water pipe. Public Works is a secondary department required to repair the broken road and the large pothole caused at the location.",
+      "evidence_highlights": [
+        {
+          "phrase": "kudineer pipe odanju rendu naala thanni leak aagudhu",
+          "translation": "drinking water pipe is broken and water has been leaking for two days",
+          "significance": "Establishes the primary water supply issue, duration, and specific component requiring attention."
+        },
+        {
+          "phrase": "Andha idathula road um odanju periya pothole irukku",
+          "translation": "At that location, the road is also broken and there is a large pothole",
+          "significance": "Establishes the secondary road damage requiring public works intervention."
+        }
+      ]
+    }
+  },
+  {
+    "case": 11,
+    "text": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+    "analysis": {
+      "transcript": "Garbage has not been collected on Temple Road for four days. The road is not damaged, and the drain is not blocked.",
+      "normalized_complaint": "Garbage has not been collected on Temple Road for four days. The road is reported to be undamaged and the drain is reported not to be blocked.",
+      "language": "English",
+      "dialect": "",
+      "category": "Sanitation",
+      "intent": "Report uncollected garbage",
+      "primary_department": "Sanitation",
+      "secondary_departments": [],
+      "urgency": "Medium",
+      "confidence": 1.0,
+      "keywords": [
+        "Garbage",
+        "collected",
+        "Temple Road",
+        "four days"
+      ],
+      "detected_meaning": "The citizen is reporting that municipal waste collection has been missed on Temple Road for the past four days, while explicitly noting no issues with road damage or blocked drains.",
+      "explanation": "The dominant issue is uncollected waste, placing it under Sanitation and the Sanitation department. The duration of four days indicates a medium urgency. Explicit negations confirm no public works or drainage intervention is required.",
+      "evidence_highlights": [
+        {
+          "phrase": "Garbage has not been collected on Temple Road for four days",
+          "translation": "Garbage has not been collected on Temple Road for four days",
+          "significance": "Establishes the core sanitation complaint, location, and duration."
+        },
+        {
+          "phrase": "The road is not damaged, and the drain is not blocked",
+          "translation": "The road is not damaged, and the drain is not blocked",
+          "significance": "Explicitly rules out issues related to Public Works and Drainage."
+        }
+      ]
+    }
+  },
+  {
+    "case": 12,
+    "text": "Something is wrong in our area, but I cannot tell what it is.",
+    "analysis": {
+      "transcript": "Something is wrong in our area, but I cannot tell what it is.",
+      "normalized_complaint": "The citizen reports that something is wrong in their area, but is unable to specify the exact issue.",
+      "language": "English",
+      "dialect": "",
+      "category": "Other",
+      "intent": "Report a vague or unspecified issue",
+      "primary_department": "General Administration",
+      "secondary_departments": [],
+      "urgency": "Low",
+      "confidence": 0.5,
+      "keywords": [
+        "wrong",
+        "area",
+        "unspecified"
+      ],
+      "detected_meaning": "The user is expressing a general concern without providing any specific civic complaint details or location.",
+      "explanation": "Category is Other because no specific civic domain is identified. Urgency is Low due to the absence of immediate danger or clear impact. Primary ownership defaults to General Administration for unclear or non-civic input. Confidence is low (0.5) because the input is entirely vague and lacks actionable details.",
+      "evidence_highlights": [
+        {
+          "phrase": "Something is wrong in our area, but I cannot tell what it is.",
+          "translation": "Something is wrong in our area, but I cannot tell what it is.",
+          "significance": "Demonstrates the complete lack of specific actionable information or a defined civic issue."
+        }
+      ]
+    }
+  }
+]

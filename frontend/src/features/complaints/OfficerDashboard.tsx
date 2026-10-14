@@ -11,6 +11,7 @@ import { listComplaints, trackComplaint, updateComplaint } from "./api";
 import { ApiError } from "../../shared/request";
 import { ComplaintDetail } from "./ComplaintDetail";
 import {
+  categories,
   statusLabels,
   type Complaint,
   type ComplaintPage,
@@ -29,6 +30,14 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
   const [error, setError] = useState("");
   const [decisionError, setDecisionError] = useState("");
   const [department, setDepartment] = useState("");
+  const [secondaryDepartments, setSecondaryDepartments] = useState<string[]>(
+    [],
+  );
+  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [departmentRole, setDepartmentRole] = useState<
+    "" | "primary" | "secondary"
+  >("");
+  const [category, setCategory] = useState("");
   const [note, setNote] = useState("");
   const lock = useRef(false);
   const alive = useRef(true);
@@ -41,9 +50,20 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
+    setPage(null);
     setError("");
     const timer = setTimeout(() => {
-      listComplaints({ status, search, offset }, controller.signal)
+      listComplaints(
+        {
+          status,
+          search,
+          offset,
+          department: departmentFilter,
+          department_role: departmentRole,
+          category,
+        },
+        controller.signal,
+      )
         .then((result) => {
           if (!controller.signal.aborted) {
             setPage(result);
@@ -61,11 +81,24 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [status, search, offset, reload]);
+  }, [
+    status,
+    search,
+    offset,
+    reload,
+    departmentFilter,
+    departmentRole,
+    category,
+  ]);
   function select(record: Complaint) {
     setSelected(record);
     setDepartment(
       record.assigned_department || record.analysis?.primary_department || "",
+    );
+    setSecondaryDepartments(
+      record.assigned_department
+        ? record.assigned_secondary_departments || []
+        : record.analysis?.secondary_departments || [],
     );
     setNote("");
     setDecisionError("");
@@ -86,7 +119,9 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
       const result = await updateComplaint(selected.tracking_id, {
         version: selected.version,
         status: next,
-        ...(next === "routed" ? { department } : {}),
+        ...(next === "routed"
+          ? { department, secondary_departments: secondaryDepartments }
+          : {}),
         note,
       });
       if (!alive.current) return;
@@ -104,6 +139,11 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
               updated.assigned_department ||
                 updated.analysis?.primary_department ||
                 department,
+            );
+            setSecondaryDepartments(
+              updated.assigned_department
+                ? updated.assigned_secondary_departments || []
+                : updated.analysis?.secondary_departments || [],
             );
             setReload((value) => value + 1);
           }
@@ -171,6 +211,71 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
               }}
             />
           </div>
+          <label htmlFor="queue-department" className="field-label mt-4">
+            Filter by department
+          </label>
+          <select
+            id="queue-department"
+            className="field"
+            disabled={saving}
+            value={departmentFilter}
+            onChange={(e) => {
+              setDepartmentFilter(e.target.value);
+              setDepartmentRole("");
+              setOffset(0);
+              setSelected(null);
+            }}
+          >
+            <option value="">All departments</option>
+            {departments.map((value) => (
+              <option key={value}>{value}</option>
+            ))}
+          </select>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="queue-role" className="field-label">
+                Department role
+              </label>
+              <select
+                id="queue-role"
+                className="field"
+                disabled={saving || !departmentFilter}
+                value={departmentRole}
+                onChange={(e) => {
+                  setDepartmentRole(
+                    e.target.value as "" | "primary" | "secondary",
+                  );
+                  setOffset(0);
+                  setSelected(null);
+                }}
+              >
+                <option value="">Primary or secondary</option>
+                <option value="primary">Primary</option>
+                <option value="secondary">Secondary</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="queue-category" className="field-label">
+                Category
+              </label>
+              <select
+                id="queue-category"
+                className="field"
+                disabled={saving}
+                value={category}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setOffset(0);
+                  setSelected(null);
+                }}
+              >
+                <option value="">All categories</option>
+                {categories.map((value) => (
+                  <option key={value}>{value}</option>
+                ))}
+              </select>
+            </div>
+          </div>
           <label htmlFor="queue-status" className="field-label mt-4">
             Status
           </label>
@@ -198,7 +303,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
             </p>
           )}
           <div className="mt-6 space-y-3">
-            {loading ? (
+            {error ? null : loading ? (
               <p
                 role="status"
                 className="flex items-center gap-2 py-8 text-sm text-stone-500"
@@ -236,11 +341,18 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                           : "text-emerald-700"
                       }
                     >
-                      {item.analysis?.urgency || "Unclassified"} ·{" "}
+                      {item.analysis?.urgency || "Unclassified"} · Primary:{" "}
                       {item.assigned_department ||
                         item.analysis?.primary_department ||
                         "Review needed"}
                     </span>
+                  </span>
+                  <span className="mt-2 block text-xs text-stone-500">
+                    Secondary:{" "}
+                    {(item.assigned_department
+                      ? item.assigned_secondary_departments || []
+                      : item.analysis?.secondary_departments || []
+                    ).join(", ") || "None"}
                   </span>
                 </button>
               ))
@@ -304,7 +416,12 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                         className="field mb-4"
                         disabled={saving}
                         value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
+                        onChange={(e) => {
+                          setDepartment(e.target.value);
+                          setSecondaryDepartments((values) =>
+                            values.filter((name) => name !== e.target.value),
+                          );
+                        }}
                         required
                       >
                         <option value="" disabled>
@@ -314,6 +431,38 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                           <option key={value}>{value}</option>
                         ))}
                       </select>
+                      <fieldset className="mb-4" disabled={saving}>
+                        <legend className="field-label">
+                          Secondary departments
+                        </legend>
+                        <p className="mb-3 text-xs text-stone-500">
+                          Select every supporting department needed to resolve
+                          this complaint.
+                        </p>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {departments.map((value) => (
+                            <label
+                              key={value}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <input
+                                type="checkbox"
+                                className="accent-emerald-700"
+                                disabled={value === department}
+                                checked={secondaryDepartments.includes(value)}
+                                onChange={(e) =>
+                                  setSecondaryDepartments((values) =>
+                                    e.target.checked
+                                      ? [...values, value]
+                                      : values.filter((name) => name !== value),
+                                  )
+                                }
+                              />
+                              {value}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
                     </>
                   )}
                   <label htmlFor="decision-note" className="field-label">

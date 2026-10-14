@@ -55,12 +55,14 @@ export interface Complaint {
   requires_review: boolean;
   review_reason: string;
   assigned_department: string | null;
+  assigned_secondary_departments: string[];
   version: number;
   analysis_ms: number | null;
   events: {
     timestamp: string;
     status: Status;
     department: string | null;
+    secondary_departments: string[];
     note: string;
   }[];
 }
@@ -81,6 +83,7 @@ export interface Decision {
   version: number;
   status: "routed" | "in_progress" | "resolved";
   department?: string;
+  secondary_departments?: string[];
   note: string;
 }
 export const statusLabels: Record<Status, string> = {
@@ -91,3 +94,11 @@ export const statusLabels: Record<Status, string> = {
   in_progress: "In progress",
   resolved: "Resolved",
 };
+export const categories = [
+  "Water Supply",
+  "Roads",
+  "Sanitation",
+  "Electricity",
+  "Drainage",
+  "Other",
+] as const;

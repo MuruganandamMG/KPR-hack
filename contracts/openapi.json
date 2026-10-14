@@ -105,6 +105,74 @@
             }
           },
           {
+            "name": "department",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Water Supply",
+                    "Public Works",
+                    "Sanitation",
+                    "Electricity",
+                    "Drainage",
+                    "General Administration"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department"
+            }
+          },
+          {
+            "name": "department_role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "primary",
+                    "secondary"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department Role"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Water Supply",
+                    "Roads",
+                    "Sanitation",
+                    "Electricity",
+                    "Drainage",
+                    "Other"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
@@ -452,7 +520,8 @@
             "type": "string",
             "maxLength": 5000,
             "minLength": 1,
-            "title": "Normalized Complaint"
+            "title": "Normalized Complaint",
+            "description": "Faithful formal English complaint for official staff, preserving all reported facts, issues, negations and uncertainty without invented details."
           },
           "language": {
             "type": "string",
@@ -475,7 +544,8 @@
               "Drainage",
               "Other"
             ],
-            "title": "Category"
+            "title": "Category",
+            "description": "Category of the dominant actionable civic issue."
           },
           "intent": {
             "type": "string",
@@ -493,7 +563,8 @@
               "Drainage",
               "General Administration"
             ],
-            "title": "Primary Department"
+            "title": "Primary Department",
+            "description": "One lead department responsible for the dominant issue, matching the category."
           },
           "secondary_departments": {
             "items": {
@@ -509,7 +580,8 @@
             },
             "type": "array",
             "maxItems": 5,
-            "title": "Secondary Departments"
+            "title": "Secondary Departments",
+            "description": "All distinct supporting departments whose work is necessary, supported by reported issues or resolution dependencies; no alternatives, duplicates or primary overlap."
           },
           "urgency": {
             "type": "string",
@@ -548,7 +620,8 @@
             "type": "string",
             "maxLength": 5000,
             "minLength": 1,
-            "title": "Explanation"
+            "title": "Explanation",
+            "description": "Observable evidence for category, urgency and primary responsibility, plus the specific necessary work of each secondary department."
           },
           "evidence_highlights": {
             "items": {
@@ -634,6 +707,21 @@
               }
             ],
             "title": "Department"
+          },
+          "secondary_departments": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "Water Supply",
+                "Public Works",
+                "Sanitation",
+                "Electricity",
+                "Drainage",
+                "General Administration"
+              ]
+            },
+            "type": "array",
+            "title": "Secondary Departments"
           },
           "note": {
             "type": "string",
@@ -766,6 +854,21 @@
               }
             ],
             "title": "Assigned Department"
+          },
+          "assigned_secondary_departments": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "Water Supply",
+                "Public Works",
+                "Sanitation",
+                "Electricity",
+                "Drainage",
+                "General Administration"
+              ]
+            },
+            "type": "array",
+            "title": "Assigned Secondary Departments"
           },
           "version": {
             "type": "integer",
@@ -955,6 +1058,29 @@
               }
             ],
             "title": "Department"
+          },
+          "secondary_departments": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "Water Supply",
+                    "Public Works",
+                    "Sanitation",
+                    "Electricity",
+                    "Drainage",
+                    "General Administration"
+                  ]
+                },
+                "type": "array",
+                "maxItems": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secondary Departments"
           },
           "note": {
             "type": "string",

@@ -1,7 +1,7 @@
 from typing import Literal
 
 from app.features.civic_intelligence.schemas import Analysis, Department
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Status = Literal[
     "received", "awaiting_review", "analysis_failed", "routed", "in_progress", "resolved"
@@ -25,7 +25,17 @@ class OfficerDecision(BaseModel):
     version: int = Field(ge=1)
     status: Literal["routed", "in_progress", "resolved"]
     department: Department | None = None
+    secondary_departments: list[Department] | None = Field(default=None, max_length=5)
     note: str = Field(min_length=3, max_length=2000)
+
+    @model_validator(mode="after")
+    def validate_departments(self):
+        secondary = self.secondary_departments or []
+        if len(set(secondary)) != len(secondary):
+            raise ValueError("Secondary departments must be unique")
+        if self.department in secondary:
+            raise ValueError("Secondary departments cannot repeat the primary department")
+        return self
 
     @field_validator("note")
     @classmethod
@@ -39,6 +49,7 @@ class AuditEvent(BaseModel):
     timestamp: str
     status: Status
     department: Department | None
+    secondary_departments: list[Department] = Field(default_factory=list)
     note: str
 
 
@@ -55,6 +66,7 @@ class Complaint(BaseModel):
     requires_review: bool
     review_reason: str
     assigned_department: Department | None
+    assigned_secondary_departments: list[Department] = Field(default_factory=list)
     version: int
     analysis_ms: int | None
     events: list[AuditEvent]

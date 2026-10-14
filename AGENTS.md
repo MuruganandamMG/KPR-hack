@@ -4,7 +4,9 @@
 
 Maintain a clear, modular frontend and backend that can grow through isolated features. Keep operations focused, interfaces explicit, and changes easy to review and verify.
 
-This is the initial baseline. Application code, the problem statement, stack, database, and deployment requirements are not defined yet. Select them from the problem statement when it arrives. Do not scaffold an application just because this file suggests a layout.
+The project helps municipal grievance systems understand citizen complaints submitted as text or voice in regional dialects, informal vocabulary, and misspelled language. It should normalize complaints, identify civic intent, department, and urgency, preserve original context, expose routing explanations, confidence, and tracking IDs, and evaluate routing accuracy, dialect robustness, and initial response time.
+
+Application code, stack, database, and deployment requirements are not defined yet. Select them from the requirements during project planning. Do not scaffold an application just because this file suggests a layout.
 
 ## Working rules
 
@@ -42,14 +44,24 @@ docs/
   plans/                      # Substantial feature plans, when needed
 ```
 
-- Put each new feature in its own descriptive folder within the relevant application. A feature may have matching frontend and backend folders.
+- Before implementing each new feature, create its own descriptive folder within each application it affects. Use matching feature names when it spans frontend and backend. Extend an existing feature in its existing folder rather than creating a duplicate.
 - Keep feature-specific code and tests inside that feature. Create files and subfolders as responsibilities appear; avoid empty scaffolding.
+- Keep a short `README.md` in each implemented feature folder describing its purpose, public entry points, inputs and outputs, dependencies, and how to verify it. Document the files that actually exist.
+- Maintain a concise feature-to-folder map in the root README as features are added, so people and agents can locate the relevant code without searching unrelated modules.
 - Keep each module focused on one clear responsibility. Split unrelated operations rather than growing a catch-all file.
 - Give every API operation a named function or handler with explicit inputs, outputs, and errors. Separate substantial operations into their own files; do not require a new file for every trivial function call.
 - Share common transport, authentication, validation, and utilities rather than duplicating them in every operation.
 - Import another feature through its public interface, not its private implementation. Avoid circular dependencies.
 - Move code into `shared` only when multiple features actually need it. Keep framework-specific frontend and backend code separate.
 - Keep shared contracts compatible with both applications. If their languages differ, use an API specification or schema rather than importing incompatible source files.
+
+## Protecting completed features
+
+- Once a feature is implemented and verified, leave its files unchanged during unrelated work. Do not restyle, rename, move, rewrite, or refactor it merely because another feature is being added.
+- Change an existing feature only when required by the requested behavior, a relevant bug or security fix, or a necessary integration or compatibility update. Explain the dependency before making a change outside the owning feature folder.
+- Keep unavoidable integration edits small: update the needed route registration, contract, configuration, or public interface rather than rewriting the surrounding feature.
+- When changing a completed feature, verify its affected behavior and consumers and update its documentation if its interface or responsibilities change.
+- Folder separation supports navigation and ownership; it does not guarantee independence. Keep dependencies explicit and check integration behavior as well as individual features.
 
 ## Frontend maintenance
 
@@ -77,7 +89,7 @@ docs/
 - Keep UI, network, filesystem, clock, randomness, and database effects at application boundaries. Pass required values into calculation code.
 - For mathematical behavior, document the valid input domain, units, precision, rounding, and edge cases. Verify known results and relevant mathematical properties.
 - Use the numeric representation required by the domain; do not silently accept precision loss where exact results matter.
-- Working assumption: calculations should use pure functions. The project's mathematical purpose, if any, remains undefined until the problem statement arrives; do not infer a requirement for inverse algorithms.
+- These rules apply to deterministic calculations and transformations. Speech recognition and AI dialect interpretation are external inference operations; isolate them behind explicit interfaces rather than assuming their outputs are deterministic.
 
 ## Preventing conflicts and regressions
 
@@ -104,6 +116,6 @@ docs/
 
 - Update setup instructions when commands, dependencies, or environment requirements change. Document public interfaces and significant decisions near their owning module.
 - Remove obsolete code as part of the relevant change. Keep comments focused on intent, constraints, and non-obvious decisions.
-- After the problem statement arrives, refine this file with the actual stack, feature map, domain rules, commands, and acceptance criteria. Preserve useful rules and remove assumptions that no longer apply.
+- As project planning and implementation establish the stack, feature map, domain rules, commands, and acceptance criteria, update this file. Preserve useful rules and remove assumptions that no longer apply.
 - Add frontend or backend `AGENTS.md` files only when concrete local rules are needed. Keep root rules here and local differences in those files.
 - Keep `SYSTEM_INSTRUCTIONS.md` aligned with this file; repository-specific rules belong here so there is one maintained source.

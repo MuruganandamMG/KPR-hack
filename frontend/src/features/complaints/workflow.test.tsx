@@ -16,6 +16,7 @@ import { ComplaintDetail } from "./ComplaintDetail";
 import { ConfidenceMeter } from "./ConfidenceMeter";
 import { DecisionTree } from "./DecisionTree";
 import { EvidenceHighlight } from "./EvidenceHighlight";
+import { ExplainabilityPanel } from "./ExplainabilityPanel";
 import { OfficerSummaryCard } from "./OfficerSummaryCard";
 import { SelfVerificationCard } from "./SelfVerificationCard";
 import { SmartFollowUpCard } from "./SmartFollowUpCard";
@@ -902,5 +903,61 @@ it("renders answered state when smart follow-up has already been clarified", () 
   expect(screen.getByText("Critical Priority")).toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: /Change Answer/i }),
+  ).toBeInTheDocument();
+});
+
+it("renders ExplainabilityPanel with all 7 criteria matching routing rationale", () => {
+  render(<ExplainabilityPanel complaint={complaint as unknown as Complaint} />);
+
+  expect(screen.getByText("Why was this routed?")).toBeInTheDocument();
+  expect(screen.getByText("7 of 7 Criteria Verified")).toBeInTheDocument();
+  expect(screen.getByText("✔ Detected Tamil and English")).toBeInTheDocument();
+  expect(screen.getByText("✔ Recognized dialect phrase")).toBeInTheDocument();
+  expect(screen.getByText("✔ Complaint mapped to Roads")).toBeInTheDocument();
+  expect(screen.getByText("✔ Essential Service")).toBeInTheDocument();
+  expect(screen.getByText("✔ Duration detected")).toBeInTheDocument();
+  expect(screen.getByText("✔ High Priority")).toBeInTheDocument();
+  expect(
+    screen.getByText("✔ Routed to Public Works Department"),
+  ).toBeInTheDocument();
+});
+
+it("renders ExplainabilityPanel with Water Department specific routing as per user specification", () => {
+  const waterComplaint = {
+    ...complaint,
+    assigned_department: "Water Supply",
+    analysis: {
+      ...complaint.analysis,
+      language: "Tamil",
+      dialect: "Madurai Tamil",
+      category: "Water Supply",
+      intent: "Restore drinking water supply",
+      primary_department: "Water Supply",
+      urgency: "High" as const,
+      officer_summary: {
+        problem: "Water Supply",
+        area: "Ward 18",
+        duration: "3 Days",
+        priority: "High" as const,
+        department: "Water Supply",
+        suggested_action: "Inspect pipeline and restore water flow",
+      },
+    },
+  };
+
+  render(
+    <ExplainabilityPanel complaint={waterComplaint as unknown as Complaint} />,
+  );
+
+  expect(screen.getByText("✔ Detected Tamil")).toBeInTheDocument();
+  expect(screen.getByText("✔ Recognized dialect phrase")).toBeInTheDocument();
+  expect(
+    screen.getByText("✔ Complaint mapped to Water Supply"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("✔ Essential Service")).toBeInTheDocument();
+  expect(screen.getByText("✔ Duration detected")).toBeInTheDocument();
+  expect(screen.getByText("✔ High Priority")).toBeInTheDocument();
+  expect(
+    screen.getByText("✔ Routed to Water Supply Department"),
   ).toBeInTheDocument();
 });

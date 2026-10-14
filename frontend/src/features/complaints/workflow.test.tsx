@@ -12,6 +12,7 @@ import { TrackComplaint } from "./TrackComplaint";
 import { OfficerDashboard } from "./OfficerDashboard";
 import { useRecorder } from "./useRecorder";
 import { ComplaintDetail } from "./ComplaintDetail";
+import { DecisionTree } from "./DecisionTree";
 import type { Complaint } from "./types";
 
 const complaint = {
@@ -467,4 +468,58 @@ it("approves routing with version and department then updates the queue", async 
     department: "Public Works",
     note: "Reviewed and approved road repair.",
   });
+});
+
+it("renders the AI decision tree visualization with all 6 reasoning steps", () => {
+  render(<DecisionTree complaint={complaint as unknown as Complaint} />);
+  expect(
+    screen.getByRole("region", { name: "AI Decision Tree" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/Explainable AI Reasoning Tree/i),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Step 01 · Input Ingestion")).toBeInTheDocument();
+  expect(screen.getByText("Text Submission")).toBeInTheDocument();
+  expect(
+    screen.getByText("Step 02 · Language Identification"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Tamil and English")).toBeInTheDocument();
+  expect(
+    screen.getByText("Step 03 · Dialect & Regional Nuance"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Colloquial Tamil")).toBeInTheDocument();
+  expect(
+    screen.getByText("Step 04 · Complaint Category & Intent"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Roads")).toBeInTheDocument();
+  expect(screen.getByText("Repair the road")).toBeInTheDocument();
+  expect(screen.getByText("Step 05 · Urgency Assessment")).toBeInTheDocument();
+  expect(screen.getByText("High Priority")).toBeInTheDocument();
+  expect(screen.getByText("Step 06 · Department Routing")).toBeInTheDocument();
+  expect(screen.getByText("Public Works")).toBeInTheDocument();
+  expect(screen.getByText(/92% Confidence/i)).toBeInTheDocument();
+});
+
+it("renders voice input details in decision tree and handles null analysis fallback", () => {
+  const voiceComplaint = {
+    ...complaint,
+    input_type: "voice" as const,
+    audio_mime: "audio/webm",
+  };
+  const { rerender } = render(
+    <DecisionTree complaint={voiceComplaint as unknown as Complaint} />,
+  );
+  expect(screen.getByText("Voice Recording")).toBeInTheDocument();
+  expect(screen.getByText("audio/webm")).toBeInTheDocument();
+
+  const manualComplaint = {
+    ...complaint,
+    analysis: null,
+    analysis_error: "AI analysis was unavailable.",
+  };
+  rerender(
+    <DecisionTree complaint={manualComplaint as unknown as Complaint} />,
+  );
+  expect(screen.getByText("Decision Tree Unavailable")).toBeInTheDocument();
+  expect(screen.getByText("AI analysis was unavailable.")).toBeInTheDocument();
 });

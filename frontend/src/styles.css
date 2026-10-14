@@ -147,6 +147,15 @@
   .tracking-id {
     overflow-wrap: anywhere;
   }
+  .decision-tree-container {
+    @apply rounded-2xl border border-stone-200/90 bg-stone-50/50 p-4 sm:p-5;
+  }
+  .decision-tree-steps {
+    @apply space-y-1;
+  }
+  .decision-tree-card {
+    @apply transition-shadow hover:shadow-xs;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   *,

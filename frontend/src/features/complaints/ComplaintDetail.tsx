@@ -2,6 +2,7 @@ import { CheckCircle2, Clock3, Copy, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../shared/ui/button";
 import { audioUrl } from "./api";
+import { DecisionTree } from "./DecisionTree";
 import { statusLabels, type Complaint } from "./types";
 
 export function ComplaintDetail({
@@ -126,6 +127,11 @@ export function ComplaintDetail({
           </>
         )}
       </dl>
+      {analysis && (
+        <div className="border-t border-stone-100 pt-5">
+          <DecisionTree complaint={complaint} />
+        </div>
+      )}
       {analysis && (
         <details className="border-t border-stone-100 pt-5">
           <summary className="flex cursor-pointer items-center gap-2 font-semibold">

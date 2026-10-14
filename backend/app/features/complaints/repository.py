@@ -25,26 +25,44 @@ def read_complaint(connection, tracking_id: str) -> Complaint:
         raise HTTPException(404, "Complaint not found. Check your tracking ID.")
     data = dict(row)
     data["analysis"] = json.loads(data.pop("analysis_json")) if data["analysis_json"] else None
+    data["assigned_secondary_departments"] = json.loads(
+        data.pop("assigned_secondary_departments_json")
+    )
     events = (
         connection.execute(
             text(
-                "SELECT timestamp,status,department,note FROM complaint_events WHERE tracking_id=:id ORDER BY id"
+                "SELECT timestamp,status,department,note,secondary_departments_json "
+                "FROM complaint_events WHERE tracking_id=:id ORDER BY id"
             ),
             {"id": tracking_id},
         )
         .mappings()
         .all()
     )
-    data["events"] = [dict(e) for e in events]
+    data["events"] = []
+    for event in events:
+        event_data = dict(event)
+        event_data["secondary_departments"] = json.loads(
+            event_data.pop("secondary_departments_json")
+        )
+        data["events"].append(event_data)
     return Complaint.model_validate(data)
 
 
-def add_event(connection, tracking_id, status, note, department=None):
+def add_event(connection, tracking_id, status, note, department=None, secondary_departments=()):
     connection.execute(
         text(
-            "INSERT INTO complaint_events(tracking_id,timestamp,status,department,note) VALUES (:id,:at,:status,:department,:note)"
+            "INSERT INTO complaint_events(tracking_id,timestamp,status,department,note,"
+            "secondary_departments_json) VALUES (:id,:at,:status,:department,:note,:secondary)"
         ),
-        {"id": tracking_id, "at": now(), "status": status, "department": department, "note": note},
+        {
+            "id": tracking_id,
+            "at": now(),
+            "status": status,
+            "department": department,
+            "note": note,
+            "secondary": json.dumps(list(secondary_departments)),
+        },
     )
 
 
@@ -98,9 +116,37 @@ def get_complaint(engine, tracking_id):
         return read_complaint(db, tracking_id)
 
 
-def list_complaints(engine, *, status=None, search="", limit=25, offset=0):
+def list_complaints(
+    engine,
+    *,
+    status=None,
+    search="",
+    department=None,
+    department_role=None,
+    category=None,
+    limit=25,
+    offset=0,
+):
     clauses = []
     params = {"limit": limit, "offset": offset}
+    if category:
+        clauses.append("json_extract(analysis_json, '$.category')=:category")
+        params["category"] = category
+    if department:
+        # Once approved, assignments are authoritative; AI remains immutable evidence.
+        primary = "COALESCE(assigned_department, json_extract(analysis_json, '$.primary_department'))=:department"
+        secondary = """EXISTS (SELECT 1 FROM json_each(
+            CASE WHEN assigned_department IS NOT NULL THEN assigned_secondary_departments_json
+            ELSE json_extract(analysis_json, '$.secondary_departments') END
+        ) WHERE value=:department)"""
+        clauses.append(
+            primary
+            if department_role == "primary"
+            else secondary
+            if department_role == "secondary"
+            else f"({primary} OR {secondary})"
+        )
+        params["department"] = department
     if status:
         clauses.append("status=:status")
         params["status"] = status
@@ -175,26 +221,43 @@ def update_complaint(engine, tracking_id, decision):
         if allowed.get(record.status) != decision.status:
             raise HTTPException(422, "Invalid status transition.")
         department = record.assigned_department
+        secondary = record.assigned_secondary_departments
         if decision.status == "routed":
             if not decision.department:
                 raise HTTPException(422, "Select a department before approving routing.")
             department = decision.department
+            secondary = decision.secondary_departments
+            if secondary is None:
+                secondary = [
+                    name
+                    for name in (record.analysis.secondary_departments if record.analysis else [])
+                    if name != department
+                ]
         elif decision.department and decision.department != department:
             raise HTTPException(422, "Department cannot change after routing approval.")
+        elif (
+            decision.secondary_departments is not None
+            and decision.secondary_departments != secondary
+        ):
+            raise HTTPException(422, "Secondary departments cannot change after routing approval.")
+        if department in secondary:
+            raise HTTPException(422, "Secondary departments cannot repeat the primary department.")
         result = db.execute(
             text("""UPDATE complaints SET status=:status,assigned_department=:department,
+            assigned_secondary_departments_json=:secondary,
             requires_review=0,updated_at=:at,version=version+1 WHERE tracking_id=:id AND version=:version"""),
             {
                 "id": tracking_id,
                 "version": decision.version,
                 "status": decision.status,
                 "department": department,
+                "secondary": json.dumps(secondary),
                 "at": now(),
             },
         )
         if result.rowcount != 1:
             raise HTTPException(409, "This complaint was updated. Refresh before retrying.")
-        add_event(db, tracking_id, decision.status, decision.note, department)
+        add_event(db, tracking_id, decision.status, decision.note, department, secondary)
         return read_complaint(db, tracking_id)
 
 

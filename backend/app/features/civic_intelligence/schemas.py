@@ -36,18 +36,30 @@ class EvidenceItem(BaseModel):
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     transcript: Nonempty
-    normalized_complaint: Nonempty
+    normalized_complaint: Nonempty = Field(
+        description="Faithful formal English complaint for official staff, preserving all "
+        "reported facts, issues, negations and uncertainty without invented details."
+    )
     language: Nonempty
     dialect: str = Field(max_length=200)
-    category: Category
+    category: Category = Field(description="Category of the dominant actionable civic issue.")
     intent: Nonempty
-    primary_department: Department
-    secondary_departments: list[Department] = Field(max_length=5)
+    primary_department: Department = Field(
+        description="One lead department responsible for the dominant issue, matching the category."
+    )
+    secondary_departments: list[Department] = Field(
+        max_length=5,
+        description="All distinct supporting departments whose work is necessary, supported by "
+        "reported issues or resolution dependencies; no alternatives, duplicates or primary overlap.",
+    )
     urgency: Urgency
     confidence: float = Field(ge=0, le=1, allow_inf_nan=False)
     keywords: list[Nonempty] = Field(min_length=1, max_length=20)
     detected_meaning: Nonempty
-    explanation: Nonempty
+    explanation: Nonempty = Field(
+        description="Observable evidence for category, urgency and primary responsibility, "
+        "plus the specific necessary work of each secondary department."
+    )
     evidence_highlights: list[EvidenceItem] = Field(default_factory=list, max_length=10)
 
     @model_validator(mode="after")

@@ -44,6 +44,8 @@ Without a Gemini key, accepted complaints are saved with tracking IDs and marked
 
 Exact contract: [contracts/openapi.json](contracts/openapi.json). Feature READMEs document interfaces/tests. Text limit: 5000 characters. Voice: 10 MiB/120 seconds. Confidence is an uncalibrated model estimate. Every route requires officer approval. Immutable evidence, append-only audit events, submission idempotency and optimistic officer versions protect records.
 
+Primary and secondary assignments are approved and audited together. Officer queues filter by department, routing role and category. Formal complaint text can be copied for staff with routing approval clearly identified. SQLite migration 002 upgrades existing records without inventing historical secondary approvals; back up using SQLite's backup API before upgrading. Verification and AI limitations: [routing quality report](docs/test-results/routing-quality.md).
+
 ## Verification
 
 ```powershell

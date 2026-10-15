@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
@@ -40,6 +41,8 @@ export function SubmitComplaint({
   onPendingChange?: (pending: boolean) => void;
   onTrack?: (id: string) => void;
 }) {
+  const { t } = useLanguage();
+
   const [mode, setMode] = useState<"text" | "voice">("text");
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -124,7 +127,7 @@ export function SubmitComplaint({
             onClick={reset}
             autoFocus
           >
-            New complaint
+            {t("New complaint")}
           </Button>
         )}
         <AnalysisPanel
@@ -142,16 +145,17 @@ export function SubmitComplaint({
       <form onSubmit={submit} className="panel editor-panel">
         <div className="workspace-panel-heading">
           <div>
-            <p className="eyebrow">LET’S START HERE</p>
+            <p className="eyebrow">{t("LET’S START HERE")}</p>
             <h2 className="mt-1 text-lg font-semibold">
-              Tell us what happened
+              {t("Tell us what happened")}
             </h2>
           </div>
           <span className="intake-private">
-            <ShieldCheck size={15} /> Original words preserved
+            <ShieldCheck size={15} />
+            {t(" Original words preserved")}
           </span>
         </div>
-        <div className="input-switch" aria-label="Complaint input method">
+        <div className="input-switch" aria-label={t("Complaint input method")}>
           <button
             type="button"
             aria-pressed={mode === "text"}
@@ -160,7 +164,7 @@ export function SubmitComplaint({
             onClick={() => setMode("text")}
           >
             <FileText size={17} />
-            Type a complaint
+            {t("Type a complaint")}
           </button>
           <button
             type="button"
@@ -170,16 +174,17 @@ export function SubmitComplaint({
             onClick={() => setMode("voice")}
           >
             <Mic size={17} />
-            Use your voice
+            {t("Use your voice")}
           </button>
         </div>
         {mode === "text" ? (
           <>
             <div className="intake-samples">
               <p className="mb-3 text-xs text-stone-500">
-                Need a starting point?{" "}
+                {t("Need a starting point?")}
+                {t(" ")}
                 <span className="text-stone-700">
-                  Try an example, then make it yours.
+                  {t("Try an example, then make it yours.")}
                 </span>
               </p>
               <div className="intake-sample-grid">
@@ -190,7 +195,7 @@ export function SubmitComplaint({
                       key={sample.label}
                       type="button"
                       className="intake-sample"
-                      aria-label={sample.label}
+                      aria-label={t(sample.label)}
                       aria-pressed={text === sample.text}
                       disabled={locked}
                       onClick={() => {
@@ -203,8 +208,8 @@ export function SubmitComplaint({
                         <Icon size={22} />
                       </span>
                       <span>
-                        <strong>{sample.label}</strong>
-                        <small>{sampleDescriptions[index]}</small>
+                        <strong>{t(sample.label)}</strong>
+                        <small>{t(sampleDescriptions[index])}</small>
                       </span>
                       {text === sample.text ? (
                         <Check size={16} />
@@ -218,7 +223,7 @@ export function SubmitComplaint({
             </div>
             <div className="mt-5">
               <label className="field-label" htmlFor="complaint-text">
-                Your complaint
+                {t("Your complaint")}
               </label>
               <textarea
                 id="complaint-text"
@@ -231,13 +236,17 @@ export function SubmitComplaint({
                 value={text}
                 onChange={(event) => setText(event.target.value)}
                 className="field complaint-editor"
-                placeholder="What happened, and where? For example: The street near our school has deep potholes. It gets flooded when it rains…"
+                placeholder={t(
+                  "What happened, and where? For example: The street near our school has deep potholes. It gets flooded when it rains…",
+                )}
               />
               <div className="mt-2 flex items-center justify-between gap-2 text-xs text-stone-500">
                 <span id="complaint-help">
-                  Any Indian language or dialect · No formal wording needed
+                  {t(
+                    "Any Indian language or dialect · No formal wording needed",
+                  )}
                 </span>
-                <span>{text.length}/5000</span>
+                <span>{t(text.length)}/5000</span>
               </div>
               <GrievanceCopilot
                 currentText={text}
@@ -251,24 +260,31 @@ export function SubmitComplaint({
             </div>
             <details className="intake-tips">
               <summary>
-                <Sparkles size={15} /> What makes a helpful complaint?
+                <Sparkles size={15} />
+                {t(" What makes a helpful complaint?")}
                 <ChevronDown size={15} />
               </summary>
               <div className="intake-tip-grid">
                 <p>
                   <MapPin size={17} />
-                  <strong>Where is it?</strong>
-                  <span>Mention the street, area, or a nearby landmark.</span>
+                  <strong>{t("Where is it?")}</strong>
+                  <span>
+                    {t("Mention the street, area, or a nearby landmark.")}
+                  </span>
                 </p>
                 <p>
                   <Clock3 size={17} />
-                  <strong>Since when?</strong>
-                  <span>Share when it started and how often it happens.</span>
+                  <strong>{t("Since when?")}</strong>
+                  <span>
+                    {t("Share when it started and how often it happens.")}
+                  </span>
                 </p>
                 <p>
                   <Users size={17} />
-                  <strong>Who is affected?</strong>
-                  <span>Explain the impact and any immediate danger.</span>
+                  <strong>{t("Who is affected?")}</strong>
+                  <span>
+                    {t("Explain the impact and any immediate danger.")}
+                  </span>
                 </p>
               </div>
             </details>
@@ -281,13 +297,17 @@ export function SubmitComplaint({
               <Mic size={34} />
             </span>
             <p className="font-medium">
-              {recorder.recording
-                ? `Recording: ${recorder.seconds}s / 120s`
-                : recorder.pending
-                  ? "Waiting for microphone..."
-                  : "Record or upload your complaint"}
+              {t(
+                recorder.recording
+                  ? `Recording: ${recorder.seconds}s / 120s`
+                  : recorder.pending
+                    ? "Waiting for microphone..."
+                    : "Record or upload your complaint",
+              )}
             </p>
-            <p className="text-xs text-stone-500">Up to 2 minutes / 10 MiB</p>
+            <p className="text-xs text-stone-500">
+              {t("Up to 2 minutes / 10 MiB")}
+            </p>
             {recorder.recording && <AudioActivity stream={recorder.stream} />}
             <div className="flex flex-wrap justify-center gap-3">
               <Button
@@ -297,16 +317,16 @@ export function SubmitComplaint({
                 onClick={recordingBusy ? recorder.stop : recorder.start}
               >
                 {recorder.pending ? (
-                  <>Cancel microphone request</>
+                  <>{t("Cancel microphone request")}</>
                 ) : recorder.recording ? (
                   <>
                     <Square size={15} />
-                    Stop recording
+                    {t("Stop recording")}
                   </>
                 ) : (
                   <>
                     <Mic size={15} />
-                    Start recording
+                    {t("Start recording")}
                   </>
                 )}
               </Button>
@@ -314,9 +334,9 @@ export function SubmitComplaint({
                 className={`upload-control ${locked ? "pointer-events-none opacity-50" : ""}`}
               >
                 <Upload size={15} />
-                Upload audio
+                {t("Upload audio")}
                 <input
-                  aria-label="Upload audio"
+                  aria-label={t("Upload audio")}
                   type="file"
                   accept="audio/*,.webm,.m4a"
                   disabled={locked}
@@ -335,7 +355,7 @@ export function SubmitComplaint({
                   {file?.name}
                 </p>
                 <audio
-                  aria-label="Recording preview"
+                  aria-label={t("Recording preview")}
                   className="w-full"
                   controls
                   src={preview}
@@ -344,7 +364,7 @@ export function SubmitComplaint({
             )}
             {recorder.error && (
               <p role="alert" className="text-sm text-red-700">
-                {recorder.error}
+                {t(recorder.error)}
               </p>
             )}
           </div>
@@ -354,15 +374,15 @@ export function SubmitComplaint({
             role="alert"
             className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800"
           >
-            {error}
+            {t(error)}
           </p>
         )}
         <div className="editor-actions">
           <span className="intake-review-note">
             <ShieldCheck size={18} />
             <span>
-              <strong>You report. We help make sense of it.</strong>
-              <small>Routing requires officer approval</small>
+              <strong>{t("You report. We help make sense of it.")}</strong>
+              <small>{t("Routing requires officer approval")}</small>
             </span>
           </span>
           <Button
@@ -372,7 +392,7 @@ export function SubmitComplaint({
             }
           >
             <>
-              Submit complaint
+              {t("Submit complaint")}
               <ArrowRight size={17} />
             </>
           </Button>

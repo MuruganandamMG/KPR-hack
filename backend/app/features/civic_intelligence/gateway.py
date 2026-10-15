@@ -22,6 +22,7 @@ from .schemas import (
     ResolutionPredictor,
     RoutingRisk,
     SmartFollowUp,
+    validate_issue_evidence,
 )
 
 
@@ -58,6 +59,7 @@ Roads -> Public Works (potholes, road/pavement damage and public infrastructure 
 Sanitation -> Sanitation (garbage collection, waste removal and street cleaning);
 Electricity -> Electricity (power outages, streetlights, exposed/live wires);
 Drainage -> Drainage (blocked drains, sewage, wastewater overflow);
+Public Health -> Health (reported illness, suspected community exposure and public health investigation);
 Other -> General Administration (unclear responsibility or non-civic input).
 Choose exactly one primary department owning the dominant issue or immediate hazard.
 Include ALL necessary secondary departments, only when explicit reported issues or concrete
@@ -69,6 +71,38 @@ Examples: blocked drain + sewage + garbage + damaged road -> Drainage primary, S
 and Public Works secondary; leaking supply pipe + damaged road -> Water Supply primary,
 Public Works secondary; live wire on an intact road -> Electricity primary, no road department.
 For multiple issues, preserve them all in the formal complaint even with one dominant category.
+
+ISSUE DECOMPOSITION (REQUIRED): Return issues as an array of 1 to 10 independent actionable
+civic grievances. Do this for both text and voice. Each issue needs a unique short issue_id,
+normalized_complaint, category, department (matching the mapping above), urgency, confidence,
+explanation, basis ('explicit' or 'implicit'), evidence (verbatim substrings from original
+text/transcript), related_issue_ids (other IDs in this array; [] when none), and
+relationship_explanation (null if no relationships). Explain the specific work for that issue's
+department. Keep each normalized complaint focused on that issue and preserve uncertainty.
+An implicit issue must be grounded in reported impact, not a hypothetical risk. Children
+getting sick after reliance on borewell water supports a Health investigation, not a diagnosis
+or proof of contamination causing illness. Preserve citizen-reported causal claims as reports;
+do not assert unverified causality. A broken road and blocked drain warrant separate tickets;
+flooding caused by the same blocked drain is impact, not another duplicate drainage ticket.
+No local disaster-assessment policy is configured: do not create speculative Disaster Management
+or flood-assessment tickets. Do not split paraphrases of the same issue or create tickets merely
+for places/department names. Negated, repaired or hypothetical faults are not active issues.
+Example: damaged road + failed streetlights + uncollected garbage yields three issues:
+Roads/Public Works, Electricity/Electricity and Sanitation/Sanitation. No illness reported means
+no Health ticket. The health grievance is implicit when the citizen reports symptoms but does
+not explicitly ask for a public health investigation; retain the reported symptom as evidence.
+STRICT RELATIONSHIP RULES: Co-reported issues do not establish a shared location, dependency or
+causality. For unrelated road/light/garbage faults, return related_issue_ids=[] and
+relationship_explanation=null; their common parent already captures co-reporting. Never add
+'at the same location' when no location is stated. If the citizen says people are USING water,
+do not change that to drinking/consuming it. 'Using borewell water AND children getting sick'
+is association, not proof of cause. Normalize that health issue as 'Illness is reported among
+children while residents rely on borewell water; public health investigation is requested.'
+Explain that the cause is unverified. Never say 'illness caused by', 'direct consequence',
+'after consuming' or 'resulting from contamination' unless the submission explicitly reports
+that causal claim, and even then attribute it to the citizen rather than asserting it as fact. Non-civic/unclear input yields one Other/General Administration issue with
+low confidence and a request for human clarification, never invented civic facts.
+Parent fields summarize the full submission; they do not replace the issue array.
 
 EXPLANATION, METRICS AND OFFICER SUMMARY: Give concise observable evidence for category, urgency, primary
 ownership and the distinct work required from EACH secondary department in explanation.
@@ -83,21 +117,50 @@ area (ward, street or locality, or 'Ward / Locality Unspecified'), duration, pri
 and a concise 1-sentence suggested_action for municipal triage. Perform an internal self_verification
 critic pass auditing whether the assigned department and urgency accurately represent the raw citizen
 complaint (status: 'Verified', 'Disputed', or 'Flagged for Review'; critique: concise audit evaluation;
-agreement: boolean; verification_confidence: float). Formulate smart_follow_up: if the grievance is brief,
-vague, or missing critical scope or duration (such as 'Water problem', 'No water', 'Current cut', 'Road bad'),
-set needed=true, craft a targeted question (e.g., 'Does the issue affect:'), explain category_context,
-and provide 2 to 3 structured options (e.g., 'Your house only' -> Low/Medium, 'Entire street' -> High,
-'Entire village / neighborhood' -> Critical) each with label, urgency_impact, description, and priority_weight.
+agreement: boolean; verification_confidence: float). Formulate smart_follow_up: multiple-choice scope triage. If the grievance is brief,
+vague, or missing geographical scale (such as 'Water problem', 'No water', 'Current cut', 'Road bad'),
+set needed=true. The question MUST be a concise prompt asking strictly about the physical extent or scale
+(e.g., 'What is the physical scope of the road damage:', 'Does the water issue affect:', 'What is the extent of the outage:').
+NEVER ask open-ended questions like 'What is your street name?' or 'How long?' in smart_follow_up.question,
+because specific text fields (street name, duration, landmark) are handled separately in completeness.
+Provide 2 to 3 structured options (e.g., 'Isolated spot / single property', 'Entire street', 'Entire village / neighborhood')
+each with label, urgency_impact, description, and priority_weight.
 If clear scope/duration is already reported, set needed=false and standard options.
 Evaluate emotional_urgency: identify emotional distress cues (e.g., pleas for help, affected children/infants/elderly,
 long deprivation of essential lifeline utility). If distress signals are present, set detected=true, list distress_signals,
 and escalate urgency (e.g., to Critical) with escalation_reason.
-Evaluate completeness: calculate completeness score (0 to 100%) and list missing fields (street name, landmark, duration, scope).
+Evaluate completeness: calculate completeness score (0 to 100%) and list missing fields (street name, landmark, duration).
 Identify learned_dialect: pinpoint regional slang or colloquial expressions (e.g., 'sombu', 'thanni', 'mosama'), provide suggested_meaning and category.
 Provide citizen_validation: craft a clear, faithful summary_statement for citizen confirmation before final ticket generation.
 Critical urgency requires reported immediate
 danger to life or safety; do not infer one without evidence. Repeated inconvenience alone is not evidence
 of imminent danger. These are recommendations awaiting officer approval, never a claim of actual dispatch."""
+
+
+def sanitize_smart_follow_up(follow_up: SmartFollowUp, category: str) -> SmartFollowUp:
+    q_lower = follow_up.question.lower()
+    invalid_keywords = [
+        "street name",
+        "locality",
+        "how long",
+        "what is the name",
+        "duration",
+        "specify your street",
+        "specify your locality",
+        "where",
+    ]
+    if any(k in q_lower for k in invalid_keywords):
+        category_prompts = {
+            "Roads": "What is the physical extent of the road damage:",
+            "Water Supply": "Does the water supply issue affect:",
+            "Electricity": "What is the extent of the electrical issue:",
+            "Sanitation": "What is the scale of waste accumulation:",
+            "Drainage": "What is the extent of drainage overflow:",
+        }
+        follow_up.question = category_prompts.get(
+            category, "What is the physical scope of this issue:"
+        )
+    return follow_up
 
 
 def build_smart_follow_up(category: str, transcript: str) -> SmartFollowUp:
@@ -414,30 +477,8 @@ def build_complaint_completeness(transcript: str) -> ComplaintCompleteness:
         )
     )
 
-    has_extent = any(
-        w in t
-        for w in [
-            "house",
-            "street",
-            "village",
-            "all",
-            "whole",
-            "entire",
-            "block",
-            "community",
-        ]
-    )
-    items.append(
-        MissingInfoItem(
-            field_name="Scope & Affected Extent",
-            is_missing=not has_extent,
-            prompt_question="Does this affect only your residence or the broader street/area?",
-            example_suggestion="e.g., Entire street, 20+ houses, individual connection",
-        )
-    )
-
     present_count = sum(1 for item in items if not item.is_missing)
-    score = 20 + int((present_count / len(items)) * 80)
+    score = 25 + int((present_count / len(items)) * 75)
 
     return ComplaintCompleteness(score=score, missing_fields=items)
 
@@ -872,10 +913,17 @@ class GeminiGateway:
                     if "text" in p and not p.get("thought")
                 )
                 analysis = Analysis.model_validate_json(output)
+                if not analysis.issues:
+                    raise ValueError("New inference must include issue decomposition")
+                validate_issue_evidence(analysis, text if text is not None else analysis.transcript)
                 updates = {}
                 if analysis.smart_follow_up is None:
                     updates["smart_follow_up"] = build_smart_follow_up(
                         analysis.category, analysis.transcript
+                    )
+                else:
+                    updates["smart_follow_up"] = sanitize_smart_follow_up(
+                        analysis.smart_follow_up, analysis.category
                     )
                 if analysis.emotional_urgency is None:
                     updates["emotional_urgency"] = build_emotional_urgency(

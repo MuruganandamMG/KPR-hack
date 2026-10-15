@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useState } from "react";
 import {
   CheckCircle2,
@@ -20,6 +21,8 @@ export function CompletenessCard({
   complaint,
   onComplaintUpdated,
 }: CompletenessCardProps) {
+  const { t } = useLanguage();
+
   const completeness = complaint.analysis?.completeness;
   if (!completeness) return null;
 
@@ -58,7 +61,7 @@ export function CompletenessCard({
   return (
     <div
       className="rounded-2xl border border-stone-200 bg-white p-5 shadow-xs"
-      aria-label="Complaint completeness and missing details"
+      aria-label={t("Complaint completeness and missing details")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -73,10 +76,11 @@ export function CompletenessCard({
           </span>
           <div>
             <p className="eyebrow text-xs uppercase tracking-wider text-stone-500">
-              USP 3 · Missing Information Detection
+              {t("USP 3 · Missing Information Detection")}
             </p>
             <h3 className="font-semibold text-stone-900">
-              Complaint Completeness: {completeness.score}%
+              {t("Complaint Completeness: ")}
+              {t(completeness.score)}%
             </h3>
           </div>
         </div>
@@ -88,9 +92,11 @@ export function CompletenessCard({
               : "bg-amber-100 text-amber-900"
           }`}
         >
-          {isComplete
-            ? "Action-Ready"
-            : `${missingItems.length} detail(s) missing`}
+          {t(
+            isComplete
+              ? "Action-Ready"
+              : t("{0} detail(s) missing", [t(missingItems.length)]),
+          )}
         </span>
       </div>
 
@@ -114,7 +120,9 @@ export function CompletenessCard({
       {!isComplete && (
         <div className="mt-4 space-y-3">
           <p className="text-xs font-medium text-stone-500 uppercase tracking-wider">
-            Fill missing details to accelerate on-ground municipal action:
+            {t(
+              "Fill missing details to accelerate on-ground municipal action:",
+            )}
           </p>
           <div className="grid gap-2.5 sm:grid-cols-2">
             {missingItems.map((item) => (
@@ -125,7 +133,7 @@ export function CompletenessCard({
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-800">
                     <HelpCircle size={14} className="text-amber-600" />
-                    <span>{item.field_name}</span>
+                    <span>{t(item.field_name)}</span>
                   </div>
                   <p className="mt-1 text-xs text-stone-600">
                     {item.prompt_question}
@@ -140,7 +148,9 @@ export function CompletenessCard({
                     <input
                       type="text"
                       className="field text-xs py-1.5 px-2.5 w-full bg-white border-stone-300 rounded-lg"
-                      placeholder={`Enter ${item.field_name.toLowerCase()}...`}
+                      placeholder={t("Enter {0}...", [
+                        t(item.field_name.toLowerCase()),
+                      ])}
                       value={fieldValue}
                       onChange={(e) => setFieldValue(e.target.value)}
                       autoFocus
@@ -169,7 +179,7 @@ export function CompletenessCard({
                         }}
                         className="text-xs py-1 h-7 text-stone-500"
                       >
-                        Cancel
+                        {t("Cancel")}
                       </Button>
                     </div>
                   </div>
@@ -184,7 +194,8 @@ export function CompletenessCard({
                     }}
                   >
                     <Plus size={13} />
-                    Add {item.field_name}
+                    {t("Add ")}
+                    {t(item.field_name)}
                   </Button>
                 )}
               </div>
@@ -193,14 +204,15 @@ export function CompletenessCard({
         </div>
       )}
 
-      {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
+      {error && <p className="mt-2 text-xs text-rose-600">{t(error)}</p>}
 
       {isComplete && (
         <div className="mt-3 flex items-center gap-2 text-xs text-emerald-800">
           <CheckCircle2 size={15} className="text-emerald-600" />
           <span>
-            Complaint has all high-priority fields: location, duration, and
-            scope.
+            {t(
+              "Complaint has all high-priority fields: location, duration, and scope.",
+            )}
           </span>
         </div>
       )}

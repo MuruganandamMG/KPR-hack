@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timezone
 from uuid import uuid4
 
+from app.features.civic_intelligence.schemas import issue_analysis, review_reason
 from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -24,7 +25,31 @@ def read_complaint(connection, tracking_id: str) -> Complaint:
     if row is None:
         raise HTTPException(404, "Complaint not found. Check your tracking ID.")
     data = dict(row)
+    data["issue"] = json.loads(data.pop("issue_json")) if data["issue_json"] else None
+    if data["parent_tracking_id"]:
+        parent = (
+            connection.execute(
+                text(
+                    "SELECT original_text,audio_mime,input_type FROM complaints WHERE tracking_id=:id"
+                ),
+                {"id": data["parent_tracking_id"]},
+            )
+            .mappings()
+            .one()
+        )
+        data.update(parent)
+    child_ids = (
+        connection.execute(
+            text("SELECT tracking_id FROM complaints WHERE parent_tracking_id=:id ORDER BY rowid"),
+            {"id": tracking_id},
+        )
+        .scalars()
+        .all()
+    )
+    data["children"] = [read_complaint(connection, child_id) for child_id in child_ids]
     data["analysis"] = json.loads(data.pop("analysis_json")) if data["analysis_json"] else None
+    if data["issue"] is None and data["analysis"] and len(data["analysis"].get("issues", [])) == 1:
+        data["issue"] = data["analysis"]["issues"][0]
     data["assigned_secondary_departments"] = json.loads(
         data.pop("assigned_secondary_departments_json")
     )
@@ -127,7 +152,9 @@ def list_complaints(
     limit=25,
     offset=0,
 ):
-    clauses = []
+    clauses = [
+        "NOT EXISTS (SELECT 1 FROM complaints child WHERE child.parent_tracking_id=complaints.tracking_id)"
+    ]
     params = {"limit": limit, "offset": offset}
     if category:
         clauses.append("json_extract(analysis_json, '$.category')=:category")
@@ -152,7 +179,7 @@ def list_complaints(
         params["status"] = status
     if search:
         clauses.append(
-            "(tracking_id LIKE :search OR original_text LIKE :search OR analysis_json LIKE :search)"
+            "(tracking_id LIKE :search OR parent_tracking_id LIKE :search OR original_text LIKE :search OR analysis_json LIKE :search)"
         )
         params["search"] = f"%{search}%"
     where = " WHERE " + " AND ".join(clauses) if clauses else ""
@@ -178,10 +205,10 @@ def list_complaints(
         }
 
 
-def save_analysis(engine, tracking_id, *, analysis, error, reason, elapsed_ms):
+def save_analysis(engine, tracking_id, *, analysis, error, reason, elapsed_ms, threshold=0.75):
     status = "awaiting_review" if analysis else "analysis_failed"
     with engine.begin() as db:
-        db.execute(
+        result = db.execute(
             text("""UPDATE complaints SET status=:status,analysis_json=:analysis,
             analysis_error=:error,requires_review=:review,review_reason=:reason,
             analysis_ms=:elapsed,updated_at=:at,version=version+1 WHERE tracking_id=:id AND status='received'"""),
@@ -196,6 +223,56 @@ def save_analysis(engine, tracking_id, *, analysis, error, reason, elapsed_ms):
                 "at": now(),
             },
         )
+        if result.rowcount != 1:
+            return read_complaint(db, tracking_id)
+        if analysis and len(analysis.issues) > 1:
+            input_type = db.execute(
+                text("SELECT input_type FROM complaints WHERE tracking_id=:id"), {"id": tracking_id}
+            ).scalar_one()
+            children_need_review = False
+            for issue in analysis.issues:
+                child_id = f"GRV-{now()[:4]}-{uuid4().hex}"
+                child_analysis = issue_analysis(analysis, issue)
+                child_reason = review_reason(child_analysis, threshold, issue)
+                children_need_review = children_need_review or bool(child_reason)
+                db.execute(
+                    text("""INSERT INTO complaints (
+                    tracking_id,idempotency_key,fingerprint,input_type,created_at,updated_at,
+                    status,analysis_json,requires_review,review_reason,analysis_ms,
+                    parent_tracking_id,issue_json
+                ) VALUES (:id,:key,:fingerprint,:type,:at,:at,'awaiting_review',:analysis,
+                    :review,:reason,:elapsed,:parent,:issue)"""),
+                    {
+                        "id": child_id,
+                        "key": f"child:{child_id}",
+                        "fingerprint": child_id,
+                        "type": input_type,
+                        "at": now(),
+                        "analysis": child_analysis.model_dump_json(),
+                        "review": bool(child_reason),
+                        "reason": child_reason,
+                        "elapsed": elapsed_ms,
+                        "parent": tracking_id,
+                        "issue": issue.model_dump_json(),
+                    },
+                )
+                add_event(
+                    db,
+                    child_id,
+                    "awaiting_review",
+                    f"Issue {issue.issue_id} linked to {tracking_id}. "
+                    + (child_reason or "Awaiting officer routing approval."),
+                )
+            if children_need_review:
+                db.execute(
+                    text(
+                        "UPDATE complaints SET requires_review=1, review_reason=:reason WHERE tracking_id=:id"
+                    ),
+                    {
+                        "id": tracking_id,
+                        "reason": reason or "One or more linked issues require officer review.",
+                    },
+                )
         add_event(
             db,
             tracking_id,
@@ -214,6 +291,8 @@ def update_complaint(engine, tracking_id, decision):
     }
     with engine.begin() as db:
         record = read_complaint(db, tracking_id)
+        if record.children:
+            raise HTTPException(422, "Update each linked issue ticket independently.")
         if record.version != decision.version:
             raise HTTPException(
                 409, "Another officer updated this complaint. Refresh before retrying."
@@ -258,7 +337,32 @@ def update_complaint(engine, tracking_id, decision):
         if result.rowcount != 1:
             raise HTTPException(409, "This complaint was updated. Refresh before retrying.")
         add_event(db, tracking_id, decision.status, decision.note, department, secondary)
+        if record.parent_tracking_id:
+            refresh_parent(db, record.parent_tracking_id, tracking_id)
         return read_complaint(db, tracking_id)
+
+
+def refresh_parent(db, parent_id, child_id):
+    children = db.execute(
+        text("SELECT status,requires_review FROM complaints WHERE parent_tracking_id=:id"),
+        {"id": parent_id},
+    ).all()
+    states = [row[0] for row in children]
+    status = (
+        "resolved"
+        if all(value == "resolved" for value in states)
+        else "in_progress"
+        if any(value in ("in_progress", "resolved") for value in states)
+        else "routed"
+        if all(value == "routed" for value in states)
+        else "awaiting_review"
+    )
+    db.execute(
+        text("""UPDATE complaints SET status=:status, requires_review=:review,
+        updated_at=:at,version=version+1 WHERE tracking_id=:id"""),
+        {"id": parent_id, "status": status, "review": any(row[1] for row in children), "at": now()},
+    )
+    add_event(db, parent_id, status, f"Linked ticket {child_id} progress updated.")
 
 
 def clarify_complaint(engine, tracking_id, clarification):
@@ -304,7 +408,10 @@ def clarify_complaint(engine, tracking_id, clarification):
 def get_audio(engine, tracking_id):
     with engine.connect() as db:
         row = db.execute(
-            text("SELECT original_audio,audio_mime FROM complaints WHERE tracking_id=:id"),
+            text(
+                "SELECT original_audio,audio_mime FROM complaints WHERE tracking_id="
+                "COALESCE((SELECT parent_tracking_id FROM complaints WHERE tracking_id=:id),:id)"
+            ),
             {"id": tracking_id},
         ).first()
         if row is None or row[0] is None:

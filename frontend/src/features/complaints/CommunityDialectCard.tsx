@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useEffect, useState } from "react";
 import {
   BookOpen,
@@ -18,6 +19,8 @@ export interface CommunityDialectCardProps {
 }
 
 export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
+  const { t } = useLanguage();
+
   const dialectWord = complaint.analysis?.learned_dialect;
   const [modalOpen, setModalOpen] = useState(false);
   const [communityList, setCommunityList] = useState<LearnedDialectWord[]>([]);
@@ -76,7 +79,7 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
   return (
     <div
       className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-5 shadow-xs"
-      aria-label="Community Dialect Learning"
+      aria-label={t("Community Dialect Learning")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -85,10 +88,10 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
           </span>
           <div>
             <p className="eyebrow text-xs uppercase tracking-wider text-indigo-800">
-              USP 4 · Community Dialect Learning
+              {t("USP 4 · Community Dialect Learning")}
             </p>
             <h3 className="font-semibold text-stone-900">
-              Regional Vernacular Dictionary
+              {t("Regional Vernacular Dictionary")}
             </h3>
           </div>
         </div>
@@ -100,7 +103,7 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
           className="text-xs h-8 border-indigo-200 bg-white text-indigo-900 hover:bg-indigo-50"
         >
           <BookOpen size={14} className="mr-1.5" />
-          View Dialect Lexicon
+          {t("View Dialect Lexicon")}
         </Button>
       </div>
 
@@ -109,26 +112,32 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-base font-bold text-indigo-950 font-serif">
-                “{dialectWord.word}”
+                “{t(dialectWord.word)}”
               </span>
               <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-2xs font-medium text-indigo-700 border border-indigo-100">
-                {dialectWord.region}
+                {t(dialectWord.region)}
               </span>
             </div>
             <span className="flex items-center gap-1 text-xs text-emerald-700 font-medium">
-              <Check size={14} /> Learned & Verified
+              <Check size={14} />
+              {t(" Learned & Verified")}
             </span>
           </div>
 
           <p className="mt-2 text-xs text-stone-600">
-            <strong className="text-stone-800">Civic Translation: </strong>
-            {dialectWord.suggested_meaning} (Mapped to {dialectWord.category})
+            <strong className="text-stone-800">
+              {t("Civic Translation: ")}
+            </strong>
+            {t(dialectWord.suggested_meaning)}
+            {t(" (Mapped to ")}
+            {t(dialectWord.category)})
           </p>
         </div>
       ) : (
         <p className="mt-2 text-xs text-stone-600">
-          Standard civic vocabulary identified. Regional idioms are auto-indexed
-          into the municipal lexicon.
+          {t(
+            "Standard civic vocabulary identified. Regional idioms are auto-indexed into the municipal lexicon.",
+          )}
         </p>
       )}
 
@@ -145,10 +154,10 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                 <Globe2 size={20} className="text-indigo-600" />
                 <div>
                   <h3 className="font-semibold text-stone-900">
-                    Community Dialect Knowledge Base
+                    {t("Community Dialect Knowledge Base")}
                   </h3>
                   <p className="text-xs text-stone-500">
-                    Crowdsourced & AI-verified regional vocabulary
+                    {t("Crowdsourced & AI-verified regional vocabulary")}
                   </p>
                 </div>
               </div>
@@ -163,13 +172,16 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
 
             {submitSuccess && (
               <div className="mt-3 rounded-lg bg-emerald-50 p-2.5 text-xs text-emerald-800 border border-emerald-200">
-                ✔ New dialect term successfully contributed to the municipal AI!
+                {t(
+                  "✔ New dialect term successfully contributed to the municipal AI!",
+                )}
               </div>
             )}
 
             <div className="mt-4 flex items-center justify-between">
               <span className="text-xs font-medium text-stone-500">
-                {communityList.length} Registered Term(s)
+                {t(communityList.length)}
+                {t(" Registered Term(s)")}
               </span>
               <Button
                 size="sm"
@@ -178,7 +190,7 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                 onClick={() => setShowAddForm(!showAddForm)}
               >
                 <Plus size={13} />
-                {showAddForm ? "Close Form" : "Contribute Term"}
+                {t(showAddForm ? "Close Form" : "Contribute Term")}
               </Button>
             </div>
 
@@ -188,13 +200,13 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                 className="mt-3 rounded-xl border border-stone-200 bg-stone-50 p-3.5 text-xs space-y-2.5"
               >
                 <p className="font-medium text-stone-800">
-                  Add local slang or dialect word:
+                  {t("Add local slang or dialect word:")}
                 </p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <input
                     type="text"
                     required
-                    placeholder="Dialect word (e.g. Sombu)"
+                    placeholder={t("Dialect word (e.g. Sombu)")}
                     value={newWord}
                     onChange={(e) => setNewWord(e.target.value)}
                     className="field text-xs py-1.5 px-2 bg-white"
@@ -202,7 +214,7 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                   <input
                     type="text"
                     required
-                    placeholder="Standard Meaning (e.g. Water Pipe / Pot)"
+                    placeholder={t("Standard Meaning (e.g. Water Pipe / Pot)")}
                     value={newMeaning}
                     onChange={(e) => setNewMeaning(e.target.value)}
                     className="field text-xs py-1.5 px-2 bg-white"
@@ -214,11 +226,11 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                     onChange={(e) => setNewCategory(e.target.value)}
                     className="field text-xs py-1 px-2 bg-white w-40"
                   >
-                    <option value="Water Supply">Water Supply</option>
-                    <option value="Roads">Roads</option>
-                    <option value="Sanitation">Sanitation</option>
-                    <option value="Electricity">Electricity</option>
-                    <option value="Drainage">Drainage</option>
+                    <option value="Water Supply">{t("Water Supply")}</option>
+                    <option value="Roads">{t("Roads")}</option>
+                    <option value="Sanitation">{t("Sanitation")}</option>
+                    <option value="Electricity">{t("Electricity")}</option>
+                    <option value="Drainage">{t("Drainage")}</option>
                   </select>
                   <Button
                     type="submit"
@@ -243,11 +255,11 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                     size={18}
                     className="animate-spin mx-auto mb-2 text-indigo-500"
                   />
-                  Loading vernacular database...
+                  {t("Loading vernacular database...")}
                 </div>
               ) : communityList.length === 0 ? (
                 <p className="py-6 text-center text-xs text-stone-400">
-                  No terms registered yet.
+                  {t("No terms registered yet.")}
                 </p>
               ) : (
                 communityList.map((item, idx) => (
@@ -261,7 +273,7 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                           {item.word}
                         </span>
                         <span className="rounded bg-stone-100 px-1.5 py-0.5 text-2xs text-stone-600">
-                          {item.category}
+                          {t(item.category)}
                         </span>
                       </div>
                       <p className="mt-1 text-stone-600">
@@ -269,7 +281,7 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                       </p>
                     </div>
                     <span className="text-2xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 shrink-0">
-                      Active
+                      {t("Active")}
                     </span>
                   </div>
                 ))
@@ -283,7 +295,7 @@ export function CommunityDialectCard({ complaint }: CommunityDialectCardProps) {
                 onClick={() => setModalOpen(false)}
                 className="text-xs h-8"
               >
-                Close
+                {t("Close")}
               </Button>
             </div>
           </div>

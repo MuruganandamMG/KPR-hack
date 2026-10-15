@@ -880,7 +880,7 @@ it("renders SmartFollowUpCard with question, options and permits priority clarif
 
   // Click confirm button
   const confirmBtn = screen.getByRole("button", {
-    name: /Confirm & Update Priority/i,
+    name: /Confirm Scope/i,
   });
   await user.click(confirmBtn);
 

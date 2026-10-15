@@ -3,6 +3,7 @@ import json
 import httpx
 import pytest
 from app.features.civic_intelligence.gateway import GeminiGateway, InferenceError
+from app.features.complaints.test_decomposition import issue
 from app.features.complaints.test_workflow import prediction
 from app.shared.config import Settings
 
@@ -13,7 +14,13 @@ def test_malformed_output_retried_and_validated():
     def respond(request):
         body = json.loads(request.content)
         calls.append(body)
-        output = "not JSON" if len(calls) == 1 else prediction().model_dump_json()
+        output = (
+            "not JSON"
+            if len(calls) == 1
+            else prediction(
+                issues=[issue("road", "Repair damaged road.", "Roads", "Public Works", "Road")]
+            ).model_dump_json()
+        )
         return httpx.Response(
             200,
             json={
@@ -57,7 +64,23 @@ def test_audio_sent_as_inline_wav():
                 "candidates": [
                     {
                         "finishReason": "STOP",
-                        "content": {"parts": [{"text": prediction().model_dump_json()}]},
+                        "content": {
+                            "parts": [
+                                {
+                                    "text": prediction(
+                                        issues=[
+                                            issue(
+                                                "road",
+                                                "Repair damaged road.",
+                                                "Roads",
+                                                "Public Works",
+                                                "Road",
+                                            )
+                                        ]
+                                    ).model_dump_json()
+                                }
+                            ]
+                        },
                     }
                 ]
             },
@@ -65,3 +88,22 @@ def test_audio_sent_as_inline_wav():
 
     gateway = GeminiGateway(Settings(gemini_api_key="test-secret"), httpx.MockTransport(respond))
     assert gateway.analyze(audio=b"wav").transcript == "Road romba mosama."
+
+
+def test_missing_decomposition_is_rejected_for_new_inference():
+    def respond(request):
+        return httpx.Response(
+            200,
+            json={
+                "candidates": [
+                    {
+                        "finishReason": "STOP",
+                        "content": {"parts": [{"text": prediction().model_dump_json()}]},
+                    }
+                ]
+            },
+        )
+
+    gateway = GeminiGateway(Settings(gemini_api_key="test-secret"), httpx.MockTransport(respond))
+    with pytest.raises(InferenceError):
+        gateway.analyze(text="Road romba mosama.")

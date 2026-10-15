@@ -117,7 +117,8 @@
                     "Sanitation",
                     "Electricity",
                     "Drainage",
-                    "General Administration"
+                    "General Administration",
+                    "Health"
                   ],
                   "type": "string"
                 },
@@ -161,7 +162,8 @@
                     "Sanitation",
                     "Electricity",
                     "Drainage",
-                    "Other"
+                    "Other",
+                    "Public Health"
                   ],
                   "type": "string"
                 },
@@ -710,6 +712,14 @@
     "schemas": {
       "Analysis": {
         "properties": {
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/CivicIssue"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Issues"
+          },
           "transcript": {
             "type": "string",
             "maxLength": 5000,
@@ -742,7 +752,8 @@
               "Sanitation",
               "Electricity",
               "Drainage",
-              "Other"
+              "Other",
+              "Public Health"
             ],
             "title": "Category",
             "description": "Category of the dominant actionable civic issue."
@@ -761,7 +772,8 @@
               "Sanitation",
               "Electricity",
               "Drainage",
-              "General Administration"
+              "General Administration",
+              "Health"
             ],
             "title": "Primary Department",
             "description": "One lead department responsible for the dominant issue, matching the category."
@@ -775,7 +787,8 @@
                 "Sanitation",
                 "Electricity",
                 "Drainage",
-                "General Administration"
+                "General Administration",
+                "Health"
               ]
             },
             "type": "array",
@@ -1009,7 +1022,8 @@
                   "Sanitation",
                   "Electricity",
                   "Drainage",
-                  "General Administration"
+                  "General Administration",
+                  "Health"
                 ]
               },
               {
@@ -1027,7 +1041,8 @@
                 "Sanitation",
                 "Electricity",
                 "Drainage",
-                "General Administration"
+                "General Administration",
+                "Health"
               ]
             },
             "type": "array",
@@ -1107,11 +1122,160 @@
         ],
         "title": "CitizenValidationRequest"
       },
+      "CivicIssue": {
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Issue Id"
+          },
+          "normalized_complaint": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Normalized Complaint"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Water Supply",
+              "Roads",
+              "Sanitation",
+              "Electricity",
+              "Drainage",
+              "Other",
+              "Public Health"
+            ],
+            "title": "Category"
+          },
+          "department": {
+            "type": "string",
+            "enum": [
+              "Water Supply",
+              "Public Works",
+              "Sanitation",
+              "Electricity",
+              "Drainage",
+              "General Administration",
+              "Health"
+            ],
+            "title": "Department"
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Urgency"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Explanation"
+          },
+          "basis": {
+            "type": "string",
+            "enum": [
+              "explicit",
+              "implicit"
+            ],
+            "title": "Basis"
+          },
+          "evidence": {
+            "items": {
+              "type": "string",
+              "maxLength": 5000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Evidence"
+          },
+          "related_issue_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 9,
+            "title": "Related Issue Ids"
+          },
+          "relationship_explanation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relationship Explanation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "issue_id",
+          "normalized_complaint",
+          "category",
+          "department",
+          "urgency",
+          "confidence",
+          "explanation",
+          "basis",
+          "evidence",
+          "related_issue_ids",
+          "relationship_explanation"
+        ],
+        "title": "CivicIssue"
+      },
       "Complaint": {
         "properties": {
           "tracking_id": {
             "type": "string",
             "title": "Tracking Id"
+          },
+          "parent_tracking_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Tracking Id"
+          },
+          "issue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CivicIssue"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/Complaint"
+            },
+            "type": "array",
+            "title": "Children"
           },
           "input_type": {
             "type": "string",
@@ -1202,7 +1366,8 @@
                   "Sanitation",
                   "Electricity",
                   "Drainage",
-                  "General Administration"
+                  "General Administration",
+                  "Health"
                 ]
               },
               {
@@ -1220,7 +1385,8 @@
                 "Sanitation",
                 "Electricity",
                 "Drainage",
-                "General Administration"
+                "General Administration",
+                "Health"
               ]
             },
             "type": "array",
@@ -1394,7 +1560,8 @@
               "Sanitation",
               "Electricity",
               "Drainage",
-              "General Administration"
+              "General Administration",
+              "Health"
             ],
             "title": "Selected Department"
           },
@@ -1799,7 +1966,8 @@
               "Sanitation",
               "Electricity",
               "Drainage",
-              "Other"
+              "Other",
+              "Public Health"
             ],
             "title": "Category"
           },
@@ -1886,7 +2054,8 @@
                   "Sanitation",
                   "Electricity",
                   "Drainage",
-                  "General Administration"
+                  "General Administration",
+                  "Health"
                 ]
               },
               {
@@ -1906,7 +2075,8 @@
                     "Sanitation",
                     "Electricity",
                     "Drainage",
-                    "General Administration"
+                    "General Administration",
+                    "Health"
                   ]
                 },
                 "type": "array",
@@ -1972,7 +2142,8 @@
               "Sanitation",
               "Electricity",
               "Drainage",
-              "General Administration"
+              "General Administration",
+              "Health"
             ],
             "title": "Department"
           },

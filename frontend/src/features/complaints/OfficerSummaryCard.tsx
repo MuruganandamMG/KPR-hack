@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import {
   AlertCircle,
   Building2,
@@ -18,6 +19,8 @@ export function OfficerSummaryCard({
   complaint: Complaint;
   onSelectAction?: (actionText: string) => void;
 }) {
+  const { t } = useLanguage();
+
   const { analysis } = complaint;
 
   if (!analysis) {
@@ -25,7 +28,7 @@ export function OfficerSummaryCard({
   }
 
   const summary: OfficerSummary = analysis.officer_summary || {
-    problem: analysis.intent || `${analysis.category} issue reported`,
+    problem: analysis.intent || t("{0} issue reported", [t(analysis.category)]),
     area: "Ward / Locality Unspecified",
     duration: analysis.keywords.find(
       (k) =>
@@ -37,7 +40,10 @@ export function OfficerSummaryCard({
       : "Ongoing / Active Issue",
     priority: analysis.urgency,
     department: analysis.primary_department,
-    suggested_action: `Inspect and rectify ${analysis.category.toLowerCase()} fault under ${analysis.primary_department} jurisdiction.`,
+    suggested_action: t(
+      "Inspect and rectify {0} fault under {1} jurisdiction.",
+      [t(analysis.category.toLowerCase()), t(analysis.primary_department)],
+    ),
   };
 
   const priorityStyles: Record<string, string> = {
@@ -50,7 +56,7 @@ export function OfficerSummaryCard({
   return (
     <section
       className="officer-summary-card rounded-2xl border-2 border-emerald-500/80 bg-gradient-to-br from-emerald-50/70 via-white to-stone-50 p-4 sm:p-5 shadow-xs"
-      aria-label="Officer Executive Summary"
+      aria-label={t("Officer Executive Summary")}
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100 pb-3">
         <div className="flex items-center gap-2">
@@ -60,14 +66,14 @@ export function OfficerSummaryCard({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-stone-900">
-                Officer 10-Second Executive Summary
+                {t("Officer 10-Second Executive Summary")}
               </h3>
               <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 uppercase tracking-wide">
-                Instant Triage USP
+                {t("Instant Triage USP")}
               </span>
             </div>
             <p className="text-xs text-stone-500">
-              Skip reading 200 words · Actionable 6-point briefing
+              {t("Skip reading 200 words · Actionable 6-point briefing")}
             </p>
           </div>
         </div>
@@ -78,10 +84,10 @@ export function OfficerSummaryCard({
         <div className="rounded-xl border border-stone-200/90 bg-white p-3.5 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-500">
             <AlertCircle size={14} className="text-amber-600" />
-            <span>Problem</span>
+            <span>{t("Problem")}</span>
           </div>
           <p className="mt-1.5 text-sm font-bold text-stone-900 leading-snug">
-            {summary.problem}
+            {t(summary.problem)}
           </p>
         </div>
 
@@ -89,10 +95,10 @@ export function OfficerSummaryCard({
         <div className="rounded-xl border border-stone-200/90 bg-white p-3.5 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-500">
             <MapPin size={14} className="text-emerald-700" />
-            <span>Area / Location</span>
+            <span>{t("Area / Location")}</span>
           </div>
           <p className="mt-1.5 text-sm font-bold text-stone-900 leading-snug">
-            {summary.area}
+            {t(summary.area)}
           </p>
         </div>
 
@@ -100,10 +106,10 @@ export function OfficerSummaryCard({
         <div className="rounded-xl border border-stone-200/90 bg-white p-3.5 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-500">
             <Clock size={14} className="text-blue-600" />
-            <span>Duration</span>
+            <span>{t("Duration")}</span>
           </div>
           <p className="mt-1.5 text-sm font-bold text-stone-900 leading-snug">
-            {summary.duration}
+            {t(summary.duration)}
           </p>
         </div>
 
@@ -111,7 +117,7 @@ export function OfficerSummaryCard({
         <div className="rounded-xl border border-stone-200/90 bg-white p-3.5 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-500">
             <Zap size={14} className="text-purple-600" />
-            <span>Priority</span>
+            <span>{t("Priority")}</span>
           </div>
           <div className="mt-1.5">
             <span
@@ -120,7 +126,8 @@ export function OfficerSummaryCard({
                 "bg-stone-100 text-stone-800"
               }`}
             >
-              {summary.priority} Priority
+              {t(summary.priority)}
+              {t(" Priority")}
             </span>
           </div>
         </div>
@@ -129,10 +136,10 @@ export function OfficerSummaryCard({
         <div className="rounded-xl border border-stone-200/90 bg-white p-3.5 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-500">
             <Building2 size={14} className="text-indigo-600" />
-            <span>Department</span>
+            <span>{t("Department")}</span>
           </div>
           <p className="mt-1.5 text-sm font-bold text-stone-900 leading-snug">
-            {summary.department}
+            {t(summary.department)}
           </p>
         </div>
 
@@ -141,7 +148,7 @@ export function OfficerSummaryCard({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-900">
               <Sparkles size={14} className="text-emerald-700" />
-              <span>Suggested Action</span>
+              <span>{t("Suggested Action")}</span>
             </div>
             {onSelectAction && (
               <Button
@@ -152,12 +159,14 @@ export function OfficerSummaryCard({
                 onClick={() => onSelectAction(summary.suggested_action)}
               >
                 <Check size={13} className="text-emerald-700" />
-                Use as Decision Note
+                {t("Use as Decision Note")}
               </Button>
             )}
           </div>
           <p className="mt-1.5 text-sm font-medium text-emerald-950 leading-relaxed">
-            &ldquo;{summary.suggested_action}&rdquo;
+            {t("“")}
+            {summary.suggested_action}
+            {t("”")}
           </p>
         </div>
       </div>

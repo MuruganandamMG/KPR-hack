@@ -4,7 +4,7 @@
 
 Maintain a clear, modular frontend and backend that can grow through isolated features. Keep operations focused, interfaces explicit, and changes easy to review and verify.
 
-The project helps municipal grievance systems understand citizen complaints submitted as text or voice in regional dialects, informal vocabulary, and misspelled language. It should normalize complaints, identify civic intent, department, and urgency, preserve original context, expose routing explanations, confidence, and tracking IDs, and evaluate routing accuracy, dialect robustness, and initial response time.
+The project helps municipal grievance systems understand citizen complaints submitted as text or voice in regional dialects, informal vocabulary, and misspelled language. It should normalize complaints, decompose explicit and evidence-backed implicit civic issues, identify civic intent, department, and urgency per issue, preserve original context, expose routing explanations, confidence, and linked parent/child tracking IDs, and evaluate routing accuracy, dialect robustness, and initial response time.
 
 The hackathon prototype follows PRD.md and plan.md. Its feature map and setup/check commands are in README.md. Keep work within that scope; do not scaffold future features.
 

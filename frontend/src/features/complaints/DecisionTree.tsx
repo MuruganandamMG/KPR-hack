@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import {
   AlertTriangle,
   ArrowDown,
@@ -26,6 +27,8 @@ interface StepNode {
 }
 
 export function DecisionTree({ complaint }: { complaint: Complaint }) {
+  const { t } = useLanguage();
+
   const { analysis } = complaint;
 
   if (!analysis) {
@@ -33,17 +36,19 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
     return (
       <div
         className="rounded-2xl border border-stone-200 bg-stone-50/70 p-5 text-sm"
-        aria-label="AI Decision Tree"
+        aria-label={t("AI Decision Tree")}
       >
         <div className="flex items-center gap-2 font-medium text-stone-700">
           <AlertTriangle size={18} className="text-amber-600" />
-          <span>Decision Tree Unavailable</span>
+          <span>{t("Decision Tree Unavailable")}</span>
         </div>
         <p className="mt-2 text-stone-500">
-          {isResolved
-            ? "This complaint was classified and resolved manually by an officer without AI decision tree inference."
-            : complaint.analysis_error ||
-              "This complaint is being reviewed manually by an officer. An automated decision tree is generated during AI inference."}
+          {t(
+            isResolved
+              ? "This complaint was classified and resolved manually by an officer without AI decision tree inference."
+              : complaint.analysis_error ||
+                  "This complaint is being reviewed manually by an officer. An automated decision tree is generated during AI inference.",
+          )}
         </p>
       </div>
     );
@@ -66,7 +71,7 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
       value: isVoice ? "Voice Recording" : "Text Submission",
       subtitle: isVoice
         ? complaint.audio_mime || "Audio format"
-        : `${complaint.original_text?.length ?? 0} characters`,
+        : t("{0} characters", [t(complaint.original_text?.length ?? 0)]),
       details:
         complaint.original_text ||
         analysis.transcript ||
@@ -118,7 +123,7 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
     {
       step: "05",
       title: "Urgency Assessment",
-      value: `${analysis.urgency} Priority`,
+      value: t("{0} Priority", [t(analysis.urgency)]),
       subtitle:
         analysis.urgency === "Critical"
           ? "Immediate threat to public safety or life"
@@ -129,7 +134,7 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
               : "Routine municipal maintenance",
       icon: Zap,
       badge: {
-        text: `${analysis.urgency} Urgency`,
+        text: t("{0} Urgency", [t(analysis.urgency)]),
         className:
           urgencyStyles[analysis.urgency] || "bg-stone-100 text-stone-700",
       },
@@ -138,11 +143,11 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
       step: "06",
       title: "Department Routing",
       value: analysis.primary_department,
-      subtitle: `Model confidence: ${confidencePercent}%`,
+      subtitle: t("Model confidence: {0}%", [t(confidencePercent)]),
       details: analysis.explanation,
       icon: Building2,
       badge: {
-        text: `${confidencePercent}% Confidence`,
+        text: t("{0}% Confidence", [t(confidencePercent)]),
         className:
           analysis.confidence >= 0.75
             ? "bg-emerald-50 text-emerald-800 border-emerald-200"
@@ -154,20 +159,20 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
   return (
     <div
       className="decision-tree-container"
-      aria-label="AI Decision Tree"
+      aria-label={t("AI Decision Tree")}
       role="region"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-stone-900">
-            Explainable AI Reasoning Tree
+            {t("Explainable AI Reasoning Tree")}
           </span>
           <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
-            USP
+            {t("USP")}
           </span>
         </div>
         <span className="text-xs text-stone-500">
-          6-step verifiable inference path
+          {t("6-step verifiable inference path")}
         </span>
       </div>
 
@@ -208,31 +213,32 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
                 <div className="decision-tree-card min-w-0 flex-1 rounded-xl border border-stone-200/90 bg-white p-3.5 shadow-xs sm:p-4">
                   <div className="flex flex-wrap items-center justify-between gap-1.5">
                     <span className="font-mono text-[11px] font-semibold tracking-wider text-stone-600 uppercase">
-                      Step {node.step} · {node.title}
+                      {t("Step ")}
+                      {t(node.step)} · {t(node.title)}
                     </span>
                     {node.badge && (
                       <span
                         className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${node.badge.className}`}
                       >
-                        {node.badge.text}
+                        {t(node.badge.text)}
                       </span>
                     )}
                   </div>
 
                   <p className="mt-1 text-base font-semibold text-stone-900">
-                    {node.value}
+                    {t(node.value)}
                   </p>
 
                   {node.subtitle && (
                     <p className="mt-0.5 text-xs text-stone-500">
-                      {node.subtitle}
+                      {node.step === "04" ? node.subtitle : t(node.subtitle)}
                     </p>
                   )}
 
                   {node.keywords && node.keywords.length > 0 && (
                     <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                       <span className="text-[11px] text-stone-600">
-                        Extracted keywords:
+                        {t("Extracted keywords:")}
                       </span>
                       {node.keywords.map((word, i) => (
                         <span
@@ -247,16 +253,23 @@ export function DecisionTree({ complaint }: { complaint: Complaint }) {
 
                   {node.details && (
                     <p className="mt-2 text-xs leading-relaxed text-stone-600">
-                      {node.details}
+                      {["01", "03", "06"].includes(node.step)
+                        ? node.details
+                        : t(node.details)}
                     </p>
                   )}
 
                   {isLast && analysis.secondary_departments.length > 0 && (
                     <p className="mt-2 border-t border-stone-100 pt-2 text-xs text-stone-500">
                       <span className="font-medium text-stone-700">
-                        Secondary department recommendations:
-                      </span>{" "}
-                      {analysis.secondary_departments.join(", ")}
+                        {t("Secondary department recommendations:")}
+                      </span>
+                      {t(" ")}
+                      {t(
+                        analysis.secondary_departments
+                          .map((value) => t(value))
+                          .join(", "),
+                      )}
                     </p>
                   )}
                 </div>

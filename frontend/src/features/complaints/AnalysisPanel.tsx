@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { CheckCircle2, ChevronRight, ScanText, Sparkles } from "lucide-react";
 import { Button } from "../../shared/ui/button";
 import { ComplaintDetail } from "./ComplaintDetail";
@@ -17,10 +18,12 @@ export function AnalysisPanel({
   mode?: "text" | "voice";
   onComplaintUpdated?: (updated: Complaint) => void;
 }) {
+  const { t } = useLanguage();
+
   return (
     <section
       className="panel analysis-panel"
-      aria-label="Analysis"
+      aria-label={t("Analysis")}
       aria-busy={pending}
     >
       <div className="workspace-panel-heading">
@@ -29,9 +32,9 @@ export function AnalysisPanel({
             <Sparkles size={19} />
           </span>
           <div>
-            <p className="eyebrow">02 / Understanding</p>
+            <p className="eyebrow">{t("02 / Understanding")}</p>
             <h2 className="mt-1 text-lg font-semibold">
-              {complaint ? "Complaint received" : "AI analysis"}
+              {t(complaint ? "Complaint received" : "AI analysis")}
             </h2>
           </div>
         </div>
@@ -44,6 +47,7 @@ export function AnalysisPanel({
           <ComplaintDetail
             complaint={complaint}
             onComplaintUpdated={onComplaintUpdated}
+            onTrack={onTrack}
           />
           {onTrack && (
             <Button
@@ -51,7 +55,7 @@ export function AnalysisPanel({
               variant="outline"
               onClick={() => onTrack(complaint.tracking_id)}
             >
-              Track progress
+              {t("Track progress")}
               <ChevronRight size={16} />
             </Button>
           )}
@@ -63,16 +67,16 @@ export function AnalysisPanel({
           </span>
           <div>
             <h3 className="font-semibold text-stone-700">
-              Your complaint, made clear
+              {t("Your complaint, made clear")}
             </h3>
             <p className="mt-2 text-sm text-stone-500">
-              Submit text or audio to see the analysis.
+              {t("Submit text or audio to see the analysis.")}
             </p>
           </div>
           <div className="analysis-fields">
-            <span>Language & meaning</span>
-            <span>Department & priority</span>
-            <span>Explanation & tracking ID</span>
+            <span>{t("Language & meaning")}</span>
+            <span>{t("Department & priority")}</span>
+            <span>{t("Explanation & tracking ID")}</span>
           </div>
         </div>
       )}

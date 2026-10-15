@@ -1,6 +1,6 @@
 from typing import Literal
 
-from app.features.civic_intelligence.schemas import Analysis, Department
+from app.features.civic_intelligence.schemas import Analysis, CivicIssue, Department
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Status = Literal[
@@ -55,6 +55,9 @@ class AuditEvent(BaseModel):
 
 class Complaint(BaseModel):
     tracking_id: str
+    parent_tracking_id: str | None = None
+    issue: CivicIssue | None = None
+    children: list["Complaint"] = Field(default_factory=list)
     input_type: Literal["text", "voice"]
     original_text: str | None
     audio_mime: str | None

@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useState } from "react";
 import {
   Check,
@@ -20,6 +21,8 @@ export function CitizenValidationCard({
   complaint,
   onComplaintUpdated,
 }: CitizenValidationCardProps) {
+  const { t } = useLanguage();
+
   const validation = complaint.analysis?.citizen_validation;
   if (!validation) return null;
 
@@ -53,7 +56,7 @@ export function CitizenValidationCard({
           ? "border-emerald-200 bg-emerald-50/50 shadow-xs"
           : "border-sky-200 bg-sky-50/40 shadow-xs"
       }`}
-      aria-label="Citizen validation layer"
+      aria-label={t("Citizen validation layer")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -72,10 +75,10 @@ export function CitizenValidationCard({
           </span>
           <div>
             <p className="eyebrow text-xs uppercase tracking-wider text-stone-500">
-              USP 5 · Citizen Validation Layer
+              {t("USP 5 · Citizen Validation Layer")}
             </p>
             <h3 className="font-semibold text-stone-900">
-              Citizen Pre-Flight Validation
+              {t("Citizen Pre-Flight Validation")}
             </h3>
           </div>
         </div>
@@ -83,18 +86,18 @@ export function CitizenValidationCard({
         {validation.is_confirmed ? (
           <span className="flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white shadow-xs">
             <Check size={14} />
-            Confirmed by Citizen
+            {t("Confirmed by Citizen")}
           </span>
         ) : (
           <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
-            Awaiting Citizen Confirmation
+            {t("Awaiting Citizen Confirmation")}
           </span>
         )}
       </div>
 
       <div className="mt-3.5 rounded-xl border border-stone-200 bg-white p-3.5 shadow-2xs">
         <p className="text-2xs font-semibold uppercase tracking-wider text-stone-400">
-          What the AI understood:
+          {t("What the AI understood:")}
         </p>
         <p className="mt-1 text-sm font-medium leading-relaxed text-stone-800">
           “{validation.summary_statement}”
@@ -104,7 +107,9 @@ export function CitizenValidationCard({
       {!validation.is_confirmed ? (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-1">
           <p className="text-xs text-stone-600">
-            Did we capture your grievance correctly before final dispatch?
+            {t(
+              "Did we capture your grievance correctly before final dispatch?",
+            )}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -119,7 +124,7 @@ export function CitizenValidationCard({
               ) : (
                 <>
                   <Flag size={13} className="mr-1 text-amber-600" />
-                  Flag Correction
+                  {t("Flag Correction")}
                 </>
               )}
             </Button>
@@ -135,7 +140,7 @@ export function CitizenValidationCard({
               ) : (
                 <>
                   <Check size={14} />
-                  Yes, Exactly Correct
+                  {t("Yes, Exactly Correct")}
                 </>
               )}
             </Button>
@@ -145,8 +150,9 @@ export function CitizenValidationCard({
         <div className="mt-3 flex items-center justify-between text-xs text-emerald-800">
           <span className="flex items-center gap-1.5">
             <CheckCircle2 size={14} className="text-emerald-600" />
-            Citizen confirmed the grievance summary. Ready for municipal field
-            team.
+            {t(
+              "Citizen confirmed the grievance summary. Ready for municipal field team.",
+            )}
           </span>
           <Button
             size="sm"
@@ -155,12 +161,12 @@ export function CitizenValidationCard({
             onClick={() => handleConfirm(false)}
             className="text-2xs text-stone-500 hover:text-stone-700 h-6 px-2"
           >
-            Change response
+            {t("Change response")}
           </Button>
         </div>
       )}
 
-      {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
+      {error && <p className="mt-2 text-xs text-rose-600">{t(error)}</p>}
     </div>
   );
 }

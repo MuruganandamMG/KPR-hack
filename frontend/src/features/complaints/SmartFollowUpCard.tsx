@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useState } from "react";
 import {
   AlertCircle,
@@ -22,6 +23,8 @@ export function SmartFollowUpCard({
   complaint,
   onComplaintUpdated,
 }: SmartFollowUpCardProps) {
+  const { t } = useLanguage();
+
   const followUp = complaint.analysis?.smart_follow_up;
   if (!followUp) return null;
 
@@ -57,11 +60,20 @@ export function SmartFollowUpCard({
     }
   }
 
+  // Guard against any LLM response that mistakenly asked for street name or duration
+  // instead of introducing the multiple-choice scope options:
+  const isInvalidQuestion =
+    !followUp.question ||
+    /street\s*name|locality|how\s*long|specify\s*your/i.test(followUp.question);
+  const displayQuestion = isInvalidQuestion
+    ? "What is the physical extent or scope of this issue:"
+    : followUp.question;
+
   // Answered State
   if (currentAnswer && !isEditing) {
     return (
       <section
-        aria-label="Smart follow-up clarification"
+        aria-label={t("Smart follow-up clarification")}
         className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/40 p-4 text-left shadow-xs md:p-5"
       >
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100 pb-3">
@@ -73,11 +85,11 @@ export function SmartFollowUpCard({
               <div className="flex items-center gap-2">
                 <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
                 <h3 className="text-xs font-semibold tracking-wider text-emerald-900 uppercase">
-                  AI Smart Clarification Confirmed
+                  {t("AI Smart Clarification Confirmed")}
                 </h3>
               </div>
               <p className="text-xs text-stone-500">
-                Citizen clarified grievance scope
+                {t("Citizen clarified grievance scope")}
               </p>
             </div>
           </div>
@@ -88,21 +100,23 @@ export function SmartFollowUpCard({
             className="text-xs text-emerald-800 hover:text-emerald-950"
             onClick={() => setIsEditing(true)}
           >
-            Change Answer
+            {t("Change Answer")}
           </Button>
         </div>
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200/60 bg-white/80 p-3">
           <div>
             <p className="text-xs font-semibold text-stone-500">
-              Confirmed Scope:
+              {t("Confirmed Scope:")}
             </p>
             <p className="text-sm font-bold text-emerald-950">
-              {currentAnswer}
+              {t(currentAnswer)}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-stone-500">Updated Urgency:</span>
+            <span className="text-xs text-stone-500">
+              {t("Assessed Priority:")}
+            </span>
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                 complaint.analysis?.urgency === "Critical"
@@ -112,7 +126,8 @@ export function SmartFollowUpCard({
                     : "bg-emerald-100 text-emerald-800 border border-emerald-200"
               }`}
             >
-              {complaint.analysis?.urgency} Priority
+              {t(complaint.analysis?.urgency)}
+              {t(" Priority")}
             </span>
           </div>
         </div>
@@ -123,7 +138,7 @@ export function SmartFollowUpCard({
   // Interactive Question State
   return (
     <section
-      aria-label="Smart follow-up clarification"
+      aria-label={t("Smart follow-up clarification")}
       className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50/70 via-white to-orange-50/30 p-4 text-left shadow-xs md:p-5"
     >
       {/* Header */}
@@ -136,23 +151,25 @@ export function SmartFollowUpCard({
             <div className="flex items-center gap-2">
               <span className="inline-block h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
               <h3 className="text-xs font-semibold tracking-wider text-amber-900 uppercase">
-                AI Smart Follow-up Clarification
+                {t("AI Smart Follow-up Clarification")}
               </h3>
             </div>
             <p className="text-xs text-stone-500">
-              Interactive triage · Clarify scope to prioritize response
+              {t(
+                "Scope Clarification · Select the physical extent to dispatch appropriate municipal response",
+              )}
             </p>
           </div>
         </div>
         <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-900">
-          Action Recommended
+          {t("Action Recommended")}
         </span>
       </div>
 
       {/* Question Prompt */}
       <div className="mt-3">
         <h4 className="text-sm font-bold text-stone-900">
-          {followUp.question}
+          {t(displayQuestion)}
         </h4>
         <p className="mt-1 text-xs text-stone-500">
           {followUp.category_context}
@@ -163,7 +180,7 @@ export function SmartFollowUpCard({
       <div
         className="mt-3 space-y-2"
         role="radiogroup"
-        aria-label={followUp.question}
+        aria-label={t(displayQuestion)}
       >
         {followUp.options.map((opt) => {
           const isSelected = selected === opt.label;
@@ -195,7 +212,7 @@ export function SmartFollowUpCard({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-1">
                   <span className="text-xs font-bold text-stone-900">
-                    {opt.label}
+                    {t(opt.label)}
                   </span>
                   <span
                     className={`rounded px-2 py-0.5 text-[10px] font-semibold ${
@@ -206,11 +223,17 @@ export function SmartFollowUpCard({
                           : "bg-emerald-100 text-emerald-800"
                     }`}
                   >
-                    {opt.priority_weight} ({opt.urgency_impact})
+                    {t(
+                      opt.urgency_impact === "Critical"
+                        ? "Critical / Widespread Impact"
+                        : opt.urgency_impact === "High"
+                          ? "Street Impact"
+                          : "Localized Impact",
+                    )}
                   </span>
                 </div>
                 <p className="mt-0.5 text-[11px] text-stone-500">
-                  {opt.description}
+                  {t(opt.description)}
                 </p>
               </div>
             </label>
@@ -221,15 +244,16 @@ export function SmartFollowUpCard({
       {error && (
         <div className="mt-3 flex items-center gap-2 rounded-lg bg-red-50 p-2 text-xs text-red-700">
           <AlertCircle size={14} />
-          {error}
+          {t(error)}
         </div>
       )}
 
       {/* Action Footer */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-amber-100 pt-3">
         <p className="text-[11px] text-stone-500">
-          Selecting higher scope automatically updates municipal dispatch
-          priority.
+          {t(
+            "Specifying the affected scope helps municipal engineers dispatch the right equipment and crew.",
+          )}
         </p>
         <div className="flex items-center gap-2">
           {currentAnswer && (
@@ -240,7 +264,7 @@ export function SmartFollowUpCard({
               disabled={busy}
               onClick={() => setIsEditing(false)}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
           )}
           <Button
@@ -253,11 +277,11 @@ export function SmartFollowUpCard({
             {busy ? (
               <>
                 <LoaderCircle size={14} className="animate-spin" />
-                Updating Priority...
+                {t("Saving Details...")}
               </>
             ) : (
               <>
-                Confirm &amp; Update Priority
+                {t("Confirm Scope")}
                 <ArrowRight size={14} />
               </>
             )}

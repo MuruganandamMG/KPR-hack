@@ -164,7 +164,7 @@ def test_version_one_upgrade_preserves_approved_records_without_inventing_assign
     engine = create_database(Settings(database_path=str(path)))
     engine.dispose()
     with sqlite3.connect(path) as db:
-        assert db.execute("PRAGMA user_version").fetchone()[0] == 2
+        assert db.execute("PRAGMA user_version").fetchone()[0] == 3
         assert db.execute(
             "SELECT original_text,assigned_department,assigned_secondary_departments_json "
             "FROM complaints"

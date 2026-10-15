@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -20,6 +21,8 @@ import {
 } from "./types";
 
 export function OfficerDashboard({ departments }: { departments: string[] }) {
+  const { t } = useLanguage();
+
   const [page, setPage] = useState<ComplaintPage | null>(null);
   const [selected, setSelected] = useState<Complaint | null>(null);
   const [status, setStatus] = useState<Status | "">("");
@@ -172,16 +175,17 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h2 className="mt-2 text-xl font-semibold">
-                Complaint queue{" "}
+                {t("Complaint queue")}
+                {t(" ")}
                 <span className="ml-1 text-sm font-normal text-stone-400">
-                  {page?.total ?? "—"}
+                  {t(page?.total ?? "—")}
                 </span>
               </h2>
             </div>
             <Button
               variant="outline"
               size="sm"
-              aria-label="Refresh queue"
+              aria-label={t("Refresh queue")}
               disabled={saving}
               onClick={() => {
                 setSelected(null);
@@ -192,7 +196,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
             </Button>
           </div>
           <label htmlFor="queue-search" className="field-label">
-            Search complaints
+            {t("Search complaints")}
           </label>
           <div className="relative">
             <Search
@@ -203,7 +207,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
               id="queue-search"
               disabled={saving}
               className="field pl-10"
-              placeholder="Tracking ID or complaint…"
+              placeholder={t("Tracking ID or complaint…")}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -213,7 +217,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
             />
           </div>
           <label htmlFor="queue-department" className="field-label mt-4">
-            Filter by department
+            {t("Filter by department")}
           </label>
           <select
             id="queue-department"
@@ -227,15 +231,17 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
               setSelected(null);
             }}
           >
-            <option value="">All departments</option>
+            <option value="">{t("All departments")}</option>
             {departments.map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>
+                {t(value)}
+              </option>
             ))}
           </select>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="queue-role" className="field-label">
-                Department role
+                {t("Department role")}
               </label>
               <select
                 id="queue-role"
@@ -250,14 +256,14 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                   setSelected(null);
                 }}
               >
-                <option value="">Primary or secondary</option>
-                <option value="primary">Primary</option>
-                <option value="secondary">Secondary</option>
+                <option value="">{t("Primary or secondary")}</option>
+                <option value="primary">{t("Primary")}</option>
+                <option value="secondary">{t("Secondary")}</option>
               </select>
             </div>
             <div>
               <label htmlFor="queue-category" className="field-label">
-                Category
+                {t("Category")}
               </label>
               <select
                 id="queue-category"
@@ -270,15 +276,17 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                   setSelected(null);
                 }}
               >
-                <option value="">All categories</option>
+                <option value="">{t("All categories")}</option>
                 {categories.map((value) => (
-                  <option key={value}>{value}</option>
+                  <option key={value} value={value}>
+                    {t(value)}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
           <label htmlFor="queue-status" className="field-label mt-4">
-            Status
+            {t("Status")}
           </label>
           <select
             id="queue-status"
@@ -291,16 +299,16 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
               setSelected(null);
             }}
           >
-            <option value="">All statuses</option>
+            <option value="">{t("All statuses")}</option>
             {Object.entries(statusLabels).map(([key, label]) => (
               <option value={key} key={key}>
-                {label}
+                {t(label)}
               </option>
             ))}
           </select>
           {error && (
             <p role="alert" className="mt-5 text-sm text-red-700">
-              {error}
+              {t(error)}
             </p>
           )}
           <div className="mt-6 space-y-3">
@@ -310,12 +318,12 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                 className="flex items-center gap-2 py-8 text-sm text-stone-500"
               >
                 <LoaderCircle size={16} className="animate-spin" />
-                Loading complaints…
+                {t("Loading complaints…")}
               </p>
             ) : !page?.items.length ? (
               <div className="py-10 text-center text-stone-400">
                 <Inbox size={30} className="mx-auto mb-3" />
-                <p className="text-sm">No complaints match this view.</p>
+                <p className="text-sm">{t("No complaints match this view.")}</p>
               </div>
             ) : (
               page.items.map((item) => (
@@ -334,7 +342,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                       "Voice complaint · Manual review"}
                   </span>
                   <span className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <span>{statusLabels[item.status]}</span>
+                    <span>{t(statusLabels[item.status])}</span>
                     <span
                       className={
                         item.analysis?.urgency === "Critical"
@@ -342,18 +350,27 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                           : "text-emerald-700"
                       }
                     >
-                      {item.analysis?.urgency || "Unclassified"} · Primary:{" "}
-                      {item.assigned_department ||
-                        item.analysis?.primary_department ||
-                        "Review needed"}
+                      {t(item.analysis?.urgency || "Unclassified")}
+                      {t(" · Primary:")}
+                      {t(" ")}
+                      {t(
+                        item.assigned_department ||
+                          item.analysis?.primary_department ||
+                          "Review needed",
+                      )}
                     </span>
                   </span>
                   <span className="mt-2 block text-xs text-stone-500">
-                    Secondary:{" "}
-                    {(item.assigned_department
-                      ? item.assigned_secondary_departments || []
-                      : item.analysis?.secondary_departments || []
-                    ).join(", ") || "None"}
+                    {t("Secondary:")}
+                    {t(" ")}
+                    {t(
+                      (item.assigned_department
+                        ? item.assigned_secondary_departments || []
+                        : item.analysis?.secondary_departments || []
+                      )
+                        .map((value) => t(value))
+                        .join(", ") || "None",
+                    )}
                   </span>
                 </button>
               ))
@@ -370,10 +387,12 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                   setSelected(null);
                 }}
               >
-                Previous
+                {t("Previous")}
               </Button>
               <span>
-                {offset + 1}–{Math.min(offset + 25, page.total)} of {page.total}
+                {t(offset + 1)}–{t(Math.min(offset + 25, page.total))}
+                {t(" of ")}
+                {t(page.total)}
               </span>
               <Button
                 variant="outline"
@@ -384,7 +403,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                   setSelected(null);
                 }}
               >
-                Next
+                {t("Next")}
               </Button>
             </div>
           )}
@@ -398,7 +417,8 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
             onClick={() => setSelected(null)}
             autoFocus
           >
-            <ArrowLeft size={16} /> Back to queue
+            <ArrowLeft size={16} />
+            {t(" Back to queue")}
           </Button>
           <ComplaintDetail
             key={selected.tracking_id}
@@ -411,11 +431,11 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
               onSubmit={decide}
               className="mt-7 border-t border-stone-100 pt-6"
             >
-              <h3 className="mb-4 font-semibold">Officer decision</h3>
+              <h3 className="mb-4 font-semibold">{t("Officer decision")}</h3>
               {canRoute && (
                 <>
                   <label htmlFor="assigned-department" className="field-label">
-                    Assigned department
+                    {t("Assigned department")}
                   </label>
                   <select
                     id="assigned-department"
@@ -431,19 +451,22 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                     required
                   >
                     <option value="" disabled>
-                      Select department
+                      {t("Select department")}
                     </option>
                     {departments.map((value) => (
-                      <option key={value}>{value}</option>
+                      <option key={value} value={value}>
+                        {t(value)}
+                      </option>
                     ))}
                   </select>
                   <fieldset className="mb-4" disabled={saving}>
                     <legend className="field-label">
-                      Secondary departments
+                      {t("Secondary departments")}
                     </legend>
                     <p className="mb-3 text-xs text-stone-500">
-                      Select every supporting department needed to resolve this
-                      complaint.
+                      {t(
+                        "Select every supporting department needed to resolve this complaint.",
+                      )}
                     </p>
                     <div className="grid gap-2 sm:grid-cols-2">
                       {departments.map((value) => (
@@ -464,7 +487,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                               )
                             }
                           />
-                          {value}
+                          {t(value)}
                         </label>
                       ))}
                     </div>
@@ -472,7 +495,7 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                 </>
               )}
               <label htmlFor="decision-note" className="field-label">
-                Decision note
+                {t("Decision note")}
               </label>
               <textarea
                 id="decision-note"
@@ -483,11 +506,13 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                 maxLength={2000}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Explain your review, any department override, or the progress update."
+                placeholder={t(
+                  "Explain your review, any department override, or the progress update.",
+                )}
               />
               {decisionError && (
                 <p role="alert" className="mt-3 text-sm text-red-700">
-                  {decisionError}
+                  {t(decisionError)}
                 </p>
               )}
               <Button
@@ -501,12 +526,15 @@ export function OfficerDashboard({ departments }: { departments: string[] }) {
                   <LoaderCircle size={16} className="animate-spin" />
                 ) : (
                   <ArrowRight size={16} />
-                )}{" "}
-                {canRoute
-                  ? "Approve routing"
-                  : selected.status === "routed"
-                    ? "Start work"
-                    : "Mark resolved"}
+                )}
+                {t(" ")}
+                {t(
+                  canRoute
+                    ? "Approve routing"
+                    : selected.status === "routed"
+                      ? "Start work"
+                      : "Mark resolved",
+                )}
               </Button>
             </form>
           )}

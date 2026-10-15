@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import {
   Building2,
   CheckCircle2,
@@ -14,13 +15,15 @@ export interface DepartmentExplanationCardProps {
 export function DepartmentExplanationCard({
   complaint,
 }: DepartmentExplanationCardProps) {
+  const { t } = useLanguage();
+
   const deptExp = complaint.analysis?.department_explanation;
   if (!deptExp) return null;
 
   return (
     <div
       className="rounded-2xl border border-stone-200 bg-white p-5 shadow-xs"
-      aria-label="Differential Department Explanation"
+      aria-label={t("Differential Department Explanation")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -29,16 +32,17 @@ export function DepartmentExplanationCard({
           </span>
           <div>
             <p className="eyebrow text-xs uppercase tracking-wider text-stone-500">
-              USP 7 · Transparent Department Explanation
+              {t("USP 7 · Transparent Department Explanation")}
             </p>
             <h3 className="font-semibold text-stone-900">
-              Differential Routing Diagnosis: {deptExp.selected_department}
+              {t("Differential Routing Diagnosis: ")}
+              {t(deptExp.selected_department)}
             </h3>
           </div>
         </div>
 
         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800 border border-blue-200">
-          Official Jurisdiction Assigned
+          {t("Official Jurisdiction Assigned")}
         </span>
       </div>
 
@@ -46,8 +50,8 @@ export function DepartmentExplanationCard({
         <p className="flex items-start gap-2 text-xs text-blue-950 font-medium leading-relaxed">
           <CheckCircle2 size={15} className="text-blue-700 shrink-0 mt-0.5" />
           <span>
-            <strong>Primary Remit: </strong>
-            {deptExp.why_selected}
+            <strong>{t("Primary Remit: ")}</strong>
+            {t(deptExp.why_selected)}
           </span>
         </p>
       </div>
@@ -56,7 +60,7 @@ export function DepartmentExplanationCard({
         deptExp.excluded_departments.length > 0 && (
           <div className="mt-4 space-y-2">
             <p className="text-2xs font-semibold uppercase tracking-wider text-stone-500">
-              Excluded Adjacent Departments & Rationale:
+              {t("Excluded Adjacent Departments & Rationale:")}
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
               {deptExp.excluded_departments.map((ex) => (
@@ -70,7 +74,7 @@ export function DepartmentExplanationCard({
                   />
                   <div>
                     <span className="font-semibold text-stone-800">
-                      {ex.department}
+                      {t(ex.department)}
                     </span>
                     <p className="mt-0.5 text-2xs text-stone-600 leading-normal">
                       {ex.exclusion_reason}
@@ -86,7 +90,7 @@ export function DepartmentExplanationCard({
         <div className="mt-3.5 flex items-center gap-2 border-t border-stone-100 pt-3 text-2xs text-stone-500">
           <Scale size={13} className="text-stone-400 shrink-0" />
           <span>
-            <strong>Statutory Reference: </strong>
+            <strong>{t("Statutory Reference: ")}</strong>
             {deptExp.jurisdiction_basis}
           </span>
         </div>

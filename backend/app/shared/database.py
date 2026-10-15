@@ -11,7 +11,11 @@ def create_database(settings: Settings):
     path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(path) as db:
         db.execute("PRAGMA journal_mode=WAL")
-        migrations = ["001_complaints.sql", "002_secondary_routing.sql"]
+        migrations = [
+            "001_complaints.sql",
+            "002_secondary_routing.sql",
+            "003_issue_decomposition.sql",
+        ]
         # Serialize migration checks as well as writes across concurrent server starts.
         db.execute("BEGIN IMMEDIATE")
         try:

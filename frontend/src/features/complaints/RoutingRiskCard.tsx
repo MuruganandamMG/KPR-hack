@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import {
   AlertOctagon,
   CheckCircle2,
@@ -12,6 +13,8 @@ export interface RoutingRiskCardProps {
 }
 
 export function RoutingRiskCard({ complaint }: RoutingRiskCardProps) {
+  const { t } = useLanguage();
+
   const risk = complaint.analysis?.routing_risk;
   if (!risk) return null;
 
@@ -25,7 +28,7 @@ export function RoutingRiskCard({ complaint }: RoutingRiskCardProps) {
           ? "border-amber-300 bg-amber-50/60 shadow-xs"
           : "border-emerald-200 bg-emerald-50/40 shadow-xs"
       }`}
-      aria-label="Routing Risk Assessment"
+      aria-label={t("Routing Risk Assessment")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -44,10 +47,11 @@ export function RoutingRiskCard({ complaint }: RoutingRiskCardProps) {
           </span>
           <div>
             <p className="eyebrow text-xs uppercase tracking-wider text-stone-500">
-              USP 6 · Misrouting Prevention
+              {t("USP 6 · Misrouting Prevention")}
             </p>
             <h3 className="font-semibold text-stone-900">
-              Routing Risk Score: {risk.level} ({scorePercent}%)
+              {t("Routing Risk Score: ")}
+              {t(risk.level)} ({t(scorePercent)}%)
             </h3>
           </div>
         </div>
@@ -59,13 +63,14 @@ export function RoutingRiskCard({ complaint }: RoutingRiskCardProps) {
               : "bg-emerald-100 text-emerald-900"
           }`}
         >
-          {risk.recommendation}
+          {t(risk.recommendation)}
         </span>
       </div>
 
       <p className="mt-3 text-xs leading-relaxed text-stone-700">
         <strong className="font-medium text-stone-900">
-          Protocol Guidance:{" "}
+          {t("Protocol Guidance:")}
+          {t(" ")}
         </strong>
         {risk.mitigation_notes}
       </p>
@@ -73,7 +78,7 @@ export function RoutingRiskCard({ complaint }: RoutingRiskCardProps) {
       {risk.risk_factors && risk.risk_factors.length > 0 && (
         <div className="mt-3.5 border-t border-stone-200/60 pt-3">
           <p className="text-2xs font-semibold uppercase tracking-wider text-stone-500">
-            Assessed Risk Factors:
+            {t("Assessed Risk Factors:")}
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {risk.risk_factors.map((factor, idx) => (
@@ -82,7 +87,7 @@ export function RoutingRiskCard({ complaint }: RoutingRiskCardProps) {
                 className="inline-flex items-center gap-1 rounded-md border border-stone-200 bg-white px-2.5 py-1 text-xs font-medium text-stone-700 shadow-2xs"
               >
                 <Info size={12} className="text-stone-400" />
-                {factor}
+                {t(factor)}
               </span>
             ))}
           </div>

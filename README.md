@@ -39,10 +39,16 @@ Without a Gemini key, accepted complaints are saved with tracking IDs and marked
 | Feature | Backend | Frontend |
 | --- | --- | --- |
 | Intake, tracking, routing, audit | `backend/app/features/complaints/` | `frontend/src/features/complaints/` |
+| Website language selection and UI catalogs | — | `frontend/src/features/localization/` |
+| Multi-issue and implicit grievance decomposition | `backend/app/features/complaints/` + `civic_intelligence/` | `frontend/src/features/complaints/LinkedIssues.tsx` |
 | Gemini inference/validation | `backend/app/features/civic_intelligence/` | Analysis in complaints |
 | Shared configuration/database/transport/UI | `backend/app/shared/` | `frontend/src/shared/` |
 
 Exact contract: [contracts/openapi.json](contracts/openapi.json). Feature READMEs document interfaces/tests. Text limit: 5000 characters. Voice: 10 MiB/120 seconds. Confidence is an uncalibrated model estimate. Every route requires officer approval. Immutable evidence, append-only audit events, submission idempotency and optimistic officer versions protect records.
+
+The website header has a **Language** selector for English, Tamil, Hindi, Telugu, Kannada, Malayalam, Marathi, Bengali, Gujarati and Punjabi. It changes navigation, forms, buttons, status labels, instructions and feedback across citizen and officer screens. The first visit uses a supported browser language, and explicit choices are remembered. Switching keeps drafts and stored complaints intact. Interface translations are static and need no runtime Gemini request; original evidence and recorded AI content retain their original language.
+
+New submissions are decomposed into independent evidence-backed civic issues, including implied public-health work. Multi-issue receipts create linked child tickets with separate routing approval, audit and progress; one tracking page shows them all. A single issue stays one ticket. Health/Public Health routing is supported; optional disaster assessment is excluded without a configured policy. SQLite migration 003 preserves old records without retroactive decomposition. See [implementation plan](docs/plans/multi-issue-decomposition.md) and [verification report](docs/test-results/multi-issue-decomposition.md).
 
 Primary and secondary assignments are approved and audited together. Officer queues filter by department, routing role and category. Formal complaint text can be copied for staff with routing approval clearly identified. SQLite migration 002 upgrades existing records without inventing historical secondary approvals; back up using SQLite's backup API before upgrading. Verification and AI limitations: [routing quality report](docs/test-results/routing-quality.md).
 

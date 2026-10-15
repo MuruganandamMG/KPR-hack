@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -21,6 +22,8 @@ export function ConfidenceMeter({
   complaint: Complaint;
   threshold?: number;
 }) {
+  const { t } = useLanguage();
+
   const { analysis } = complaint;
 
   if (!analysis) {
@@ -83,7 +86,7 @@ export function ConfidenceMeter({
   return (
     <section
       className="confidence-meter-container rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 shadow-xs"
-      aria-label="AI Confidence Meter"
+      aria-label={t("AI Confidence Meter")}
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3">
         <div className="flex items-center gap-2">
@@ -92,15 +95,15 @@ export function ConfidenceMeter({
           </div>
           <div>
             <h3 className="font-semibold text-stone-900">
-              AI Confidence Meter
+              {t("AI Confidence Meter")}
             </h3>
             <p className="text-xs text-stone-500">
-              Multi-dimensional certainty scores for officers and judges
+              {t("Multi-dimensional certainty scores for officers and judges")}
             </p>
           </div>
         </div>
         <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
-          Trust & Explainability USP
+          {t("Trust & Explainability USP")}
         </span>
       </div>
 
@@ -127,10 +130,10 @@ export function ConfidenceMeter({
                         : "font-semibold text-stone-800"
                     }`}
                   >
-                    {m.label}
+                    {t(m.label)}
                   </span>
                   <span className="ml-2 text-xs text-stone-500 hidden sm:inline">
-                    · {m.subtitle}
+                    · {t(m.subtitle)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -139,7 +142,7 @@ export function ConfidenceMeter({
                       m.score,
                     )}`}
                   >
-                    {percent}%
+                    {t(percent)}%
                   </span>
                 </div>
               </div>
@@ -151,7 +154,7 @@ export function ConfidenceMeter({
                 aria-valuenow={percent}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-label={`${m.label} confidence`}
+                aria-label={t("{0} confidence", [t(m.label)])}
               >
                 <div
                   className={`h-full rounded-full transition-all duration-500 ease-out ${getMeterColor(
@@ -184,29 +187,37 @@ export function ConfidenceMeter({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold tracking-wider uppercase">
-                {isHighConfidence ? "Auto-Route / Ready" : "Review Required"}
+                {t(isHighConfidence ? "Auto-Route / Ready" : "Review Required")}
               </span>
               <span className="text-xs text-stone-500">
-                (System threshold: {Math.round(threshold * 100)}%)
+                {t("(System threshold: ")}
+                {t(Math.round(threshold * 100))}%)
               </span>
             </div>
             <p className="mt-1 text-sm leading-relaxed">
               {isHighConfidence ? (
                 <>
                   <strong className="font-semibold text-emerald-900">
-                    High Confidence ({overallPercent}%):
-                  </strong>{" "}
-                  All inference criteria satisfy municipal standards. The
-                  recommendation is trusted for 1-click officer dispatch.
+                    {t("High Confidence (")}
+                    {t(overallPercent)}%):
+                  </strong>
+                  {t(" ")}
+                  {t(
+                    "All inference criteria satisfy municipal standards. The recommendation is trusted for 1-click officer dispatch.",
+                  )}
                 </>
               ) : (
                 <>
                   <strong className="font-semibold text-amber-900">
-                    Needs Officer Verification ({overallPercent}%):
-                  </strong>{" "}
-                  Confidence is below the {Math.round(threshold * 100)}%
-                  threshold. Officer must manually verify dialect intent and
-                  routing before dispatch.
+                    {t("Needs Officer Verification (")}
+                    {t(overallPercent)}%):
+                  </strong>
+                  {t(" ")}
+                  {t("Confidence is below the ")}
+                  {t(Math.round(threshold * 100))}
+                  {t(
+                    "% threshold. Officer must manually verify dialect intent and routing before dispatch.",
+                  )}
                 </>
               )}
             </p>

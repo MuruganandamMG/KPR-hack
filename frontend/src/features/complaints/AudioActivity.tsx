@@ -1,6 +1,9 @@
+import { useLanguage } from "../localization";
 import { useEffect, useState } from "react";
 
 export function AudioActivity({ stream }: { stream: MediaStream | null }) {
+  const { t } = useLanguage();
+
   const [level, setLevel] = useState(0);
   const [available, setAvailable] = useState(false);
   useEffect(() => {
@@ -37,7 +40,7 @@ export function AudioActivity({ stream }: { stream: MediaStream | null }) {
         className="field-label text-center text-xs"
         htmlFor="microphone-level"
       >
-        Microphone activity
+        {t("Microphone activity")}
       </label>
       <meter
         id="microphone-level"

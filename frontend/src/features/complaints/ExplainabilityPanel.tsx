@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useState } from "react";
 import {
   Check,
@@ -25,6 +26,8 @@ export function ExplainabilityPanel({
   complaint,
   defaultOpen = true,
 }: ExplainabilityPanelProps) {
+  const { t } = useLanguage();
+
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const { analysis } = complaint;
 
@@ -59,53 +62,77 @@ export function ExplainabilityPanel({
   const checkpoints: Checkpoint[] = [
     {
       id: "language",
-      title: `Detected ${analysis.language}`,
-      detail: `Citizen input was accurately recognized as ${analysis.language} with verified phonetics and vocabulary.`,
+      title: t("Detected {0}", [t(analysis.language)]),
+      detail: t(
+        "Citizen input was accurately recognized as {0} with verified phonetics and vocabulary.",
+        [t(analysis.language)],
+      ),
       badge: analysis.language,
     },
     {
       id: "dialect",
       title: `Recognized dialect phrase`,
       detail: dialectTranslation
-        ? `Colloquial phrase "${dialectEvidence}" translated to "${dialectTranslation}" (${analysis.dialect || "Regional Dialect"}).`
-        : `Idiomatic expression "${dialectEvidence}" decoded from ${analysis.dialect || "regional dialect"}.`,
+        ? t('Colloquial phrase "{0}" translated to "{1}" ({2}).', [
+            dialectEvidence,
+            dialectTranslation,
+            t(analysis.dialect || "Regional Dialect"),
+          ])
+        : t('Idiomatic expression "{0}" decoded from {1}.', [
+            dialectEvidence,
+            t(analysis.dialect || "regional dialect"),
+          ]),
       badge: analysis.dialect || "Dialect Recognized",
     },
     {
       id: "mapping",
-      title: `Complaint mapped to ${analysis.category}`,
-      detail: `Civic intent resolved as "${analysis.intent}" within municipal taxonomy.`,
+      title: t("Complaint mapped to {0}", [t(analysis.category)]),
+      detail: t('Civic intent resolved as "{0}" within municipal taxonomy.', [
+        analysis.intent,
+      ]),
       badge: analysis.category,
     },
     {
       id: "essential",
       title: `Essential Service`,
-      detail: `${analysis.category} is classified as an Essential Municipal Service under public welfare statutes.`,
+      detail: t(
+        "{0} is classified as an Essential Municipal Service under public welfare statutes.",
+        [t(analysis.category)],
+      ),
       badge: "Statutory Lifeline",
     },
     {
       id: "duration",
       title: `Duration detected`,
-      detail: `Issue verified as persistent (${durationText}), escalating community impact.`,
+      detail: t(
+        "Issue verified as persistent ({0}), escalating community impact.",
+        [t(durationText)],
+      ),
       badge: durationText,
     },
     {
       id: "priority",
-      title: `${analysis.urgency} Priority`,
-      detail: `Assigned ${analysis.urgency} urgency based on service criticality, outage duration, and citizen impact.`,
+      title: t("{0} Priority", [t(analysis.urgency)]),
+      detail: t(
+        "Assigned {0} urgency based on service criticality, outage duration, and citizen impact.",
+        [t(analysis.urgency)],
+      ),
       badge: `${analysis.urgency} Priority`,
     },
     {
       id: "routing",
-      title: `Routed to ${assignedDept} Department`,
-      detail: `${assignedDept} holds direct municipal jurisdiction, equipment, and field officers to resolve this fault.`,
+      title: t("Routed to {0} Department", [t(assignedDept)]),
+      detail: t(
+        "{0} holds direct municipal jurisdiction, equipment, and field officers to resolve this fault.",
+        [t(assignedDept)],
+      ),
       badge: assignedDept,
     },
   ];
 
   return (
     <section
-      aria-label="Explainability panel"
+      aria-label={t("Explainability panel")}
       className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 p-4 text-left shadow-xs md:p-5"
     >
       {/* Header with expand/collapse control */}
@@ -123,18 +150,18 @@ export function ExplainabilityPanel({
             <div className="flex items-center gap-2">
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <h3 className="text-xs font-bold tracking-wider text-emerald-900 uppercase">
-                Explainability Panel · XAI
+                {t("Explainability Panel · XAI")}
               </h3>
             </div>
             <h2 className="mt-0.5 text-base font-bold text-stone-900">
-              Why was this routed?
+              {t("Why was this routed?")}
             </h2>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="hidden rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-900 sm:inline-block">
-            7 of 7 Criteria Verified
+            {t("7 of 7 Criteria Verified")}
           </span>
           <span className="text-stone-500">
             {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -146,11 +173,15 @@ export function ExplainabilityPanel({
       {isOpen && (
         <div className="mt-4 space-y-2.5 border-t border-emerald-100/80 pt-4">
           <p className="text-xs text-stone-500">
-            Automated reasoning trace confirming verifiable linguistic and
-            statutory evidence for this municipal routing decision:
+            {t(
+              "Automated reasoning trace confirming verifiable linguistic and statutory evidence for this municipal routing decision:",
+            )}
           </p>
 
-          <ol className="space-y-2" aria-label="Routing criteria checklist">
+          <ol
+            className="space-y-2"
+            aria-label={t("Routing criteria checklist")}
+          >
             {checkpoints.map((cp) => (
               <li
                 key={cp.id}
@@ -165,14 +196,14 @@ export function ExplainabilityPanel({
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between gap-1.5">
                     <span className="text-xs font-bold text-stone-900 md:text-sm">
-                      ✔ {cp.title}
+                      ✔ {t(cp.title)}
                     </span>
                     <span className="rounded-md bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-                      {cp.badge}
+                      {t(cp.badge)}
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-stone-600 leading-relaxed">
-                    {cp.detail}
+                    {t(cp.detail)}
                   </p>
                 </div>
               </li>
@@ -184,10 +215,12 @@ export function ExplainabilityPanel({
             <FileCheck2 size={16} className="shrink-0 text-emerald-800" />
             <p className="leading-snug">
               <strong className="font-semibold">
-                Transparent Governance Guarantee:
-              </strong>{" "}
-              100% deterministic traceability from citizen dialect to official
-              department jurisdiction.
+                {t("Transparent Governance Guarantee:")}
+              </strong>
+              {t(" ")}
+              {t(
+                "100% deterministic traceability from citizen dialect to official department jurisdiction.",
+              )}
             </p>
           </div>
         </div>

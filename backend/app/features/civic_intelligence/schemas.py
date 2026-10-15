@@ -9,8 +9,11 @@ Department = Literal[
     "Electricity",
     "Drainage",
     "General Administration",
+    "Health",
 ]
-Category = Literal["Water Supply", "Roads", "Sanitation", "Electricity", "Drainage", "Other"]
+Category = Literal[
+    "Water Supply", "Roads", "Sanitation", "Electricity", "Drainage", "Other", "Public Health"
+]
 Urgency = Literal["Low", "Medium", "High", "Critical"]
 Nonempty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=5000)]
 DEPARTMENTS = [
@@ -20,9 +23,21 @@ DEPARTMENTS = [
     "Electricity",
     "Drainage",
     "General Administration",
+    "Health",
 ]
 CATEGORY_DEPARTMENT = dict(
-    zip(["Water Supply", "Roads", "Sanitation", "Electricity", "Drainage", "Other"], DEPARTMENTS)
+    zip(
+        [
+            "Water Supply",
+            "Roads",
+            "Sanitation",
+            "Electricity",
+            "Drainage",
+            "Other",
+            "Public Health",
+        ],
+        DEPARTMENTS,
+    )
 )
 
 
@@ -175,8 +190,36 @@ class HallucinationGuardrail(BaseModel):
     safeguard_reason: Nonempty
 
 
+class CivicIssue(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    issue_id: str = Field(min_length=1, max_length=50, pattern=r"^[A-Za-z0-9_-]+$")
+    normalized_complaint: Nonempty
+    category: Category
+    department: Department
+    urgency: Urgency
+    confidence: float = Field(ge=0, le=1, allow_inf_nan=False)
+    explanation: Nonempty
+    basis: Literal["explicit", "implicit"]
+    evidence: list[Nonempty] = Field(min_length=1, max_length=10)
+    related_issue_ids: list[str] = Field(max_length=9)
+    relationship_explanation: Nonempty | None
+
+    @model_validator(mode="after")
+    def validate_issue(self):
+        if CATEGORY_DEPARTMENT[self.category] != self.department:
+            raise ValueError("Issue category and department disagree")
+        if self.issue_id in self.related_issue_ids or len(set(self.related_issue_ids)) != len(
+            self.related_issue_ids
+        ):
+            raise ValueError("Issue relationships must be distinct and cannot reference themselves")
+        if bool(self.related_issue_ids) != bool(self.relationship_explanation):
+            raise ValueError("Related issues require a relationship explanation")
+        return self
+
+
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
+    issues: list[CivicIssue] = Field(default_factory=list, max_length=10)
     transcript: Nonempty
     normalized_complaint: Nonempty = Field(
         description="Faithful formal English complaint for official staff, preserving all "
@@ -223,11 +266,51 @@ class Analysis(BaseModel):
             raise ValueError("Secondary departments cannot repeat the primary department")
         if len(set(self.secondary_departments)) != len(self.secondary_departments):
             raise ValueError("Secondary departments must be unique")
+        ids = {issue.issue_id for issue in self.issues}
+        if len(ids) != len(self.issues):
+            raise ValueError("Issue IDs must be unique")
+        complaints = {issue.normalized_complaint.casefold() for issue in self.issues}
+        if len(complaints) != len(self.issues):
+            raise ValueError("Independent issues must not be duplicated")
+        for issue in self.issues:
+            if not set(issue.related_issue_ids) <= ids:
+                raise ValueError("Related issue does not exist")
         return self
 
 
-def review_reason(analysis: Analysis, threshold: float) -> str:
+def validate_issue_evidence(analysis: Analysis, original: str) -> None:
+    for issue in analysis.issues:
+        if any(phrase not in original for phrase in issue.evidence):
+            raise ValueError("Issue evidence must be quoted from the original submission")
+
+
+def issue_analysis(analysis: Analysis, issue: CivicIssue) -> Analysis:
+    # Do not carry parent-level metrics or recommendations into a different issue.
+    return Analysis(
+        transcript=analysis.transcript,
+        normalized_complaint=issue.normalized_complaint,
+        language=analysis.language,
+        dialect=analysis.dialect,
+        category=issue.category,
+        intent=issue.normalized_complaint,
+        primary_department=issue.department,
+        secondary_departments=[],
+        urgency=issue.urgency,
+        confidence=issue.confidence,
+        keywords=issue.evidence,
+        detected_meaning=issue.normalized_complaint,
+        explanation=issue.explanation,
+    )
+
+
+def review_reason(analysis: Analysis, threshold: float, issue: CivicIssue | None = None) -> str:
     reasons = []
+    if any(item.basis == "implicit" for item in analysis.issues) or (
+        issue and issue.basis == "implicit"
+    ):
+        reasons.append(
+            "Implicit issue requires officer verification of evidence and relationships."
+        )
     if analysis.confidence < threshold:
         reasons.append("Confidence is below the officer review threshold.")
     if analysis.category == "Other":

@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useEffect, useState } from "react";
 import { CheckCircle2, Circle, LoaderCircle, Sparkles } from "lucide-react";
 
@@ -101,6 +102,8 @@ export function ThinkingTimeline({
   mode = "text",
   stepIntervalMs = 450,
 }: ThinkingTimelineProps) {
+  const { t } = useLanguage();
+
   const steps = mode === "voice" ? VOICE_TIMELINE_STEPS : TEXT_TIMELINE_STEPS;
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -124,7 +127,7 @@ export function ThinkingTimeline({
     <div
       className="w-full rounded-2xl border border-emerald-100 bg-gradient-to-b from-emerald-50/40 via-white to-stone-50/40 p-4 text-left shadow-xs md:p-5"
       role="status"
-      aria-label="AI Thinking Timeline"
+      aria-label={t("AI Thinking Timeline")}
       aria-live="polite"
     >
       {/* Header */}
@@ -137,21 +140,24 @@ export function ThinkingTimeline({
             <div className="flex items-center gap-2">
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <h3 className="text-xs font-semibold tracking-wider text-emerald-800 uppercase">
-                AI Cognitive Reasoning Pipeline
+                {t("AI Cognitive Reasoning Pipeline")}
               </h3>
             </div>
             <p className="text-xs text-stone-500">
-              Active multi-stage inference &amp; verification
+              {t("Active multi-stage inference & verification")}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 text-right">
           <span className="text-xs font-semibold text-emerald-900">
-            Step {currentStep + 1} of {steps.length}
+            {t("Step ")}
+            {t(currentStep + 1)}
+            {t(" of ")}
+            {t(steps.length)}
           </span>
           <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
-            {progressPercent}%
+            {t(progressPercent)}%
           </span>
         </div>
       </div>
@@ -188,19 +194,19 @@ export function ThinkingTimeline({
                   <CheckCircle2
                     size={17}
                     className="text-emerald-700"
-                    aria-label="Completed"
+                    aria-label={t("Completed")}
                   />
                 ) : isCurrent ? (
                   <LoaderCircle
                     size={17}
                     className="animate-spin text-emerald-700"
-                    aria-label="In progress"
+                    aria-label={t("In progress")}
                   />
                 ) : (
                   <Circle
                     size={17}
                     className="text-stone-300"
-                    aria-label="Pending"
+                    aria-label={t("Pending")}
                   />
                 )}
               </div>
@@ -217,22 +223,22 @@ export function ThinkingTimeline({
                           : "text-stone-400 font-normal"
                     }`}
                   >
-                    {step.title}
+                    {t(step.title)}
                   </span>
                   {isCurrent && (
                     <span className="rounded bg-emerald-600 px-1.5 py-0.2 text-[10px] font-semibold text-white animate-pulse">
-                      Active
+                      {t("Active")}
                     </span>
                   )}
                   {isCompleted && (
                     <span className="text-[10px] font-medium text-emerald-700">
-                      Done
+                      {t("Done")}
                     </span>
                   )}
                 </div>
                 {isCurrent && (
                   <p className="mt-0.5 text-[11px] font-medium text-emerald-800">
-                    {step.detail}
+                    {t(step.detail)}
                   </p>
                 )}
               </div>

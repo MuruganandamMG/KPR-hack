@@ -1,3 +1,4 @@
+import { useLanguage } from "./features/localization";
 import { useEffect, useState } from "react";
 import { Landmark } from "lucide-react";
 import { getMeta } from "./features/complaints/api";
@@ -5,9 +6,23 @@ import { SubmitComplaint } from "./features/complaints/SubmitComplaint";
 import { TrackComplaint } from "./features/complaints/TrackComplaint";
 import { OfficerDashboard } from "./features/complaints/OfficerDashboard";
 import type { Meta } from "./features/complaints/types";
+import {
+  LanguageProvider,
+  WebsiteLanguageSelector,
+} from "./features/localization";
 
 type View = "submit" | "track" | "officer";
 export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
+  );
+}
+
+function AppContent() {
+  const { t } = useLanguage();
+
   const [view, setView] = useState<View>("submit");
   const [pending, setPending] = useState(false);
   const [trackingId, setTrackingId] = useState("");
@@ -36,7 +51,7 @@ export default function App() {
       <header className="app-header">
         <a
           href="#"
-          aria-label="ACIE home"
+          aria-label={t("ACIE home")}
           className="flex items-center gap-3"
           onClick={(event) => {
             event.preventDefault();
@@ -47,11 +62,13 @@ export default function App() {
             <Landmark size={23} />
           </span>
           <span className="text-lg font-bold tracking-tight">
-            ACIE<span className="text-emerald-700">.</span>
+            {t("ACIE")}
+            <span className="text-emerald-700">.</span>
           </span>
-          <span className="prototype-label">MVP prototype</span>
+          <span className="prototype-label">{t("MVP prototype")}</span>
         </a>
-        <nav aria-label="Main navigation" className="app-navigation">
+        <WebsiteLanguageSelector />
+        <nav aria-label={t("Main navigation")} className="app-navigation">
           {(
             [
               ["submit", "Submit complaint"],
@@ -66,7 +83,7 @@ export default function App() {
               aria-current={view === key ? "page" : undefined}
               className={`nav-tab ${view === key ? "active" : ""}`}
             >
-              {label}
+              {t(label)}
             </button>
           ))}
         </nav>
@@ -75,34 +92,38 @@ export default function App() {
         <div className="page-heading">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              {titles[view]}
+              {t(titles[view])}
             </h1>
             <p className="mt-2 text-sm text-stone-500">
-              {view === "submit"
-                ? "Submit text or audio for civic analysis."
-                : view === "track"
-                  ? "Status, department and updates in one place."
-                  : "Review evidence. Approve routing. Update progress."}
+              {t(
+                view === "submit"
+                  ? "Submit text or audio for civic analysis."
+                  : view === "track"
+                    ? "Status, department and updates in one place."
+                    : "Review evidence. Approve routing. Update progress.",
+              )}
             </p>
           </div>
           <span className="hidden text-xs text-stone-500 sm:block">
-            {view === "officer"
-              ? "Synthetic demo data only"
-              : "Citizen services"}
+            {t(
+              view === "officer"
+                ? "Synthetic demo data only"
+                : "Citizen services",
+            )}
           </span>
         </div>
         {metaError && (
           <div className="notice mb-5" role="alert">
-            {metaError}
+            {t(metaError)}
           </div>
         )}
         {meta && !meta.ai_configured && (
           <div className="notice mb-5">
-            AI unavailable. Complaints are saved for manual review.
+            {t("AI unavailable. Complaints are saved for manual review.")}
           </div>
         )}
         {meta && !meta.voice_available && view === "submit" && (
-          <div className="notice mb-5">Voice unavailable. Use text.</div>
+          <div className="notice mb-5">{t("Voice unavailable. Use text.")}</div>
         )}
         {view === "submit" ? (
           <SubmitComplaint

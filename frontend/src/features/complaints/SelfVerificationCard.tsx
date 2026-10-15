@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import {
   AlertTriangle,
   ArrowRight,
@@ -10,6 +11,8 @@ import {
 import type { Complaint, SelfVerification } from "./types";
 
 export function SelfVerificationCard({ complaint }: { complaint: Complaint }) {
+  const { t } = useLanguage();
+
   const { analysis } = complaint;
 
   if (!analysis) {
@@ -43,7 +46,7 @@ export function SelfVerificationCard({ complaint }: { complaint: Complaint }) {
           ? "border-emerald-200/90 bg-gradient-to-br from-emerald-50/70 via-white to-stone-50/80"
           : "border-amber-200/90 bg-gradient-to-br from-amber-50/70 via-white to-stone-50/80"
       }`}
-      aria-label="AI Self Verification"
+      aria-label={t("AI Self Verification")}
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3">
         <div className="flex items-center gap-2">
@@ -57,15 +60,16 @@ export function SelfVerificationCard({ complaint }: { complaint: Complaint }) {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-stone-900">
-                AI Self-Verification Pass
+                {t("AI Self-Verification Pass")}
               </h3>
               <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 uppercase tracking-wide">
-                Dual-AI Audit USP
+                {t("Dual-AI Audit USP")}
               </span>
             </div>
             <p className="text-xs text-stone-500">
-              Two-pass model consensus to eliminate hallucinations and routing
-              errors
+              {t(
+                "Two-pass model consensus to eliminate hallucinations and routing errors",
+              )}
             </p>
           </div>
         </div>
@@ -80,12 +84,12 @@ export function SelfVerificationCard({ complaint }: { complaint: Complaint }) {
           {isVerified ? (
             <>
               <CheckCircle2 size={13} className="text-emerald-700" />
-              Verified (Correct)
+              {t("Verified (Correct)")}
             </>
           ) : (
             <>
               <AlertTriangle size={13} className="text-amber-700" />
-              {verification.status}
+              {t(verification.status)}
             </>
           )}
         </span>
@@ -99,36 +103,38 @@ export function SelfVerificationCard({ complaint }: { complaint: Complaint }) {
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1 text-[11px] font-bold tracking-wider text-stone-500 uppercase">
                 <Bot size={13} className="text-emerald-700" />
-                1st AI · Primary Generator
+                {t("1st AI · Primary Generator")}
               </span>
               <span className="rounded bg-stone-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-stone-600">
-                Pass 1
+                {t("Pass 1")}
               </span>
             </div>
 
             <div className="mt-2.5">
               <p className="text-[11px] font-medium text-stone-400 uppercase tracking-wide">
-                Selected Department
+                {t("Selected Department")}
               </p>
               <p className="text-sm font-bold text-stone-900">
-                {analysis.primary_department}
+                {t(analysis.primary_department)}
               </p>
             </div>
 
             <div className="mt-2">
               <p className="text-[11px] font-medium text-stone-400 uppercase tracking-wide">
-                Assessed Urgency
+                {t("Assessed Urgency")}
               </p>
               <p className="text-xs font-semibold text-stone-700">
-                {analysis.urgency} Priority
+                {t(analysis.urgency)}
+                {t(" Priority")}
               </p>
             </div>
           </div>
 
           <div className="mt-3 border-t border-stone-100 pt-2 text-xs text-stone-500">
-            Initial confidence:{" "}
+            {t("Initial confidence:")}
+            {t(" ")}
             <span className="font-semibold text-stone-800">
-              {Math.round(analysis.confidence * 100)}%
+              {t(Math.round(analysis.confidence * 100))}%
             </span>
           </div>
         </div>
@@ -154,7 +160,7 @@ export function SelfVerificationCard({ complaint }: { complaint: Complaint }) {
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1 text-[11px] font-bold tracking-wider text-stone-700 uppercase">
                 <CheckCheck size={13} className="text-emerald-700" />
-                2nd AI · Critic Review
+                {t("2nd AI · Critic Review")}
               </span>
               <span
                 className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-bold ${
@@ -163,39 +169,42 @@ export function SelfVerificationCard({ complaint }: { complaint: Complaint }) {
                     : "bg-amber-100 text-amber-800"
                 }`}
               >
-                Pass 2 (Audit)
+                {t("Pass 2 (Audit)")}
               </span>
             </div>
 
             <div className="mt-2.5">
               <p className="text-[11px] font-medium text-stone-500 uppercase tracking-wide">
-                Audit Target
+                {t("Audit Target")}
               </p>
               <p className="text-sm font-bold text-stone-900">
-                Department & Urgency Check
+                {t("Department & Urgency Check")}
               </p>
             </div>
 
             <div className="mt-2">
               <p className="text-[11px] font-medium text-stone-500 uppercase tracking-wide">
-                Consensus Result
+                {t("Consensus Result")}
               </p>
               <p
                 className={`text-xs font-bold ${
                   isVerified ? "text-emerald-800" : "text-amber-800"
                 }`}
               >
-                {isVerified
-                  ? "Consensus Reached (Agreed)"
-                  : "Disputed / Review Needed"}
+                {t(
+                  isVerified
+                    ? "Consensus Reached (Agreed)"
+                    : "Disputed / Review Needed",
+                )}
               </p>
             </div>
           </div>
 
           <div className="mt-3 border-t border-stone-200/60 pt-2 text-xs text-stone-600">
-            Audit confidence:{" "}
+            {t("Audit confidence:")}
+            {t(" ")}
             <span className="font-semibold text-stone-900">
-              {confidencePercent}%
+              {t(confidencePercent)}%
             </span>
           </div>
         </div>
@@ -205,10 +214,12 @@ export function SelfVerificationCard({ complaint }: { complaint: Complaint }) {
       <div className="mt-4 rounded-xl border border-stone-200/90 bg-white p-3.5">
         <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
           <Sparkles size={14} className="text-emerald-700" />
-          <span>Independent Critic Statement</span>
+          <span>{t("Independent Critic Statement")}</span>
         </div>
         <p className="mt-1.5 text-xs leading-relaxed text-stone-700 italic">
-          &ldquo;{verification.critique}&rdquo;
+          {t("“")}
+          {verification.critique}
+          {t("”")}
         </p>
       </div>
     </section>

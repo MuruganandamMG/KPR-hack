@@ -1,7 +1,10 @@
+import { useLanguage } from "../localization";
 import { ArrowUp, BookOpen, FileText, Lightbulb, Mic, Zap } from "lucide-react";
 import type { Complaint } from "./types";
 
 export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
+  const { t } = useLanguage();
+
   const { analysis } = complaint;
 
   if (!analysis) {
@@ -26,7 +29,7 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
   return (
     <section
       className="evidence-highlight-section rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/60 via-white to-stone-50/80 p-4 sm:p-5 shadow-xs"
-      aria-label="Evidence Highlighting"
+      aria-label={t("Evidence Highlighting")}
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100/80 pb-3">
         <div className="flex items-center gap-2">
@@ -35,15 +38,15 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
           </div>
           <div>
             <h3 className="font-semibold text-stone-900">
-              Evidence Highlighting & Translation
+              {t("Evidence Highlighting & Translation")}
             </h3>
             <p className="text-xs text-stone-500">
-              Translation evidence returned with the analysis
+              {t("Translation evidence returned with the analysis")}
             </p>
           </div>
         </div>
         <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
-          Explainable AI USP
+          {t("Explainable AI USP")}
         </span>
       </div>
 
@@ -56,14 +59,17 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
             ) : (
               <FileText size={14} className="text-emerald-700" />
             )}
-            Citizen says (Verbatim Dialect Input)
+            {t("Citizen says (Verbatim Dialect Input)")}
           </span>
           <span className="italic">
-            {analysis.language} · {analysis.dialect || "Dialect not identified"}
+            {t(analysis.language)} ·{" "}
+            {t(analysis.dialect || "Dialect not identified")}
           </span>
         </div>
         <p className="mt-2 text-base font-serif italic text-stone-800">
-          &ldquo;{rawText}&rdquo;
+          {t("“")}
+          {rawText}
+          {t("”")}
         </p>
       </div>
 
@@ -71,7 +77,7 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
       {items.length > 0 ? (
         <div className="mb-5">
           <p className="mb-2.5 text-xs font-semibold tracking-wider text-stone-500 uppercase">
-            Phrase-Level Translation & Civic Interpretation
+            {t("Phrase-Level Translation & Civic Interpretation")}
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item, idx) => (
@@ -85,14 +91,14 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
                       {item.phrase}
                     </span>
                     <span className="text-[10px] font-medium text-stone-400">
-                      source phrase
+                      {t("source phrase")}
                     </span>
                   </div>
 
                   <div className="my-1.5 flex items-center gap-1 text-emerald-700">
                     <ArrowUp size={14} className="shrink-0 stroke-[2.5]" />
                     <span className="text-[11px] font-semibold uppercase tracking-wider">
-                      Translates to
+                      {t("Translates to")}
                     </span>
                   </div>
 
@@ -102,7 +108,9 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
                 </div>
 
                 <div className="mt-2.5 border-t border-stone-100 pt-2 text-xs text-stone-600">
-                  <span className="font-medium text-stone-700">Impact: </span>
+                  <span className="font-medium text-stone-700">
+                    {t("Impact: ")}
+                  </span>
                   {item.significance}
                 </div>
               </div>
@@ -111,8 +119,9 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
         </div>
       ) : (
         <p className="mb-4 text-sm text-stone-500">
-          Phrase translations were not returned. Refer to the formal complaint
-          and original evidence.
+          {t(
+            "Phrase translations were not returned. Refer to the formal complaint and original evidence.",
+          )}
         </p>
       )}
 
@@ -124,7 +133,8 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
           </div>
           <div className="flex-1">
             <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-950">
-              Reasoning Bridge · Why Urgency is {analysis.urgency}
+              {t("Reasoning Bridge · Why Urgency is ")}
+              {t(analysis.urgency)}
             </h4>
             <p className="mt-1 text-sm leading-relaxed text-stone-700">
               {analysis.explanation}
@@ -132,13 +142,14 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
 
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
               <span className="rounded-md border border-stone-300 bg-white px-2.5 py-1 font-medium text-stone-700 shadow-xs">
-                Citizen Evidence: &ldquo;
+                {t("Citizen Evidence: “")}
                 {items[0]?.phrase || analysis.keywords[0] || "Reported fault"}
-                &rdquo;
+                {t("”")}
               </span>
               <span className="text-stone-400">→</span>
               <span className="rounded-md border border-stone-300 bg-white px-2.5 py-1 font-medium text-stone-700 shadow-xs">
-                Impact: {analysis.detected_meaning}
+                {t("Impact: ")}
+                {analysis.detected_meaning}
               </span>
               <span className="text-stone-400">→</span>
               <span
@@ -148,7 +159,8 @@ export function EvidenceHighlight({ complaint }: { complaint: Complaint }) {
                 }`}
               >
                 <Zap size={12} />
-                {analysis.urgency} Priority
+                {t(analysis.urgency)}
+                {t(" Priority")}
               </span>
             </div>
           </div>

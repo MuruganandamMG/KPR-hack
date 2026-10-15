@@ -1,0 +1,11 @@
+# Website localization
+
+Public interface: `LanguageProvider`, `WebsiteLanguageSelector`, `useLanguage()` and `websiteLanguages` from `index.tsx`. The application wraps its screens once with the provider. `useLanguage()` supplies the active language, setter and `t(message, parameters?)` for interface strings; parameters use numbered placeholders such as `{0}`.
+
+Supported languages: English, Tamil, Hindi, Telugu, Kannada, Malayalam, Marathi, Bengali, Gujarati and Punjabi (Gurmukhi). The header selector applies across submission, tracking, officer workflows and analysis-card labels. The first visit uses a supported browser language, otherwise English. Explicit choices persist under `acie.website-language` in localStorage. Blocked storage does not prevent language switching. The provider updates the document title and `lang` and preserves mounted forms and drafts.
+
+`messages/en.json` is the source catalog. Other JSON files contain static translations generated with Gemini during development, with key controls refined in `catalogs.ts`. Vite loads only the selected language catalog, and subsequent switches reuse it. No Gemini credentials, AI calls or external translation requests are needed at runtime. Unknown messages fall back to English. Native-language review is still recommended for the full generated catalogs; structural checks do not establish linguistic accuracy.
+
+Localize rendering, not business inputs: keep API status/category/department values, input text, tracking IDs, original evidence and recorded AI content unchanged. Translated `<option>` labels must have explicit original `value` attributes. Known UI values such as department names and urgency labels can be translated for display. Provider-written prose remains in its recorded language.
+
+Dependencies: React, Vite's static JSON imports, browser language/storage APIs; no new packages. Verify with `npm test`, `npm run build` and `npm run format:check` in `frontend`. Tests cover navigation, drafts, tracking/officer labels, persistence, browser preferences, API enum preservation, original evidence, catalog completeness and interpolation placeholders. Isolated components outside the provider retain English behavior.

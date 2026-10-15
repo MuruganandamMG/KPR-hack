@@ -136,7 +136,22 @@ export interface HallucinationGuardrail {
   safeguard_reason: string;
 }
 
+export interface CivicIssue {
+  issue_id: string;
+  normalized_complaint: string;
+  category: string;
+  department: string;
+  urgency: "Low" | "Medium" | "High" | "Critical";
+  confidence: number;
+  explanation: string;
+  basis: "explicit" | "implicit";
+  evidence: string[];
+  related_issue_ids: string[];
+  relationship_explanation: string | null;
+}
+
 export interface Analysis {
+  issues?: CivicIssue[];
   transcript: string;
   normalized_complaint: string;
   language: string;
@@ -166,6 +181,9 @@ export interface Analysis {
   hallucination_guardrail?: HallucinationGuardrail | null;
 }
 export interface Complaint {
+  parent_tracking_id?: string | null;
+  issue?: CivicIssue | null;
+  children?: Complaint[];
   tracking_id: string;
   input_type: "text" | "voice";
   original_text: string | null;
@@ -224,4 +242,5 @@ export const categories = [
   "Electricity",
   "Drainage",
   "Other",
+  "Public Health",
 ] as const;

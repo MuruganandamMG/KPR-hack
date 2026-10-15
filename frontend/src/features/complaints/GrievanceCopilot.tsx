@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useState } from "react";
 import {
   Bot,
@@ -21,6 +22,8 @@ export function GrievanceCopilot({
   onAppendText,
   disabled = false,
 }: GrievanceCopilotProps) {
+  const { t } = useLanguage();
+
   const [minimized, setMinimized] = useState(false);
 
   const trimmed = currentText.trim();
@@ -62,7 +65,7 @@ export function GrievanceCopilot({
   return (
     <div
       className="mt-3 overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50/50 p-3.5 transition-all text-xs"
-      aria-label="Adaptive AI Grievance Copilot"
+      aria-label={t("Adaptive AI Grievance Copilot")}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -71,10 +74,10 @@ export function GrievanceCopilot({
           </span>
           <div>
             <span className="font-semibold text-emerald-950">
-              AI Grievance Copilot
+              {t("AI Grievance Copilot")}
             </span>
             <span className="ml-2 text-2xs font-medium text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">
-              USP 1 · Adaptive Intake
+              {t("USP 1 · Adaptive Intake")}
             </span>
           </div>
         </div>
@@ -84,7 +87,7 @@ export function GrievanceCopilot({
           onClick={() => setMinimized(!minimized)}
           className="text-2xs font-medium text-emerald-800 hover:text-emerald-950 underline"
         >
-          {minimized ? "Show Hints" : "Hide"}
+          {t(minimized ? "Show Hints" : "Hide")}
         </button>
       </div>
 
@@ -94,13 +97,15 @@ export function GrievanceCopilot({
             {isShort ? (
               <span className="flex items-center gap-1.5 text-amber-800 font-medium">
                 <Lightbulb size={14} className="shrink-0 text-amber-600" />
-                Your grievance is brief. Adding location or duration details
-                helps municipal workers resolve it 40% faster.
+                {t(
+                  "Your grievance is brief. Adding location or duration details helps municipal workers resolve it 40% faster.",
+                )}
               </span>
             ) : (
               <span className="text-stone-600">
-                You can describe in any vernacular slang (e.g. Tamil /
-                Tanglish). Tap quick-assist details to append:
+                {t(
+                  "You can describe in any vernacular slang (e.g. Tamil / Tanglish). Tap quick-assist details to append:",
+                )}
               </span>
             )}
           </p>
@@ -113,11 +118,11 @@ export function GrievanceCopilot({
                   <button
                     key={item.label}
                     type="button"
-                    onClick={() => onAppendText(item.text)}
+                    onClick={() => onAppendText(t(item.text))}
                     className="flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-2.5 py-1 text-2xs font-medium text-emerald-900 shadow-2xs hover:bg-emerald-100/70 transition-colors"
                   >
                     <Icon size={12} className="text-emerald-700" />
-                    {item.label}
+                    {t(item.label)}
                   </button>
                 );
               })}

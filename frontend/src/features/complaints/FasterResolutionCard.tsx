@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import {
   ArrowUpRight,
   Check,
@@ -12,6 +13,8 @@ export interface FasterResolutionCardProps {
 }
 
 export function FasterResolutionCard({ complaint }: FasterResolutionCardProps) {
+  const { t } = useLanguage();
+
   const faster = complaint.analysis?.faster_resolution;
   if (!faster || !faster.suggestions || faster.suggestions.length === 0)
     return null;
@@ -19,7 +22,7 @@ export function FasterResolutionCard({ complaint }: FasterResolutionCardProps) {
   return (
     <div
       className="rounded-2xl border border-purple-200 bg-purple-50/40 p-5 shadow-xs"
-      aria-label="AI Faster Resolution Suggestions"
+      aria-label={t("AI Faster Resolution Suggestions")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -28,16 +31,16 @@ export function FasterResolutionCard({ complaint }: FasterResolutionCardProps) {
           </span>
           <div>
             <p className="eyebrow text-xs uppercase tracking-wider text-purple-800">
-              USP 9 · Actionable Acceleration Clues
+              {t("USP 9 · Actionable Acceleration Clues")}
             </p>
             <h3 className="font-semibold text-stone-900">
-              AI Suggests Faster Field Resolution
+              {t("AI Suggests Faster Field Resolution")}
             </h3>
           </div>
         </div>
 
         <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-900 border border-purple-200">
-          {faster.overall_speedup_factor}
+          {t(faster.overall_speedup_factor)}
         </span>
       </div>
 
@@ -50,10 +53,11 @@ export function FasterResolutionCard({ complaint }: FasterResolutionCardProps) {
             <div>
               <div className="flex items-center justify-between gap-1">
                 <span className="font-semibold text-xs text-stone-900">
-                  {item.item_name}
+                  {t(item.item_name)}
                 </span>
                 <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-2xs font-bold text-emerald-700 border border-emerald-100">
-                  Save {item.potential_time_saved}
+                  {t("Save ")}
+                  {t(item.potential_time_saved)}
                 </span>
               </div>
               <p className="mt-1.5 text-xs text-stone-600 leading-normal">
@@ -61,7 +65,7 @@ export function FasterResolutionCard({ complaint }: FasterResolutionCardProps) {
               </p>
             </div>
             <p className="mt-2 text-2xs italic text-stone-400 border-t border-stone-100 pt-1.5">
-              {item.example}
+              {t(item.example)}
             </p>
           </div>
         ))}

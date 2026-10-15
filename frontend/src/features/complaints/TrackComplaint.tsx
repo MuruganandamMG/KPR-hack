@@ -1,3 +1,4 @@
+import { useLanguage } from "../localization";
 import { useEffect, useRef, useState } from "react";
 import { LoaderCircle, Search } from "lucide-react";
 import { Button } from "../../shared/ui/button";
@@ -6,6 +7,8 @@ import { ComplaintDetail } from "./ComplaintDetail";
 import type { Complaint } from "./types";
 
 export function TrackComplaint({ initialId = "" }: { initialId?: string }) {
+  const { t } = useLanguage();
+
   const [id, setId] = useState(initialId);
   const [record, setRecord] = useState<Complaint | null>(null);
   const [busy, setBusy] = useState(false);
@@ -45,14 +48,14 @@ export function TrackComplaint({ initialId = "" }: { initialId?: string }) {
       <div className="panel">
         <form onSubmit={track}>
           <label htmlFor="tracking-id" className="field-label">
-            Tracking ID
+            {t("Tracking ID")}
           </label>
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
               id="tracking-id"
               required
               className="field flex-1 font-mono text-sm"
-              placeholder="GRV-2026-…"
+              placeholder={t("GRV-2026-…")}
               value={id}
               onChange={(e) => setId(e.target.value)}
             />
@@ -62,7 +65,7 @@ export function TrackComplaint({ initialId = "" }: { initialId?: string }) {
               ) : (
                 <Search size={17} />
               )}
-              Track complaint
+              {t("Track complaint")}
             </Button>
           </div>
         </form>
@@ -71,7 +74,7 @@ export function TrackComplaint({ initialId = "" }: { initialId?: string }) {
             role="alert"
             className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-800"
           >
-            {error}
+            {t(error)}
           </p>
         )}
         {record ? (
@@ -79,6 +82,10 @@ export function TrackComplaint({ initialId = "" }: { initialId?: string }) {
             <ComplaintDetail
               complaint={record}
               onComplaintUpdated={setRecord}
+              onTrack={(trackingId) => {
+                setId(trackingId);
+                void loadComplaint(trackingId);
+              }}
             />
           </div>
         ) : (
@@ -87,7 +94,7 @@ export function TrackComplaint({ initialId = "" }: { initialId?: string }) {
             <div className="py-14 text-center text-stone-400">
               <Search className="mx-auto mb-3" size={32} strokeWidth={1.5} />
               <p className="text-sm">
-                Enter a tracking ID to view its progress.
+                {t("Enter a tracking ID to view its progress.")}
               </p>
             </div>
           )
